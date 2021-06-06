@@ -120,19 +120,16 @@ public class Queries {
 
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        Parameter INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", ParametersType.Int);
-        INT_VALUE.updateParameter("1");
-        Parameter INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", ParametersType.Int);
-        INT_VALUE2.updateParameter("2");
-        Parameter STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", ParametersType.String);
-        STRING_VALUE1.updateParameter("s1");
-        Parameter STRING_VALUE2 = ParameterFactory.getParameter("STRING_VALUE2", "STRING_VALUE2", ParametersType.String);
-        STRING_VALUE2.updateParameter("s2");
+        Parameter INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", ParametersType.Int, "1");
+        Parameter INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", ParametersType.Int, "2");
+        Parameter STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", ParametersType.String, "s1");
+        Parameter STRING_VALUE2 = ParameterFactory.getParameter("STRING_VALUE2", "STRING_VALUE2", ParametersType.String, "s2");
         HashMap<String, Parameter> parameters = new HashMap<>();
         parameters.put("INT_VALUE", INT_VALUE);
         parameters.put("INT_VALUE2", INT_VALUE2);
         parameters.put("STRING_VALUE1", STRING_VALUE1);
         parameters.put("STRING_VALUE2", STRING_VALUE2);
+        
         Queries queries = new Queries("Main", "SELECT $INT_VALUE$ as aws, $STRING_VALUE1$ as aws2, $STRING_VALUE2$ as aws3, $STRING_VALUE1$ as aws4, $INT_VALUE$ as aws5,$INT_VALUE2$ as aws6;", false, parameters, connection);
         System.out.println(queries.getResult());
     }

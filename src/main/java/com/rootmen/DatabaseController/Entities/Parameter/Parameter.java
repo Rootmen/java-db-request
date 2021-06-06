@@ -5,16 +5,21 @@ import java.sql.SQLException;
 
 public class Parameter {
     private final String ID;                        //ID парметра
-    private final String parameterType;             //Тип парметра
     private final String parameterName;             //Имя параметра в SQL запросе
-    private final ParametersType parametersType;    //Имя параметра в SQL запросе
+    private final ParametersType parametersType;    //Тип парметра
     private String currentValue = null;             //Текущее значение
 
-    protected Parameter(String ID, String name, String typeName, ParametersType type) {
+    protected Parameter(String ID, String name, ParametersType type) {
         this.ID = ID;
-        this.parameterType = typeName;
         this.parameterName = name;
         this.parametersType = type;
+    }
+
+    protected Parameter(String ID, String name, ParametersType type, String value) {
+        this.ID = ID;
+        this.parameterName = name;
+        this.parametersType = type;
+        this.currentValue = value;
     }
 
     public void updateParameter(String parameter) {
@@ -31,10 +36,6 @@ public class Parameter {
 
     public String getValue() {
         return currentValue;
-    }
-
-    public String getType() {
-        return parameterType;
     }
 
     public void addParameterToStatement(PreparedStatement statement, int index) throws SQLException {
