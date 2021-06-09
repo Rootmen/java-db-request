@@ -1,0 +1,1593 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Definitions>
+    <Comm>Загрузка станций LINE 8 - вершин мелкой сети</Comm>
+    <Query ID="LOAD_STATIONS">
+        <![CDATA[
+		WITH PRE_DATA AS (SELECT start_id,
+		                         end_id
+		                  FROM dnnsi.line_8
+		                  UNION
+		                  SELECT l1.start_id,
+		                         l2.end_id
+		                  FROM dnnsi.line_8 l1
+		                           JOIN dnnsi.line_8 l2 ON l2.start_id = l1.end_id AND l2.end_id != l1.start_id),
+		     DATA AS (
+		         SELECT l.*,
+		                st1.st_kod                                         AS st_kod1,
+		                st2.st_kod                                         AS st_kod2,
+		                abs(st1.st_kod - st2.st_kod)                       AS delta,
+		                st1.dor_kod = st2.dor_kod                          AS dor_fl,
+		                COALESCE(space_flag, 0) != 0 AND ss.COR_TIP != 'D' AS space_fl
+		         FROM PRE_DATA l
+		                  JOIN dncnsi.stan st1 ON st1.stan_id = l.start_id
+		                  JOIN dncnsi.stan st2 ON st2.stan_id = l.end_id
+		                  LEFT JOIN dnasovpfp.stations ss ON ss.stan_id = st1.stan_id
+		         WHERE ST1.st_kod > 0
+		           AND st2.st_kod > 0
+
+		         ORDER BY st1.st_kod),
+		     PRE_GR_FL AS (SELECT start_id, st_kod1 AS STAN_KOD
+		                   FROM DATA
+		                   WHERE space_fl
+		                   GROUP BY start_id, st_kod1, space_fl
+		                   --HAVING NOT (--NOT bool_or(NOT dor_fl) AND
+		                     --  min(delta) > 100)
+		                       ),
+		     GR_FL as (SELECT STAN_KOD
+		               FROM PRE_GR_FL
+		               WHERE 1 = 1 or STAN_KOD not in (SELECT STAN_KOD
+		                                      FROM (
+		                                               SELECT start_id,
+		                                                      STAN_KOD,
+		                                                      lag(STAN_KOD) OVER (ORDER BY STAN_KOD),
+		                                                      sqrt(power(ABS(x - lag(x) OVER (ORDER BY STAN_KOD)), 2) +
+		                                                           power(ABS(y - lag(y) OVER (ORDER BY STAN_KOD)), 2))  as del1,
+		                                                      sqrt(power(ABS(x - lead(x) OVER (ORDER BY STAN_KOD)), 2) +
+		                                                           power(ABS(y - lead(y) OVER (ORDER BY STAN_KOD)), 2)) as del2,
+		                                                      dor_kod,
+		                                                      lag(dor_kod) OVER (ORDER BY STAN_KOD)                        pdor_kod,
+		                                                      lead(dor_kod) OVER (ORDER BY STAN_KOD)                       ndor_kod
+		                                               FROM PRE_GR_FL G
+		                                                        JOIN dncnsi.stan st on st.stan_id = g.start_id
+		                                                        JOIN dncnsi.point p on p.point_id = g.start_id) T
+		                                               join dncnsi.dor dr on dr.dor_kod = t.dor_kod
+		                                      WHERE t.dor_kod = pdor_kod
+		                                        and t.dor_kod = ndor_kod
+		                                        and coalesce(adm_kod, 20) = 20
+		                                        and del1 > 100
+		                                        and del2 > 100)),
+		     PRELINE AS (SELECT start_id AS STAN_ID
+		                 FROM dnnsi.line_8 L
+		                 UNION
+		                 SELECT end_id AS STAN_ID
+		                 FROM dnnsi.line_8)
+		SELECT ST.STAN_ID                                                        as stanId,
+		       st.st_kod                                                         AS ESR,
+		       st.dor_kod                                                        as dorKod,
+		       CASE
+		           WHEN G.STAN_KOD is not null
+		               THEN 1
+		           ELSE 0 END                                                       grFl,
+		       COALESCE(ADM_KOD, 20)                                             AS admKod,
+		       0                                                                 AS prUzl,
+		       COALESCE(stn.prv_tpr * DRG.vg_ch * 2, DRG.tpr * DRG.vg_ch * 2, 0) as tpr,
+		       COALESCE(stn.prv_tbpr * DRG.vg_ch, DRG.tbpr * DRG.vg_ch, 0)       as tbpr,
+		       st.stan_id in
+		       (select stk_id
+		        from dnnsi.ms_3book_stik)                                        as divPoint,
+      		   COALESCE(st_sl.st_kod, 0)                                         as parent
+		FROM PRELINE L
+		         JOIN DNCNSI.STAN ST ON ST.STAN_ID = L.STAN_ID AND st.COR_TIP != 'D'
+		         LEFT JOIN dnnsi.STATIONS STN on stn.esr = st.st_kod
+		         LEFT JOIN dnnsi.dorog drg on CAST(drg.kod as INTEGER) = ST.dor_kod
+		         JOIN DNCNSI.DOR DR ON DR.DOR_KOD = ST.DOR_KOD
+		         LEFT JOIN GR_FL G on G.STAN_KOD = st.st_kod
+		         LEFT JOIN dnnsi.stan_uzl su ON su.stan_id = st.stan_id AND pr_uzl IN (1, 3)
+		         LEFT JOIN dncnsi.stan_links sln ON sln.stan_id = st.stan_id and sln.cor_tip != 'D'
+		         LEFT JOIN DNCNSI.STAN ST_sl ON ST_sl.STAN_ID = sLn.stan_id_parent AND ST_sl.COR_TIP != 'D'
+		ORDER BY ST.STAN_ID
+		]]>
+    </Query>
+    <Comm>Загрузка перегонов LINE 8 - ребер мелкой сети</Comm>
+    <Query ID="LOAD_LINE">
+        <![CDATA[
+			SELECT
+				START_ID as startId, END_ID as endId, LEN AS LENGTH
+			FROM DNNSI.LINE_8 L
+			  JOIN DNCNSI.STAN ST1 ON ST1.STAN_ID = L.START_ID AND st1.COR_TIP != 'D'
+			  JOIN DNCNSI.STAN ST2 ON ST2.STAN_ID = L.END_ID AND st2.COR_TIP != 'D'
+			 ORDER BY START_ID, END_ID
+		]]>
+    </Query>
+    <Comm>Загрузка сортировочных систем - вершин крупной сети</Comm>
+    <Query ID="LOAD_DEST_STATIONS_SS">
+        <![CDATA[
+			WITH
+			    VAR AS (SELECT $VAR_ID$ AS VAR_ID),
+			    RAW_DATA AS (SELECT
+			                   STAN_ID,
+			                   KOLVAG
+			                 FROM VAR V
+			                   JOIN dnspf2.streams sa ON sa.var_id = v.VAR_ID
+			                   JOIN dncnsi.stan st ON st.stan_id = sa.stan_id2
+			                 WHERE st.st_kod != old_st2
+			                 UNION ALL
+			                 SELECT
+			                   STAN_ID1 AS STAN_ID,
+			                   KOLVAG
+			                 FROM VAR V
+			                   JOIN dnspf2.streams sa ON sa.var_id = v.VAR_ID
+			                 WHERE stan_id1 != stan_id2
+			                 UNION ALL
+			                 SELECT
+			                   STAN_ID1 AS STAN_ID,
+			                   KOLVAG * marsh_prc
+			                 FROM VAR V
+			                   JOIN dnspf2.pred_stream sa ON sa.var_id = v.VAR_ID
+			                 WHERE stan_id1 != stan_id2 and (sa.marsh_type = 1) --AND ($MARSH_PREV$ = 1)
+			                 ),
+			    STAN_LOCAL_PERERAB AS ( SELECT
+			                              stan_id,
+			                              sum(KOLVAG) AS LOCAL_KOLVAG
+			                            FROM RAW_DATA
+			                            GROUP BY stan_id),
+     			SORTSYSTEM_INFO as (SELECT * FROM dnspf2.sortsystems_info_var where var_id = (select var_id from VAR))
+			SELECT
+			  SS_ID as ssId,
+			  PR.STAN_ID as stanId,
+			  esr,
+			  DOR_KOD as dorKod,
+			  p_gorki as pGorki,
+			  t_per as tPer,
+			  t_bp as tBp,
+			  CURRENT_K_NAZN as currentDestCount,
+			  ROUND(CASE WHEN ALL_MEST_TRAIN = 0
+			    THEN
+			      COALESCE(LOCAL_KOLVAG, 0)
+			        ELSE
+			          COALESCE(LOCAL_KOLVAG, 0) * current_k_nazn / ALL_MEST_TRAIN END, 2)
+			          AS currentKolvag,
+			  udzatr_per as udzatrPer,
+			  udzatr_bp as udzatrBp,
+			  MGS_Fl as mgsFl,
+			  gr_c as grC,
+			  coalesce(pr_uzl, 0)                                                         AS prUzl,
+			  trans_fl as transFl,
+        	  case when stn is null then 0 else 1 end as mainFl, -- основной в смысле крупных грузовых станций
+        	  CAST(Coalesce(stn200.main_fl, 0) as smallint) as mainJoinFl, --Основной в смысле особенностей удлинения
+        	  extra_in_dest as extraInDest,
+        	  extra_out_dest as extraOutDest
+			FROM VAR V
+			  JOIN SORTSYSTEM_INFO PR ON PR.VAR_ID = V.VAR_ID
+			  LEFT JOIN STAN_LOCAL_PERERAB SLP ON SLP.stan_id = pr.stan_id
+			  LEFT JOIN dnnsi.stan_uzl su ON su.stan_id = pr.stan_id AND su.pr_uzl IN (1)
+        	  LEFT JOIN DNNSI.ST_PFP__MAIN stn ON stn.st_id = pr.stan_id
+        	  LEFT JOIN DNSPF2.STAN_200 stn200 on stn200.stan_id = pr.stan_id
+			ORDER BY SS_ID
+		]]>
+    </Query>
+    <Comm>Загрузка диапазонов станций, которые могут быть доставлены местными назначениями (по действующему ПФ)</Comm>
+    <Query ID="LOAD_LOCAL_SS_DIAP">
+        <![CDATA[
+			WITH VAR as (select $VAR_ID$ as VAR_ID)
+			SELECT lds.ldest_id                                      as ldestId,
+			       MIN(stan_kod)                                     as startEsr,
+			       MAX(stan_kod)                                     as endEsr,
+			       ss_id1                                            as ssId
+			FROM dnspf2.loc_destinations lds
+			         JOIN dnspf2.vw_sortsystems ss1 on ss1.ss_id = ss_id1
+			         JOIN dnspf2.vw_sortsystems ss2 on ss2.ss_id = ss_id2
+			         join dnspf2.loc_dest_diap ldd on ldd.ldest_id = lds.ldest_id
+			         JOIN dnspf2.pf_stan_agg_station psa on psa.stan_id = ss1.stan_id and psa.stan_end = psa.stan_id and
+			                                                psa.stan_kod between ldd.start_esr and ldd.end_esr
+			WHERE lds.ldest_id in
+			      (SELECT seq_id FROM dnspf2.loc_stream_desc where var_id = (SELECT var_id from var) and fact_fl = 0)
+			group by lds.ldest_id, start_esr, end_esr, ss_id1
+			ORDER BY ss_id1, start_esr
+		]]>
+    </Query>
+    <Comm>Загрузка назначений - ребер крупной сети</Comm>
+    <Query ID="LOAD_DESTINATION_SS">
+        <![CDATA[
+			WITH VAR AS (SELECT $VAR_ID$ AS VAR_ID, $FACT_FL$ as fact_fl),
+			     DEST_ROUTES AS (SELECT dest_id,
+			                            string_agg(st1_urlb || ' ' || st2_urlb || ' ' || st1 || ' ' || st2, ','
+			                                       ORDER BY DR.num)                                                      AS uchstr,
+			                            MAX(CASE WHEN NUM = 1 THEN st1 ELSE 0 END) || ',' || string_agg('' || st2, ','
+			                                                                                            ORDER BY DR.num) AS uch_code
+			                     FROM dnspf2.dest_routes dr
+			                     WHERE VAR_ID = (SELECT VAR_ID
+			                                     FROM VAR)
+			                     GROUP BY dest_id),
+			     DEST_COND as (SELECT dest_id, string_agg(stan_id1 || '-' || stan_id2, ',') as streamsCond
+			                   from dnspf2.cond_destination cd
+			                   group by dest_id),
+			     STATIONS as (SELECT ss_id
+			                  FROM DNSPF2.SORTSYSTEMS_DATA
+			                  where var_id = (SELECT VAR_ID FROM VAR))
+			SELECT DISTINCT COALESCE(ds.DEST_ID, 0)            AS destId,
+			                COALESCE(ds.nazn_id, 0)            AS naznId,
+			                (coalesce(imp_fl, 0) = 1) or streamsCond is not null               AS FL_IMPORTANT,
+			                ds.ss_id1                          AS ST1,
+			                ds.ss_id2                          AS ST2,
+			                di.est +
+			                CASE
+			                    WHEN POSITION(',' || 1472 || ',' IN ',' || UPATH || ',') > 0
+			                        THEN 10000
+			                    ELSE 0 END                        eSt,
+			                COALESCE(ds.dls, GREATEST(ds.r_dls, di.dls)) AS DLS,
+
+			                Coalesce(DI.LEN, 0)                AS LEN,
+			                ds.STKS,
+			                COALESCE(ds.rps, '0')              as rps,
+			                ds.gr_fl = 1                       AS loaded,
+			                coalesce(uchstr, '')               AS uchstr,
+			                COALESCE(extra_value, 0)           AS extraValue,
+			                uch_code                           as uchCode,
+			                ds.bearings,
+			                streamsCond,
+			                Coalesce(din.kolvag, 0) as invKolvag,
+			                coalesce(din.unf_fl = 1, false) as unfFl
+			FROM dnspf2.destinations ds
+			         JOIN DNSPF2.DESTINATION_INFO di ON di.dest_id = ds.dest_id and di.var_id = ds.var_id
+			         LEFT jOIN DNSPF2.DEST_INV DIN ON DIN.dest_id = ds.dest_id
+			         LEFT JOIN DEST_ROUTES DR ON DR.dest_id = ds.dest_id
+			         join dnspf2.vw_sortsystems ss1 on ss1.ss_id = ss_id1
+			         join dnspf2.vw_sortsystems ss2 on ss2.ss_id = ss_id2
+			left join dest_cond dc on dc.dest_id = ds.dest_id
+			WHERE (ds.VAR_ID, ds.fact_fl) = (SELECT var_id, fact_fl
+			                              FROM VAR)
+			  and ss_id1 in (select ss_id from stations)
+			  and ss_id2 in (select ss_id from stations)
+			  AND (DS.NEW_FL < 90 OR DS.NEW_FL IS NULL)
+			ORDER BY st1, st2, ds.gr_fl = 1
+		]]>
+    </Query>
+    <Comm>Загружаем принудительно распределенные диапазоны по сортировочным системам</Comm>
+    <Query ID="LOAD_FORCE_DIAPASON">
+        <![CDATA[
+
+			WITH VAR AS (SELECT $VAR_ID$ AS VAR_ID, $FACT_FL$ as fact_fl),
+			     STATIONS as (SELECT ss_id
+			                  FROM DNSPF2.SORTSYSTEMS_DATA
+			                  where var_id = (SELECT VAR_ID FROM VAR))
+			SELECT ss_id1 as ssId,
+				start_code as startCode,
+				end_code as endCode,
+				ds.dest_id as destId
+            FROM DNSPF2.force_diapason fd
+            join dnspf2.destinations ds on ds.dest_id = fd.dest_id
+            WHERE (fd.VAR_ID, ds.fact_fl) = (SELECT VAR_ID, FACT_FL FROM VAR)
+			  and ss_id1 in (select ss_id from stations)
+			  and ss_id2 in (select ss_id from stations)
+            order by ds.dest_id
+		]]>
+    </Query>
+    <Query ID="LOAD_RAS_UCH">
+        <![CDATA[
+			WITH VAR AS (SELECT $VAR_ID$ AS VAR_ID, $FACT_FL$ as FACT_FL),
+			     URLBS as (SELECT distinct on (st1_urlb, st2_urlb, st1,st2) ds.var_id,
+			                                                                st1_urlb,
+			                                                                st2_urlb,
+			                                                                st1,
+			                                                                st2,
+			                                                                dor,
+			                                                                upath,
+			                                                                len_urlb,
+			                                                                len,
+			                                                                dr.euch_gr,
+			                                                                dr.euch_pr
+			               from dnspf2.destinations ds
+			                        JOIN dnspf2.dest_routes dr ON ds.dest_id = dr.dest_id
+			               WHERE (ds.var_id, ds.fact_fl) = (SELECT VAR_ID, FACT_FL
+			                                                FROM VAR))
+			SELECT DISTINCT st1_urlb                                                                         as stanId1,
+			                st2_urlb                                                                         as stanId2,
+			                st1,
+			                st2,
+			                upath,
+			                MAX(CASE
+			                        WHEN COALESCE(dor.adm_kod, 20) = 20
+			                            THEN COALESCE(CASE when dr.euch_pr > 0 then dr.euch_pr end, dr.len * dst.spr_eu, len * 1)
+			                        ELSE LEN * 1 END
+			                    )                                                                            AS ePorV,
+			                MAX(CASE
+			                        WHEN coalesce(dor.adm_kod, 20) = 20
+			                            THEN COALESCE(CASE when dr.euch_gr > 0 then dr.euch_gr end, dr.len * dst.sgr_eu, len * 1)
+			                        ELSE LEN * 1 END
+			                    )                                                                            AS eGrV,
+			                MAX(CASE WHEN len_urlb = 0 OR UET IS NULL THEN 1 ELSE 1.00 * len / len_urlb END) as eMult
+			FROM URLBS dr
+			         LEFT JOIN dncnsi.dor dor ON dor.dor_kod = dr.dor
+			         LEFT JOIN dnspf2.euch_dor_stat dst ON dst.dor_kod = dr.dor
+			         LEFT JOIN dnspf2.urlb_e uet
+			                   ON uet.var_id = dr.var_id and uet.stan_id1 = dr.st1_urlb AND uet.stan_id2 = dr.st2_urlb
+			GROUP BY st1_urlb,
+			         st2_urlb,
+			         st1,
+			         st2,
+			         upath
+			ORDER BY st1_urlb,
+			         st2_urlb,
+			         st1,
+			         st2, upath
+		]]>
+    </Query>
+    <Query ID="LOAD_BASE_RAS_UCH_ZATR">
+        <![CDATA[
+			WITH VAR AS (SELECT $VAR_ID$ AS VAR_ID),
+			     TS as (select S.STAN_ID idST, TS.KOD idSTTex
+			            from DNNSI.STATIONS TS
+			                     join DNCNSI.STAN S on TS.ESR = S.ST_KOD),
+			     URLB as (select ST1.idST                                  STARTV,
+			                     ST2.idST                                  ENDV,
+			                     U.VES_U,
+			                     U.DLS_U,
+			                     U.TUCH,
+			                     U.SGR                                     Euch_GR,
+			                     U.SPR                                     Euch_PR,
+			                     U.VES_M                                   VES_MAX,
+			                     case when uo is null then 0 else 1 end as ignore
+			              from DNNSI.RAS_UCH U
+			                       join TS ST1 on U.STARTv = ST1.idSTTex
+			                       join TS ST2 on U.ENDV = ST2.idSTTex
+			                       left join dnspf2.urlb_overlay_ignore uo on uo.stan_id1 = st1.idST and uo.stan_id2 = st2.idST
+			     ),
+			     uet as (SELECT *
+			             FROM dnspf2.urlb_e uet
+			             WHERE (uet.var_id) = (SELECT VAR_ID
+			                                   FROM VAR)),
+			     ADD_UET as (SELECT *
+			                 FROM URLB u
+			                 WHERE (U.STARTV, u.ENDV) not in (select uet.stan_id1, uet.stan_id2 FROM UET)),
+			     ALL_UET as (SELECT var_id,
+			                        uet.stan_id1,
+			                        uet.stan_id2,
+			                        e_gr,
+			                        e_por,
+			                        dls,
+			                        ur.dls_u as dls_u,
+			                        0        as ignore
+			                 FROM uet
+			                          LEFT JOIn URLB UR on UR.STARTV = stan_id1 and ENDV = stan_id2
+			                 UNION ALL
+			                 SELECT (SELECT VAR_ID FROM VAR),
+			                        U.STARTV,
+			                        u.ENDV,
+			                        null,
+			                        null,
+			                        0,
+			                        dls_u,
+			                        ignore
+			                 FROM ADD_UET u)
+
+			SELECT DISTINCT AU.stan_id1                                                             as stanId1,
+			                AU.stan_id2                                                             as stanId2,
+			                e_por                                                                   as ePor,
+			                e_gr                                                                    as eGr,
+			                cast(COALESCE(dls, 0) as Integer)                                          dls,
+			                cast(COALESCE(dls_U, 0) as Integer)                                        dlsU,
+			                COALESCE(dnspf2.extract_value_left(e_gr, COALESCE(train_count, 5)), 0)  as dynGr,
+			                COALESCE(dnspf2.extract_value_left(e_por, COALESCE(train_count, 5)), 0) as dynPor,
+			                coalesce(ignore, 0)                                                     as ignore
+			FROM ALL_UET AU
+			         LEFT JOIN dnspf2.urlb_result ur
+			                   on ur.var_id = AU.var_id and ur.stan_id1 = AU.stan_id1 and ur.stan_id2 = AU.stan_id2 and
+			                      ur.fact_fl = 1
+			order by stanId1, stanId2
+		]]>
+    </Query>
+    <Comm>Загрузка агрегированных корреспонденций</Comm>
+    <Query ID="LOAD_CARGO">
+        <![CDATA[
+			WITH VAR AS (SELECT
+			               $VAR_ID$ AS VAR_ID,
+			               $FACT_FL$  AS FACT_FL),
+			     RAW AS (
+			         SELECT sa.stream_id                                                            AS id,
+			                sa.stan_id1                                                             as stanId1,
+			                sa.stan_id2                                                             as stanId2,
+			                st2.st_kod                                                              AS st2,
+			                GREATEST(sa.kolvag, 0.01)                                               as kolvag,
+			                ggr,
+			                sa.old_st2                                                              AS oldSt2,
+			                st.stan_id                                                              AS oldStanId2,
+			                st2.dor_kod                                                             as dorKod,
+			                st1.dor_kod                                                             as dorKod1,
+			                COALESCE(nd.len, 0)                                                     as LEN,
+			                CASE
+			                    WHEN COALESCE(dr2.adm_kod, 20) != 20
+			                        OR COALESCE(dr1.adm_kod, 20) != 20
+			                        OR dr2.dor_kod != dr1.dor_kod AND (dr1.dor_kod = 10 OR dr2.dor_kod = 10)
+			                        THEN 1
+			                    ELSE 0 END                                                          AS mgsFl,
+			                STKS,
+			                gr_por = 1                                                              AS loaded,
+			                rps,
+			                SUM(kolvag)
+			                OVER (
+			                    PARTITION BY st1.dor_kod, sa.stan_id2 )                             AS sumVagCount,
+			                SUM(kolvag)
+			                OVER (
+			                    PARTITION BY sa.stan_id1, sa.stan_id2 )                             AS kvCount,
+			                COALESCE((SELECT su1.pr_uzl
+			                          FROM dnnsi.stan_uzl su1
+			                          WHERE su1.stan_id = st1.stan_id AND su1.pr_uzl IN (1, 3)), 0) AS uzlFrom,
+			                COALESCE((SELECT su2.pr_uzl
+			                          FROM dnnsi.stan_uzl su2
+			                          WHERE su2.stan_id = st2.stan_id AND su2.pr_uzl IN (1, 3)), 0) AS uzlTo,
+			                dr1.dor_kod = dr2.dor_kod as innerFl,
+			                COALESCE(nd.len, 0) < 1000 as shortFl
+			         FROM dnspf2.streams SA
+			                  LEFT JOIN dnspf2.loc_basic_len ND ON sa.stan_id1 = nd.stan_id1 AND sa.stan_id2 = nd.stan_id2
+			                  JOIN DNCNSI.stan st1 ON st1.cor_tip != 'D' AND st1.stan_id = sa.stan_id1
+			                  JOIN DNCNSI.stan st2 ON st2.cor_tip != 'D' AND st2.stan_id = sa.stan_id2
+			                  JOIN dncnsi.dor dr1 ON dr1.dor_kod = st1.dor_kod
+			                  JOIN DNCNSI.stan st ON st.cor_tip != 'D' AND st.st_kod = sa.old_st2
+			                  JOIN dncnsi.dor dr2 ON dr2.dor_kod = st2.dor_kod
+			         WHERE VAR_ID = (SELECT VAR_ID
+			                         FROM VAR)
+			           AND sa.stan_id1 != sa.stan_id2),
+			     OLD_PATH AS (SELECT sd.stream_id                                as ID,
+			                         STRING_AGG(CASE
+			                                        WHEN sd.num = 1
+			                                            THEN ds.ss_id1 || ','
+			                                        ELSE '' END || ds.ss_id2, ','
+			                                    ORDER BY sd.num)                 AS streamPath,
+			                         STRING_AGG(DISTINCT '' || ss2.stan_id, ',') AS pfStan,
+			                         STRING_AGG('' || ds.dest_id, ','
+			                                    ORDER BY sd.num)                 AS destPath
+			                  FROM dnspf2.stream_desc sd
+			                           JOIN dnspf2.destinations ds ON ds.dest_id = sd.dest_id
+			                           JOIN dnspf2.vw_sortsystems ss2 on ss2.ss_id = ss_id2
+			                  WHERE sd.VAR_ID = (SELECT VAR_ID
+			                                     FROM VAR)
+			                    AND sd.fact_fl = 1
+			                  GROUP BY sd.stream_id)
+			SELECT r.*,
+			       streamPath,
+			       destPath,
+			       pfStan
+			FROM RAW R
+			         LEFT JOIN OLD_PATH OP ON OP.ID = R.ID --where kvCount >= 1
+			ORDER BY innerFl desc, shortFl desc, loaded desc, sumVagCount * LEN DESC, kolvag DESC, LEN DESC
+		]]>
+    </Query>
+    <Comm>Загрузка дополнительных корреспонденций (для дополнения до 200 на 200)</Comm>
+    <Query ID="LOAD_CARGO_ADD">
+        <![CDATA[
+			WITH VAR AS (SELECT
+			               $VAR_ID$ AS VAR_ID,
+			               $FACT_FL$  AS FACT_FL),
+			     RAW AS (
+			         SELECT sa.stream_id                                AS id,
+			                sa.stan_id1                                 as stanId1,
+			                sa.stan_id2                                 as stanId2,
+			                st2.st_kod                                  AS st2,
+			                0.00                   as kolvag,
+			                0 as ggr,
+			                st2.st_kod                                  AS oldSt2,
+			                st2.stan_id                                  AS oldStanId2,
+			                st2.dor_kod                                 as dorKod,
+			                st1.dor_kod                                 as dorKod1,
+			                COALESCE(nd.len, 0)                         as LEN,
+			                CASE
+			                    WHEN COALESCE(dr2.adm_kod, 20) != 20
+			                        OR COALESCE(dr1.adm_kod, 20) != 20
+			                        OR dr2.dor_kod != dr1.dor_kod AND (dr1.dor_kod = 10 OR dr2.dor_kod = 10)
+			                        THEN 1
+			                    ELSE 0 END                              AS mgsFl,
+			                STKS,
+			                TRUE                                        AS loaded,
+			                0 as rps,
+			                0 AS sumVagCount,
+			                COALESCE((SELECT su1.pr_uzl
+			                          FROM dnnsi.stan_uzl su1
+			                          WHERE su1.stan_id = st1.stan_id
+			                            AND su1.pr_uzl IN (1, 3)), 0)   AS uzlFrom,
+			                COALESCE((SELECT su2.pr_uzl
+			                          FROM dnnsi.stan_uzl su2
+			                          WHERE su2.stan_id = st2.stan_id
+			                            AND su2.pr_uzl IN (1, 3)), 0)   AS uzlTo
+			         FROM dnspf2.streams_add SA
+			                  LEFT JOIN dnspf2.loc_basic_len ND ON sa.stan_id1 = nd.stan_id1 AND sa.stan_id2 = nd.stan_id2
+			                  JOIN DNCNSI.stan st1 ON st1.cor_tip != 'D' AND st1.stan_id = sa.stan_id1
+			                  JOIN DNCNSI.stan st2 ON st2.cor_tip != 'D' AND st2.stan_id = sa.stan_id2
+			                  JOIN dncnsi.dor dr1 ON dr1.dor_kod = st1.dor_kod
+			                  JOIN dncnsi.dor dr2 ON dr2.dor_kod = st2.dor_kod
+			         WHERE VAR_ID = (SELECT VAR_ID
+			                         FROM VAR)
+			           AND sa.stan_id1 != sa.stan_id2)
+			SELECT r.*,
+			       cast(null as VARCHAR) as streamPath,
+			       cast(null as VARCHAR) as destPath,
+			       cast(null as VARCHAR) as pfStan
+			FROM RAW R
+			ORDER BY LEN DESC
+		]]>
+    </Query>
+    <Comm>Загрузка пропускных способностей по перегонам</Comm>
+    <Query ID="LOAD_PEREGON">
+        <![CDATA[
+			WITH RECURSIVE VAR as (SELECT VAR_ID, IGN_ROUTES_FL as IGNORE_ROUTES FROM DNSPF2.VARS WHERE VAR_ID = $VAR_ID$),
+			               PEREGON AS (SELECT START_ID,
+			                                  END_ID,
+			                                  LEN
+			                           FROM dnnsi.line_8
+			                           UNION
+			                           SELECT END_ID,
+			                                  START_ID,
+			                                  LEN
+			                           FROM dnnsi.line_8),
+			               PROPUSK (START_ID, END_ID, MAX_COUNT, rez_gr, GRAPH)
+			                   AS (SELECT prpd.start_id,
+			                              prpd.end_id,
+			                              COALESCE(PD_fw.fw, PD_fw.fw_graph, pd_bw.bw, pd_bw.bw_graph),
+			                              rez_gr_tyda,
+			                              MIN(COALESCE(PD_fw.fw, PD_fw.fw_graph, pd_bw.bw, pd_bw.bw_graph, tip1_f)) AS tip1_f
+			                       FROM dnpassport.rezult_rash_psprt prp
+			                                JOIN dnpassport.rezult_rash_psprt_desc prpd
+			                                     ON prpd.frag_id = prp.id_frag
+			                                LEFT JOIN dnpassport.nsi_spans ns ON ns.id_frag = prpd.frag_id
+			                                LEFT JOIN dnpassport.gdp g ON g.id_span = ns.id_span
+			                                cross join VAR V
+			                                LEFT JOIN dnspf2.pereg pd_fw
+			                                          on (pd_fw.var_id, pd_fw.start_id, pd_fw.end_id) =
+			                                             (v.var_id, prpd.start_id, prpd.end_id)
+			                                LEFT JOIN dnspf2.pereg pd_bw
+			                                          on (pd_bw.var_id, pd_bw.start_id, pd_bw.end_id) =
+			                                             (v.var_Id, prpd.end_id, prpd.start_id)
+
+			                       GROUP BY prpd.start_id, prpd.end_id, COALESCE(PD_fw.fw, PD_fw.fw_graph, pd_bw.bw, pd_bw.bw_graph), rez_gr_tyda, prpd.frag_id
+			                       UNION
+			                       SELECT prpd.end_id,
+			                              prpd.start_id,
+			                              COALESCE(PD_fw.bw, PD_fw.bw_graph, pd_bw.fw, pd_bw.fw_graph),
+			                              rez_gr_obr,
+			                              MIN(COALESCE(PD_fw.bw, PD_fw.bw_graph, pd_bw.fw, pd_bw.fw_graph, tip1_b)) AS tip1_b
+			                       FROM dnpassport.rezult_rash_psprt prp
+			                                JOIN dnpassport.rezult_rash_psprt_desc prpd
+			                                     ON prpd.frag_id = prp.id_frag
+			                                LEFT JOIN dnpassport.nsi_spans ns ON ns.id_frag = prpd.frag_id
+			                                LEFT JOIN dnpassport.gdp g ON g.id_span = ns.id_span
+			                                cross join VAR V
+			                                LEFT JOIN dnspf2.pereg pd_fw
+			                                          on (pd_fw.var_id, pd_fw.start_id, pd_fw.end_id) =
+			                                             (v.var_id, prpd.start_id, prpd.end_id)
+			                                LEFT JOIN dnspf2.pereg pd_bw
+			                                          on (pd_bw.var_id, pd_bw.start_id, pd_bw.end_id) =
+			                                             (v.var_id, prpd.end_id, prpd.start_id)
+			                       GROUP BY prpd.start_id, prpd.end_id, COALESCE(PD_fw.bw, PD_fw.bw_graph, pd_bw.fw, pd_bw.fw_graph), rez_gr_obr, prpd.frag_id
+			               ),
+			               PRERESULT AS (SELECT P.START_ID,
+			                                    P.END_ID,
+			                                    LEN,
+			                                    COALESCE(case when max_count > 0 then max_count end, SUM(GREATEST(PR.rez_gr, GRAPH)), 999999) AS MAX_COUNT,
+			                                    COUNT(*)                                             AS COn,
+			                                    COALESCE(KOL_POEZD, 0)                               AS KOL_POEZD
+			                             FROM (SELECT DISTINCT START_ID,
+			                                                   END_ID,
+			                                                   len
+			                                   FROM PEREGON) P
+			                                      JOIN PROPUSK PR ON PR.START_ID = P.START_ID AND PR.END_ID = P.END_ID
+			                                      LEFT JOIN (SELECT START_ID,
+			                                                        END_ID,
+			                                                        SUM(KOL_POEZD) AS KOL_POEZD
+			                                                 FROM VAR v
+			                                                          JOIN dnspf2.local_stream ls on ls.var_id = v.var_id
+			                                                     AND (IGNORE_ROUTES = 0 OR MARSH_FL = 0)
+			                                                 GROUP BY START_ID,
+			                                                          END_ID) LSP
+			                                                ON LSP.start_id = P.START_ID AND LSP.end_id = P.END_ID
+			                             WHERE P.START_ID IS NOT NULL
+			                             GROUP BY P.START_ID,
+			                                      P.END_ID, KOL_POEZD, LEN,max_count)
+			SELECT start_id as startId,
+			       end_id as endId,
+			       st.dor_kod as dorKod,
+			       len,
+			       MAX_COUNT as maxCount,
+			       KOL_POEZD AS currentTrain
+			FROM preresult p join dncnsi.stan st on st.stan_id = start_id
+			WHERE (START_ID, END_ID) != (17722, 17727)
+			  and end_id != 17727
+			  and START_ID != 17727
+			order by start_id, end_id
+		]]>
+    </Query>
+    <Comm>Загрузка нормативных данных по минимальным мощностям назначений в зависимости от длины пути следования и
+        особенностей работы станции формирования (скорее рудимент, но пока остается)
+    </Comm>
+    <Query ID="GET_MIN_KP_ON_NAZN">
+        <![CDATA[
+			SELECT l_nazn, t_st, n_min
+			FROM
+			  (SELECT STRING_AGG('' || L_NAZN, ','
+			          ORDER BY L_NAZN) AS L_NAZN
+			   FROM (SELECT DISTINCT L_NAZN
+			         FROM dnasovpfp.min_kp_nazn) T) F,
+			  (SELECT STRING_AGG('' || T_ST, ','
+			          ORDER BY T_ST) AS T_ST
+			   FROM (SELECT DISTINCT T_ST
+			         FROM dnasovpfp.min_kp_nazn) T) F2,
+			  (SELECT STRING_AGG('' || n_min, ','
+			          ORDER BY T_ST, L_NAZN) AS n_min
+			   FROM dnasovpfp.min_kp_nazn) VAL
+			 ORDER BY l_nazn
+		]]>
+    </Query>
+    <Comm>Чистим старые данные</Comm>
+    <Query ID="CLEAR_STREAM_DESC">
+        <![CDATA[
+			DELETE FROM dnspf2.STREAM_DESC where var_id = $VAR_ID$ AND FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.TRACE_LOG where var_id = $VAR_ID$;
+			DELETE FROM dnspf2.urlb_result where var_id = $VAR_ID$ AND FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.stan_zagr where var_id = $VAR_ID$ AND FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.dest_vag where var_id = $VAR_ID$ AND FACT_FL = $FACT_FL$;
+			--DELETE FROM dnspf2.dest_zagr where var_id = $VAR_ID$ and dest_id in (SELECT DEST_ID FROM DNSPF2.DESTINATIONS WHERE VAR_ID = $VAR_ID$ and FACT_FL = $FACT_FL$);
+			DELETE FROM dnspf2.join_streams where var_id = $VAR_ID$ and join_dest_id in (SELECT join_dest_id FROM dnspf2.join_dest WHERE VAR_ID = $VAR_ID$ and FACT_FL = $FACT_FL$);
+			DELETE FROM dnspf2.join_dest where var_id = $VAR_ID$ and FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.remove_streams where var_id = $VAR_ID$ and rm_id in (SELECT rm_id FROM dnspf2.remove_small WHERE VAR_ID = $VAR_ID$ and FACT_FL = $FACT_FL$);
+			DELETE FROM dnspf2.remove_small where var_id = $VAR_ID$ and FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.destination_diap where var_id = $VAR_ID$;
+			DELETE FROM dnspf2.dest_routes where dest_id IN (SELECT DEST_ID FROM dnspf2.destinations WHERE var_id = $VAR_ID$ and new_fl >= 90 and FACT_FL = $FACT_FL$);
+			DELETE FROM dnspf2.destinations where var_id = $VAR_ID$ and new_fl >= 90 and FACT_FL = $FACT_FL$;
+			DELETE FROM dnspf2.dest_result where var_id = $VAR_ID$ --AND FACT_FL = $FACT_FL$
+		]]>
+    </Query>
+    <Comm>Отметка в базе о начале расчета, записываем параметры расчета</Comm>
+    <Query ID="START_CALC">
+        <![CDATA[
+			UPDATE DNSPF2.VARS
+			SET calc_date = current_timestamp,
+			remove_small_fl = $REMOVE_SMALL$,
+			join_dest_fl = $JOIN_DEST$,
+			iteration_count = $ITERATION_COUNT$,
+			opt_seq_fl = $OPT_SEQ$,
+			allow_extra_dest_fl = $ALLOW_EXTRA_DEST$,
+			calc_alt_path = $ALT_DEST_PATH$,
+			ign_pereg_fl = $IGNORE_PEREGON$,
+			ign_ss_fl = $IGNORE_SORTSYSTEM$,
+			ign_tree_fl = $IGNORE_TREE$,
+			ign_dest_limit_fl = $IGNORE_DEST_LIMIT$,
+			ign_routes_fl = $IGNORE_ROUTES$,
+			use_len_fl = $USE_LEN$,
+			status = -1
+			WHERE VAR_ID = $VAR_ID$
+		]]>
+    </Query>
+    <Comm>Завершаем расчет:</Comm>
+    <Query ID="END_CALC">
+        <![CDATA[
+			--Рассчитываем параметры по удлиненным назначениям составность/длину пути следования
+			WITH DEST AS (SELECT dest_id
+						  FROM dnspf2.destinations
+						  WHERE var_id = $VAR_ID$ AND fact_fl = 0 AND NEW_FL > 90 )
+			UPDATE dnspf2.destinations ds
+			SET (r_dls, r_len) = (SELECT MIN(CASE WHEN dr.dls > 0 then dls end) as dls, sum(len) as len
+								  FROM dnspf2.dest_routes dr
+								  where dr.dest_id = ds.dest_id)
+			WHERE dest_id IN (SELECT dest_id
+							  FROM DEST);
+			--Суммируем загрузку на назначении по каждой включенной на нем станции выгрузки
+            INSERT INTO dnspf2.dest_vag (var_id, fact_fl, dest_id, stan_id, kolvag, kolvag_gr)
+			with var(VAR_ID, FACT_FL) as (select $VAR_ID$, 0),
+                 RAW as (SELECT ds.dest_id,
+                                ss.stan_id2                                               as stan_id,
+                                sum(kolvag)                                               as kolvag,
+                                COALESCE(sum(case when ss.gr_por = 1 then kolvag end), 0) as kolvag_gr
+                         from VAR V
+                                  join dnspf2.streams ss on ss.var_id = v.VAR_ID
+                                  join dnspf2.stream_desc sd on sd.stream_id = ss.stream_id and sd.fact_fl = v.FACT_FL
+                                  join dnspf2.destinations ds on ds.dest_id = sd.dest_id
+                         group by ds.dest_id, ss.stan_id2
+			             UNION ALL
+			             select dest_id, 0, kolvag, kolvag
+			             from var V
+			                      join dnspf2.dest_inv di on di.var_id = v.VAR_ID)
+            SELECT var_id, fact_fl, dest_id, stan_id, kolvag, kolvag_gr
+            from raw R
+                     cross join var;
+
+			--Рассчитываем загрузку УРЛБ
+            insert into dnspf2.urlb_result (var_id, stan_id1, stan_id2, train_count, vag_count, fact_fl, vag_gr_count)
+            WITH RECURSIVE
+                VAR AS (SELECT $VAR_ID$ AS VAR_ID, 0 as FACT_FL)
+			SELECT v.var_id,
+			       st1_urlb,
+			       st2_urlb,
+			       sum(kolvag / COALESCE(di.dls, di.r_dls, 55))             as kolpoezd,
+			       sum(kolvag)                                              as kolvag,
+			       v.fact_fl,
+			       COALESCE(sum(case when di.gr_fl = 1 then kolvag end), 0) as kolvag_gr
+			FROM VAR v
+			         JOIN dnspf2.destinations di on di.var_id = v.VAR_ID and di.fact_fl = v.FACT_FL
+			         join dnspf2.dest_routes dr on dr.dest_id = di.dest_id
+			    join dnspf2.dest_vag dv on dv.dest_id = di.dest_id
+
+			where st1_urlb != 0
+			  and st2_urlb != 0
+			  AND NOT EXISTS(SELECT * FROM DNSPF2.urlb_result WHERE (VAR_ID, FACT_FL) = (SELECT VAR_ID, FACT_FL FROM VAR))
+			group by v.var_id, st1_urlb, st2_urlb, v.fact_fl;
+
+			--Рассчитываем итоговые показатели назначений - общая загрузка, итоговая оценка стоимости проследования (исходя из окончательной загрузки УРЛБ в пути следования)
+            WITH VAR AS (SELECT $VAR_ID$ as var_id, 0 as fact_fl),
+			     PRE_DEST as (SELECT vs.var_id,
+			                         ds.fact_fl,
+			                         st1_urlb,
+			                         ds.dest_id,
+			                         ds.gr_fl,
+			                         dr.len,
+			                         CASE
+			                             WHEN len_urlb != 0
+			                                 THEN dr.len * 1.00 / len_urlb
+			                             ELSE 1 END                                                                     as koef,
+			                         uz.train_count,
+			                         uz0.train_count                                                                    as tc0,
+			                         di.est,
+			                         row_number() over (PARTITION BY ds.dest_id, dr.num order by abs(di.dls - ue.dls),  ue.dls desc ) as index,
+			                         CASE WHEN gr_fl = 0 then ue.e_por when gr_fl = 1 then ue.e_gr end                  as ecost,
+			                         CASE WHEN gr_fl = 0 then dr.euch_pr when gr_fl = 1 then dr.euch_gr end             as ecost_base
+			                  FROM var vs
+			                           JOIN dnspf2.destinations ds ON ds.var_id = vs.var_id
+			                           LEFT JOIN dnspf2.dest_routes dr ON dr.dest_id = ds.dest_id
+			                           JOIN dnspf2.destination_info di ON di.dest_id = ds.dest_id
+			                           LEFT JOIN dnspf2.urlb_result uz
+			                                     ON (uz.var_id, uz.stan_id1, uz.stan_id2, uz.fact_fl) =
+			                                        (vs.var_id, dr.st1_urlb, dr.st2_urlb, ds.fact_fl)
+			                           LEFT JOIN dnspf2.urlb_result uz0
+			                                     ON (uz0.var_id, uz0.stan_id1, uz0.stan_id2, uz0.fact_fl) =
+			                                        (vs.var_id, dr.st1_urlb, dr.st2_urlb, 1 - ds.fact_fl)
+			                           LEFT JOIN dnspf2.urlb_e ue
+			                                     ON (ue.var_id, ue.stan_id1, ue.stan_id2) =
+			                                        (ds.var_id, dr.st1_urlb, dr.st2_urlb) AND
+			                                        (ds.gr_fl = 0 and ue.e_por is not null or
+			                                         ds.gr_fl = 1 and ue.e_gr is not null)),
+			     DEST_ZATR AS (SELECT pd.var_id,
+			                          pd.fact_fl,
+			                          pd.dest_id,
+			                          CAST(SUM(COALESCE(
+			                                      koef *
+			                                      dnspf2.extract_value_left(ecost, COALESCE(PD.train_count, 0)),
+			                                      CASE WHEN ecost_base > 0 then ecost_base END,
+			                                      len * COALESCE(CASE WHEN pd.gr_fl = 1 THEN drs.sgr_eu ELSE drs.spr_eu end, 1))
+			                              ) as NUMERIC(10, 2)) AS e_uch,
+			                          CAST(SUM(COALESCE(
+			                                      koef *
+			                                      dnspf2.extract_value_left(ecost, COALESCE(PD.tc0, 0)),
+			                                      CASE WHEN ecost_base > 0 then ecost_base END,
+			                                      len * COALESCE(CASE WHEN pd.gr_fl = 1 THEN drs.sgr_eu ELSE drs.spr_eu end, 1))
+			                              ) as NUMERIC(10, 2)) AS e_uch_alt,
+			                          CAST(SUM(CASE
+			                                       when dor.adm_kod != 20 then 0
+			                                       ELSE COALESCE(
+			                                                   koef *
+			                                                   dnspf2.extract_value_left(ecost, COALESCE(pd.train_count, 0)),
+			                                                   CASE WHEN ecost_base > 0 then ecost_base END,
+			                                                   len *
+			                                                   COALESCE(CASE WHEN pd.gr_fl = 1 THEN drs.sgr_eu ELSE drs.spr_eu end,
+			                                                            1)) END
+			                              ) as NUMERIC(10, 2)) AS e_uch_rf,
+			                          PD.est
+			                   FROM PRE_DEST PD
+			                            LEFT jOIN dncnsi.stan st on st.stan_id = pd.st1_urlb
+			                            LEFT jOIN dncnsi.dor dor on dor.dor_kod = st.dor_kod
+			                            LEFT JOIN dnspf2.dor_stat drs on drs.dor_kod = st.dor_kod
+			                   WHERE pd.index = 1
+			                   GROUP BY PD.var_id, PD.fact_fl, PD.dest_id, PD.est),
+			     DEST_VAG as (SELECT dest_id, sum(kolvag) as kolvag
+			                  from VAR v
+			                           join dnspf2.dest_vag dv on dv.var_id = v.VAR_ID-- and dv.fact_fl = v.FACT_FL
+			                  group by dest_id)
+
+			insert into dnspf2.dest_result(var_id, fact_fl, dest_id, e_uch, e_st, kolvag, e_uch_rf, e_uch_alt)
+			select dz.VAR_ID,
+			       dz.FACT_FL,
+			       dz.dest_id,
+			       coalesce(dz.e_uch, 0),
+			       coalesce(dz.est, 0),
+			       coalesce(kolvag, 0),
+			       coalesce(e_uch_rf, 0),
+			       coalesce(e_uch_alt, 0)t
+			from DEST_ZATR dz
+			         left join DEST_VAG dv on dv.dest_id = dz.dest_id;
+
+			UPDATE DNSPF2.VARS
+			SET calc_date = current_timestamp, status = 1
+			WHERE VAR_ID = $VAR_ID$
+		]]>
+    </Query>
+    <Comm>Завершаем расчет в случае ошибки (кажется не реализовано, или криво)</Comm>
+    <Query ID="END_CALC_ERROR">
+        <![CDATA[
+			UPDATE DNSPF2.VARS
+			SET calc_date = current_timestamp, status = 0
+			WHERE VAR_ID = $VAR_ID$
+		]]>
+    </Query>
+    <Comm>Начинается блок запросов для расчета диапазонов включения:</Comm>
+    <Comm>Загружаем для сортировочных систем диапазоны включенные в местные назначения, которые мы не должны
+        распределять без необходимости
+    </Comm>
+    <Query ID="LOAD_LOCAL_DIAPASONE_STAN">
+        <![CDATA[
+			WITH VAR AS (SELECT VAR_ID, date_cr
+						FROM DNSPF2.VARS
+						WHERE VAR_ID = $VAR_ID$),
+			     STATIONS AS (SELECT DISTINCT STAN_ID, st_kod
+                  FROM VAR V
+                           JOIN dnspf2.sortsystems_data sd ON SD.var_id = V.VAR_ID
+                           JOIN dnspf2.vw_sortsystems vs on vs.ss_id = sd.ss_id),
+                     STAN_200 AS (select distinct station_stan_id AS stan_id
+                                  from dnspf2.sortsystems_data
+                                           left join dnasovpfp.sortsystems
+                                                     on sortsystems_data.ss_id = sortsystems.ss_id and var_id = $VAR_ID$
+                                  where sortsystems.ss_id is not null),
+                     PRERAW AS (SELECT stan_id,
+                                       pe.dest_stan_fr_code,
+                                       dest_stan_nz_id,
+                                       stan_1,
+                                       stan_2
+                                FROM STATIONS st
+                                         JOIN dnasovpfp.pf_export pe
+                                              ON PE.DEST_STAN_FR_ID = ST.STAN_ID
+                                                  AND (((select case when dor_kod = 10 then -10 else adm_kod end
+                                                         from dncnsi.dor
+                                                         where dor_kod =
+                                                               (select dor_kod from dncnsi.stan where stan_id = PE.gr_stan_nz_id)) =
+                                                        (select case when dor_kod = 10 then -10 else adm_kod end
+                                                         from dncnsi.dor
+                                                         where dor_kod =
+                                                               (select dor_kod from dncnsi.stan where stan_id = pe.dest_stan_fr_id))))
+                                                  AND (gr_stan_nz_id != dest_stan_nz_id
+                                                         or dest_stan_nz_id not in (select * from STAN_200))
+                                WHERE (select date_cr from VAR) BETWEEN pf_date AND pf_date_end
+                                  AND base = 1
+                                UNION
+                                SELECT stan_id,
+                                       st_kod,
+                                       stan_id,
+                                       st_kod,
+                                       st_kod
+                                FROM STATIONS st
+                                         JOIN dnasovpfp.sortsystems ss ON ss.station_stan_id = st.stan_id
+                                UNION
+                                SELECT DISTINCT st.stan_id,
+                                                st.st_kod,
+                                                st.stan_id,
+                                                sst.old_st2,
+                                                sst.old_st2
+                                FROM dnspf2.streams sst
+                                         JOIN dnasovpfp.sortsystems ss ON ss.station_stan_id = sst.stan_id2
+                                         JOIN dncnsi.stan st ON st.stan_id = stan_id2
+                                         JOIN dncnsi.stan st_old ON st_old.st_kod = old_st2
+                                WHERE sst.VAR_ID = (SELECT VAR_ID FROM VAR)
+                     ),
+                     RAW AS (SELECT DISTINCT PR.stan_id,
+                                             PR.dest_stan_fr_code,
+                                             PR.dest_stan_nz_id,
+                                             MIN(LEAST(PR.stan_1, NR.STAn_1))    as STAN_1,
+                                             MAX(GREATEST(PR.stan_2, NR.STAn_2)) AS STAN_2
+                             FROM PRERAW PR
+                                      LEFT JOIN PRERAW NR ON NR.stan_id = PR.stan_id AND (NR.stan_1 BETWEEN PR.stan_1 AND pr.stan_2 OR
+                                                                                          PR.stan_1 BETWEEN NR.stan_1 AND NR.stan_2)
+                             GROUP BY PR.stan_id, PR.dest_stan_fr_code, PR.dest_stan_nz_id, PR.stan_1
+                             ORDER BY dest_stan_fr_code, stan_1)
+                        ,
+                     STAN_ALL AS (SELECT CODE,
+                                         dor_kod,
+                                         ROW_NUMBER()
+                                         OVER (
+                                             ORDER BY CODE )                  AS INDEX,
+                                         st.cor_tip != 'D' AND space_flag = 1 AS GR_FL
+                                  FROM dnasovpfp.stations st
+                                           join dncnsi.stan stn on stn.stan_id = st.stan_id
+                                  WHERE code > 0),
+                     STAN_NEIGH AS (SELECT CODE                               as r_code,
+                                           dor_kod                            as r_dor_kod,
+                                           INDEX,
+                                           ROW_NUMBER()
+                                           OVER (
+                                               ORDER BY INDEX )               AS GR_INDEX,
+                                           LAG(code) OVER (ORDER BY INDEX)    as l_code,
+                                           lead(code) OVER (ORDER BY INDEX)   as last_code,
+                                           LAG(dor_kod) OVER (ORDER BY INDEX) as l_dor_kod
+                                    FROM STAN_ALL
+                                    WHERE GR_FL),
+                     RAW_NGH AS (SELECT stan_id,
+                                        stan_1,
+                                        stan_2,
+                                        sn1.l_code,
+                                        sn2.r_code,
+                                        ROW_NUMBER()
+                                        OVER (
+                                            PARTITION BY stan_id
+                                            ORDER BY stan_1 ) AS INDEX,
+                                        dest_stan_nz_id
+                                 FROM RAW R
+                                          LEFT JOIN STAN_NEIGH SN1 ON sn1.r_code = r.stan_1
+                                          LEFT JOIN STAN_NEIGH sn2 ON sn2.l_code = stan_2),
+                     DOR_EDGE as (SELECT sn.*, LAG(r_code) OVER ( ORDER BY r_code) as real_l_code
+                                  FROM STAN_NEIGH sn
+                                  where COALESCE(l_dor_kod, 0) != COALESCE(r_dor_kod, 0)
+                                     or last_code is null),
+                     DOR_INTERVAL as (SELECT real_l_code as l_code, l_code as r_code, l_dor_kod as dor_kod
+                                      FROM DOR_EDGE
+                                      where real_l_code is not null),
+                     EDGES AS (SELECT C.STAN_ID,
+                                      C.stan_1,
+                                      C.stan_2,
+                                      C.l_code,
+                                      C.r_code,
+                                      c.dest_stan_nz_id,
+                                      ROW_NUMBER()
+                                      OVER (
+                                          PARTITION BY C.stan_id
+                                          ORDER BY C.INDEX ) AS INDEX,
+                                      L IS NULL              AS START_FL,
+                                      R IS NULL              AS END_FL
+                               FROM RAW_NGH C
+                                        LEFT JOIN RAW_NGH L ON C.stan_id = l.stan_id AND C.INDEX = l.index + 1
+                                   AND (l.r_code >= C.stan_1 OR C.l_code <= l.stan_2) AND C.dest_stan_nz_id = l.dest_stan_nz_id
+                                        LEFT JOIN RAW_NGH R ON R.stan_id = C.stan_id AND r.INDEX = C.index + 1
+                                   AND (C.r_code >= r.stan_1 OR r.l_code <= C.stan_2) AND C.dest_stan_nz_id = r.dest_stan_nz_id
+                               WHERE l IS NULL
+                                  OR R IS NULL),
+                     SUM_INTERVAL AS (SELECT E_START.stan_id,
+                                             E_START.dest_stan_nz_id,
+                                             E_START.stan_1,
+                                             COALESCE(E_END.stan_2, E_START.stan_2) AS STAN_2
+                                      FROM EDGES E_START
+                                               LEFT JOIN EDGES E_END
+                                                         ON E_END.stan_id = E_START.stan_id AND E_END.INDEX = E_START.INDEX + 1 AND
+                                                            E_END.END_FL AND
+                                                            NOT E_START.END_FL
+                                      WHERE E_START.START_FL)
+
+                SELECT st.stan_id                                              as stanId,
+                       st.st_kod                                               as stKod,
+                       CAST(dest_stan_nz_id as INTEGER)                        as destStanId,
+                       GREATEST(si.stan_1, di.l_code)                          AS startCode,
+                       LEAST(si.STAN_2, di.r_code)                             AS endCode,
+                       di.dor_kod                                              as dorKod0,
+                       case when di.dor_kod = stDest.dor_Kod then 1 else 0 end as dorKod
+                FROM SUM_INTERVAL SI
+                         JOIN dncnsi.stan st ON st.stan_id = si.stan_id
+                         JOIN dncnsi.stan stDest ON stDest.stan_id = dest_stan_nz_id
+                         JOIN DOR_INTERVAL di on di.l_code between si.STAN_1 and si.STAN_2 or si.STAN_1 between di.l_code and di.r_code
+                ORDER BY stKod, startCode;
+		]]>
+    </Query>
+    <Comm>Загружаем группы диапазонов, которые приоритетно должны попадать на одинаковые назначения</Comm>
+    <Query ID="LOAD_DIAP_GROUP">
+        <![CDATA[
+			WITH PRE_DATA AS (SELECT start_id,
+			                         end_id
+			                  FROM dnnsi.line_8
+			                  UNION
+			                  SELECT l1.start_id,
+			                         l2.end_id
+			                  FROM dnnsi.line_8 l1
+			                           JOIN dnnsi.line_8 l2 ON l2.start_id = l1.end_id AND l2.end_id != l1.start_id),
+			     DATA AS (
+			         SELECT l.*,
+			                st1.st_kod                                         AS st_kod1,
+			                st2.st_kod                                         AS st_kod2,
+			                abs(st1.st_kod - st2.st_kod)                       AS delta,
+			                st1.dor_kod = st2.dor_kod                          AS dor_fl,
+			                COALESCE(space_flag, 0) != 0 AND ss.COR_TIP != 'D' AS space_fl
+			         FROM PRE_DATA l
+			                  JOIN dncnsi.stan st1 ON st1.stan_id = l.start_id
+			                  JOIN dncnsi.stan st2 ON st2.stan_id = l.end_id
+			                  LEFT JOIN dnasovpfp.stations ss ON ss.stan_id = st1.stan_id
+			         WHERE ST1.st_kod > 0
+			           AND st2.st_kod > 0
+
+			         ORDER BY st1.st_kod),
+			     PRE_GR_FL AS (SELECT start_id, st_kod1 AS STAN_KOD
+			                   FROM DATA
+			                   WHERE space_fl
+			                   GROUP BY start_id, st_kod1, space_fl
+			                   --HAVING NOT (min(delta) > 100)
+			                   ),
+			     GR_FL as (SELECT STAN_KOD
+			               FROM PRE_GR_FL
+			               WHERE 1 = 1 or STAN_KOD not in (SELECT STAN_KOD
+			                                      FROM (SELECT start_id,
+			                                                   STAN_KOD,
+			                                                   lag(STAN_KOD) OVER (ORDER BY STAN_KOD),
+			                                                   sqrt(power(ABS(x - lag(x) OVER (ORDER BY STAN_KOD)), 2) +
+			                                                        power(ABS(y - lag(y) OVER (ORDER BY STAN_KOD)), 2))  as del1,
+			                                                   sqrt(power(ABS(x - lead(x) OVER (ORDER BY STAN_KOD)), 2) +
+			                                                        power(ABS(y - lead(y) OVER (ORDER BY STAN_KOD)), 2)) as del2,
+			                                                   dor_kod,
+			                                                   lag(dor_kod) OVER (ORDER BY STAN_KOD)                        pdor_kod,
+			                                                   lead(dor_kod) OVER (ORDER BY STAN_KOD)                       ndor_kod,
+			                                                   pred_id,
+			                                                   lag(pred_id) OVER (ORDER BY STAN_KOD)                        ppred_id,
+			                                                   lead(pred_id) OVER (ORDER BY STAN_KOD)                       npred_id
+			                                            FROM PRE_GR_FL G
+			                                                     JOIN dncnsi.stan st on st.stan_id = g.start_id
+			                                                     JOIN dncnsi.point p on p.point_id = g.start_id) T
+			                                               join dncnsi.dor dr on dr.dor_kod = t.dor_kod
+			                                      WHERE t.dor_kod = pdor_kod
+			                                        and t.dor_kod = ndor_kod
+			                                        and coalesce(adm_kod, 20) = 20
+			                                        and del1 > 100
+			                                        and del2 > 100
+			                                        or not (pred_id = npred_id or pred_id = ppred_id))),
+
+			     PRED as (SELECT st_kod,
+			                     COALESCE(pred_id, st.dor_kod)                             as pred_id,
+			                     lag(COALESCE(pred_id, st.dor_kod)) OVER (ORDER BY st_kod) as pp_id,
+			                     1                                                         as mgs_fl
+			              FROM dncnsi.stan st
+			                       JOIN dnasovpfp.stations ss
+			                            ON ss.stan_id = st.stan_id and COALESCE(space_flag, 0) != 0 AND ss.COR_TIP != 'D'
+			                       join dncnsi.dor dr on dr.dor_kod = st.dor_kod
+			              where st.st_kod in (SELECT STAN_KOD from GR_FL)
+			                and st.cor_tip != 'D'
+			                AND st.st_kod > 0),
+                PRERES_BOOK as (SELECT DISTINCT ST_NZ_1 as startCode,
+			                         st_nz_2 as endCode
+			         from dnnsi.ms_3book_diapasones md
+			                  join dncnsi.stan st1 on st1.st_kod = st_nz_1
+			             join dncnsi.dor dr1 on dr1.dor_kod = st1.dor_kod
+			                  join dncnsi.stan st2 on st2.st_kod = st_nz_2
+			             join dncnsi.dor dr2 on dr2.dor_kod = st2.dor_kod
+			         where COALESCE(dr1.adm_kod, 20) != 20 or coalesce(dr2.adm_kod, 20) != 20),
+			     PRERES as (
+			         select * from PRERES_BOOK
+			         UNION ALL
+			         select 1000, 0
+			         UNION ALL
+			         SELECT st_kod, 0
+			         FROM PRED
+			         where pp_id != pred_id
+			           and st_kod not in (select startCode from PRERES_BOOK)
+
+			         ORDER BY startCode),
+			     result as (
+			         SELECT startCode,
+			                endCode,
+			                lag(startCode) over (ORDER BY startCode)      as pstartCode,
+			                lag(endCode) over (ORDER BY startCode)        as pendCode,
+			                lag(startCode) over (ORDER BY startCode desc) as nstartCode,
+			                lag(endCode) over (ORDER BY startCode desc)   as nendCode
+			         FROM PRERES),
+			     REND as (
+			         select startCode, --case when pendCode > 0 and endCode > 0 then startCode end,
+			                COALESCE(case
+			                             when nendCode > 0 and endCode > 0 then endCode
+			                             else nstartCode - 1 end, 100000) as endCode
+			         from result r
+			         ORDER BY r.startCode)
+			select *
+			from rend l
+		]]>
+    </Query>
+    <Comm>Очищаем предыдущий расчет диапазонов</Comm>
+    <Query ID="DELETE_OLD_DIAP">
+        <![CDATA[
+			DELETE FROM DNSPF2.destination_diap
+			WHERE VAR_ID = $VAR_ID$;
+			DELETE FROM DNSPF2.loc_dest_diap
+			WHERE VAR_ID = $VAR_ID$
+		]]>
+    </Query>
+    <Comm>Таблица привязок станций выгрузки к назначениям, полученная по итогам основного расчета</Comm>
+    <Query ID="LOAD_CALC_DEST_STAN">
+        <![CDATA[
+			WITH VAR AS (SELECT VAR_ID, date_cr from dnspf2.vars where var_id = $VAR_ID$),
+			     STATIONS AS (SELECT DISTINCT STAN_ID, st_kod, trans_fl, dor_kod
+			                  FROM VAR V
+			                           JOIN dnspf2.sortsystems_data sd ON SD.var_id = V.VAR_ID
+			                           JOIN dnspf2.vw_sortsystems vs on vs.ss_id = sd.ss_id),
+			     DESTINATIONS as (SELECT * FROM dnspf2.destinations ds where var_id = (SELECT VAR_ID FROM VAR) and fact_fl = 0),
+			     STREAM_DESC AS (SELECT stream_id, ds.dest_id, ss_id1, ss_id2, gr_fl, rps, r_len
+			                     FROM var V
+			                              join dnspf2.stream_desc sd on sd.var_id = v.var_id and sd.fact_fl = 0
+			                              JOIN DESTINATIONS ds on ds.dest_id = sd.dest_id),
+			     RPSS as (SELECT distinct sd.ss_id1 as ss_Id, CASE WHEN sd.gr_fl = 1 then 0 else ss.rps end as rps
+			              from STREAM_DESC sd
+			                       --JOIN DNASOVPFP.sortsystems ss1 on ss1.ss_id = sd.ss_id1
+			                       JOIN dnspf2.streams ss on ss.stream_id = sd.stream_id
+			     ),
+			     DEST_RPS as (SELECT distinct on ( dest_id, ss_id1, ss_id2, gr_fl, rps.rps) dest_id,
+			                                                                                ss_id1,
+			                                                                                ss_id2,
+			                                                                                gr_fl,
+			                                                                                rps.rps,
+			                                                                                r_len
+			                  FROM STREAM_DESC sd
+			                           LEFT JOIN RPSS RPS on rps.ss_id = sd.ss_id1 and sd.gr_fl = 0 and
+			                                                 (rps.rps || '' = ANY (regexp_split_to_array(sd.rps, ',')) or
+			                                                  coalesce(sd.rps, '0') = '0') and rps.rps != 0),
+			     DEST_PAIR as (SELECT dgr.dest_id, dpor.dest_id as por_dest_id, dpor.RPS
+			                   FROM DEST_RPS DGR
+			                            JOIN DEST_RPS DPOR on DGR.gr_fl = 1 and DPOR.gr_fl = 0 and DGR.ss_id1 = DPOR.ss_id1 and
+			                                                  DGR.ss_id2 = DPOR.ss_id2),
+			     DEST_RPS_ROUND as (SELECT ds.*,
+			                               ss1.station_stan_id       as stan_id1,
+			                               ss2.station_stan_id       as stan_id2,
+			                               COALESCE(ds_r.dest_id, 0) as pairDestId,
+			                               COALESCE(ss2r.ss_id, 0)   as pairSsId
+			                        FROM DEST_RPS ds
+			                                 JOIN dnasovpfp.sortsystems ss1 on ss1.ss_id = ds.ss_id1
+			                                 JOIN dnasovpfp.sortsystems ss2 on ss2.ss_id = ds.ss_id2
+			                                 LEFT JOIN dnasovpfp.sortsystems ss2r
+			                                           on ss2r.station_stan_id = ss1.station_stan_id and ss2r.ss_id != ss1.ss_id
+			                                 LEFT JOIN DESTINATIONS ds_r
+			                                           on ds_r.ss_id1 = ss2r.ss_id and ds_r.ss_id2 = ss1.ss_id),
+			     STREAMS as (SELECT stream_id, stan_id1, stan_id2, kolvag, gr_por, rps, st.st_kod old_st2
+			                 FROM VAR v
+			                          join dnspf2.streams ss on ss.var_id = v.var_id
+			                          join dncnsi.stan st on st.stan_id = ss.stan_id2
+			                 union all
+			                 SELECT stream_id, stan_id1, stan_id2, 0, 1, null, st.st_kod
+			                 FROM VAR v
+			                          join dnspf2.streams_add sa on sa.var_id = v.var_id
+			                          join dncnsi.stan st on st.stan_id = sa.stan_id2),
+			     PRERAW as (SELECT ds.ss_id1,
+			                       ds.ss_id2,
+			                       ds.stan_id1,
+			                       ds.stan_id2,
+			                       ds.dest_id,
+			                       ds.pairDestId,
+			                       ds.pairSsId,
+			                       ss.stan_id1                                                     as ss_stan_id1,
+			                       ss.stan_id2                                                     as ss_stan_id2,
+			                       ss.old_st2                                                      as ss_old_st2,
+			                       kolvag,
+			                       CASE WHEN ds.gr_fl = 1 then 0 else COALESCE(ds.rps, ss.rps) end as rps
+			                FROM STREAM_DESC sd
+			                         JOIN DEST_RPS_ROUND ds on ds.dest_id = sd.dest_id
+			                         JOIN streams ss on ss.stream_id = sd.stream_id),
+			     RAW AS (SELECT ds.ss_id1                        as ssId,
+			                    ds.ss_id2                        as ssId2,
+			                    ds.stan_id1                      as stanId,
+			                    ds.stan_id2                      as destStanId,
+			                    ds.dest_id                       as destId,
+			                    ds.rps                           as rps,
+			                    COALESCE(ss_old_st2, st2.st_kod) as stKod,
+			                    pairDestId,
+			                    pairSsId,
+			                    SUM(COALESCE(kolvag, 0))         as KOLVAG
+			             FROM PRERAW ds
+			                      JOIN dncnsi.stan st2 on st2.stan_id = ss_stan_id2
+			             group by ds.ss_id1, ds.ss_id2, ds.stan_id1, ds.stan_id2, ds.dest_id,
+			                      ds.rps, COALESCE(ss_old_st2, st2.st_kod), pairDestId, pairSsId
+			             UNION
+			             DISTINCT
+			             SELECT ds.ss_id1                as ssId,
+			                    ds.ss_id2                as ssId2,
+			                    ds.stan_id1              as stanId,
+			                    ds.stan_id2              as destStanId,
+			                    ds.dest_id               as destId,
+			                    ds.rps                   as rps,
+			                    st2.st_kod               as stKod,
+			                    pairDestId,
+			                    pairSsId,
+			                    SUM(COALESCE(kolvag, 0)) as KOLVAG
+			             FROM PRERAW ds
+			                      JOIN dncnsi.stan st2 on st2.stan_id = ss_stan_id2
+			             group by ds.ss_id1, ds.ss_id2, ds.stan_id1, ds.stan_id2, ds.dest_id,
+			                      ds.rps, st2.st_kod, pairDestId, pairSsId)
+			,
+			     RAW_ADD AS (SELECT rc.ss_id1                 as ssId,
+			                        rc.ss_id2                 as ssId2,
+			                        ss1.station_stan_id       as stanId,
+			                        ss2.station_stan_id       as destStanId,
+			                        rc.dest_id,
+			                        RB.rps,
+			                        stKod,
+			                        COALESCE(ds_r.dest_id, 0) as pairDestId,
+			                        COALESCE(ss2r.ss_id, 0)   as pairSsId,
+			                        kolvag
+			                 FROM DEST_RPS R
+			                          JOIN RAW RB on RB.ssId = R.ss_id2
+			                          JOIN DEST_RPS RC on RC.ss_id1 = r.ss_id1 and rc.ss_id2 = rb.ssId2
+			                          JOIN dnasovpfp.sortsystems ss1 on ss1.ss_id = rc.ss_id1
+			                          JOIN dnasovpfp.sortsystems ss2 on ss2.ss_id = rc.ss_id2
+			                          LEFT JOIN dnasovpfp.sortsystems ss2r
+			                                    on ss2r.station_stan_id = ss1.station_stan_id and ss2r.ss_id != ss1.ss_id
+			                          LEFT JOIN DESTINATIONS ds_r
+			                                    on ds_r.ss_id1 = ss2r.ss_id and ds_r.ss_id2 = ss1.ss_id
+			                 where not exists(select * FROM RAW RW where rw.ssId = rc.ss_id1 and rw.stKod = rb.stKod)
+			                   AND r.r_len < 100 )
+			        ,
+			     RAW_FINAL as (SELECT *
+			                   FROM RAW
+			                   UNION ALL
+			                   SELECT *
+			                   FROM RAW_ADD where 1 = 0)
+
+			SELECT ssId,
+			       stanId,
+			       destStanId,
+			       destId,
+			       rps,
+			       stKod,
+			       pairDestId,
+			       pairSsId,
+			       CAST(KOLVAG * 100 as INTEGER)                                   as kolvag,
+			       destStanId in (SELECT stan_id FROM STATIONS WHERE trans_fl = 1) as transFl
+			FROM (select R.*, row_number() over (PARTITION BY ssId, stKod, rps ORDER BY KOLVAG desc) as INDEX FROM RAW_FINAL R) R
+			where INDEX = 1
+			  and stanId != destStanId
+			UNION
+			DISTINCT
+			SELECT DISTINCT ss1.ss_id,
+			                ss1.station_stan_id                                                                   as stan_id,
+			                CAST(dest_stan_nz_id AS INTEGER)                                                      as dest_stan_id,
+			                1                                                                                     as dest_id,
+			                0                                                                                     as rps,
+			                st2.st_kod,
+			                0                                                                                     as pair_dest_id,
+			                0                                                                                     as pair_ss_id,
+			                1                                                                                     as kolvag,
+			                CAST(dest_stan_nz_id AS INTEGER) in (SELECT stan_id FROM STATIONS WHERE trans_fl = 1) as transFl
+			FROM dnasovpfp.pf_export pe
+			         JOIN STATIONS stans on stans.stan_id = dest_stan_fr_id
+			         JOIN dnasovpfp.sortsystems ss1 on ss1.station_stan_id = pe.dest_stan_fr_id and ss1.code = pe.dest_ss_fr_code
+			         JOIN dncnsi.stan st2 on st2.stan_id = dest_stan_nz_id
+			WHERE (select date_cr FROM VAR) BETWEEN pf_date and pf_date_end
+			  AND BASE = 1
+			  AND PE.dest_stan_nz_id NOT IN (SELECT stan_id FROM STATIONS)
+			  AND (ss1.SS_ID, st2.st_kod) NOT in (SELECT ssId, stKod FROM RAW)
+			  AND dest_stan_nz_id IN (SELECT end_id FROM dnnsi.line_8)
+			  AND dest_stan_nz_id IN (SELECT stan_id FROM dncnsi.stan where cor_tip != 'D') AND 1 = 0
+			ORDER BY ssId, rps desc, stKod
+		]]>
+    </Query>
+    <Comm>Загрузка диапазонов действующего плана, не противоречащих расчету</Comm>
+    <Query ID="LOAD_STABLE_DIAP">
+        <![CDATA[
+			WITH VAR AS (SELECT VAR_ID, date_cr from dnspf2.vars where var_id = $VAR_ID$),
+			     STAN as (SELECT station_stan_id as stan_id
+			              from var v
+			                       join dnspf2.sortsystems_data sd on sd.var_id = v.VAR_ID
+			                       join dnasovpfp.sortsystems ss on ss.ss_id = sd.ss_id),
+			     STAN_ALL AS (SELECT CODE,
+			                         dor_kod,
+			                         ROW_NUMBER()
+			                         OVER (
+			                             ORDER BY CODE )                  AS INDEX,
+			                         st.cor_tip != 'D' AND space_flag = 1 AS GR_FL
+			                  FROM dnasovpfp.stations st
+			                           join dncnsi.stan stn on stn.stan_id = st.stan_id
+			                  WHERE code > 0),
+			     STAN_NEIGH AS (SELECT CODE                               as r_code,
+			                           dor_kod                            as r_dor_kod,
+			                           INDEX,
+			                           ROW_NUMBER()
+			                           OVER (
+			                               ORDER BY INDEX )               AS GR_INDEX,
+			                           LAG(code) OVER (ORDER BY INDEX)    as l_code,
+			                           lead(code) OVER (ORDER BY INDEX)   as last_code,
+			                           LAG(dor_kod) OVER (ORDER BY INDEX) as l_dor_kod
+			                    FROM STAN_ALL
+			                    WHERE GR_FL),
+			     DOR_EDGE as (SELECT sn.*, LAG(r_code) OVER ( ORDER BY r_code) as real_l_code
+			                  FROM STAN_NEIGH sn
+			                  where COALESCE(l_dor_kod, 0) != COALESCE(r_dor_kod, 0)
+			                     or last_code is null),
+			     DOR_INTERVAL as (SELECT real_l_code           as l_code,
+			                             l_code                as r_code,
+			                             l_dor_kod             as dor_kod,
+			                             coalesce(adm_kod, 20) as adm_kod
+			                      FROM DOR_EDGE de
+			                               join dncnsi.dor dr on dr.dor_kod = de.l_dor_kod
+			                      where real_l_code is not null),
+			     PREPF as (SELECT ss_id, pe.gr_stan_nz_id, stan_1, stan_2
+			            FROM dnasovpfp.pf_export pe
+			                     join dnasovpfp.sortsystems ss
+			                          on ss.station_stan_id = pe.dest_stan_fr_id and ss.code = pe.dest_ss_fr_code
+			            where base = 1
+			              and current_timestamp between pf_date and pf_date_end
+			              and pe.dest_stan_fr_id in (select stan_id from stan)
+			              and pe.gr_stan_nz_id in (select stan_id from STAN)),
+			     PF as (SELECT ss_id,
+			                       gr_stan_nz_id,
+			                       di.dor_kod,
+			                       di.adm_kod,
+			                       GREATEST(stan_1, di.l_code) as stan_1,
+			                       LEAST(stan_2, di.r_code)    as stan_2
+			                FROM PREPF P
+			                    join dncnsi.stan st on st.stan_id = gr_stan_nz_id
+			                    join dncnsi.dor dr on dr.dor_kod = st.dor_kod
+			                         join DOR_INTERVAL DI
+			                              on di.l_code between p.STAN_1 and p.STAN_2 or p.STAN_1 between di.l_code and di.r_code
+			         ),
+			     STREAMS as (SELECT stream_id, stan_id1, stan_id2, kolvag, gr_por, rps, st.st_kod old_st2
+			                 FROM VAR v
+			                          join dnspf2.streams ss on ss.var_id = v.var_id
+			                          join dncnsi.stan st on st.stan_id = ss.stan_id2
+			                 union all
+			                 SELECT stream_id, stan_id1, stan_id2, 0, 1, null, st.st_kod
+			                 FROM VAR v
+			                          join dnspf2.streams_add sa on sa.var_id = v.var_id
+			                          join dncnsi.stan st on st.stan_id = sa.stan_id2),
+			     PRERAW as (SELECT distinct ds.ss_id1, sst2.station_stan_id, ss.old_st2, ds.dest_id
+			                FROM STREAMS ss
+			                         join dnspf2.stream_desc sd on ss.stream_id = sd.stream_id and sd.fact_fl = 0
+			                         join dnspf2.destinations ds on ds.dest_id = sd.dest_id
+			                         join dnasovpfp.sortsystems sst1 on sst1.ss_id = ds.ss_id1
+			                         join dnasovpfp.sortsystems sst2 on sst2.ss_id = ds.ss_id2
+			                where sst1.station_stan_id != sst2.station_stan_id
+			                UNION
+			                DISTINCT
+			                SELECT ds.ss_id1, sst2.station_stan_id, stn.st_kod, ds.dest_id
+			                FROM STREAMS ss
+			                         join dnspf2.stream_desc sd on ss.stream_id = sd.stream_id and sd.fact_fl = 0
+			                         join dnspf2.destinations ds on ds.dest_id = sd.dest_id
+			                         join dnasovpfp.sortsystems sst1 on sst1.ss_id = ds.ss_id1
+			                         join dnasovpfp.sortsystems sst2 on sst2.ss_id = ds.ss_id2
+			                         join dncnsi.stan stn on stn.stan_id = ss.stan_id2
+			                where sst1.station_stan_id != sst2.station_stan_id
+			                UNION
+			                DISTINCT
+			                SELECT ds.ss_id1, sst2.station_stan_id, stn.st_kod, ds.dest_id
+			                FROM STREAMS ss
+			                         join dnspf2.stream_desc sd on ss.stream_id = sd.stream_id and sd.fact_fl = 0
+			                         join dnspf2.destinations ds on ds.dest_id = sd.dest_id
+			                         join dnasovpfp.sortsystems sst1 on sst1.ss_id = ds.ss_id1
+			                         join dnasovpfp.sortsystems sst2 on sst2.ss_id = ds.ss_id2
+			                         join dncnsi.stan stn on stn.stan_id = sst2.station_stan_id
+			                where sst1.station_stan_id != sst2.station_stan_id),
+			     DESTS as (SELECT DISTINCT ss_id1, station_stan_id, MAX(dest_id) as dest_id
+			               from PRERAW
+			               GROUP BY ss_id1, station_stan_id),
+			     result as (SELECT ss_id,
+			                       stan_1,
+			                       stan_2,
+			                       gr_stan_nz_id,
+			                       ss.station_stan_id,
+			                       COALESCE(gr_stan_nz_id = ss.station_stan_id, false) or
+			                       ds is not null and ss.station_stan_id is null as correct,
+			                       ss.old_st2,
+			                       ds.dest_id--,
+			                       --ss.dest_id
+			                FROM PF pf
+			                         left join PRERAW ss on ss_id = ss_id1 and ss.old_st2 between stan_1 and stan_2
+			                         LEFT JOIN DESTS ds on ds.ss_id1 = pf.ss_id and ds.station_stan_id = pf.gr_stan_nz_id)
+			--select * from result;
+			select station_stan_id as stanId, gr_stan_nz_id as destStanId, stan_1 as startCode, stan_2 as endCode, 0 as dorKod
+			FROM (Select ss_id, gr_stan_nz_id, stan_1, stan_2, dest_id, bool_and(correct) as correct
+			      FROM RESULT
+			      group by ss_id, gr_stan_nz_id, stan_1, stan_2, dest_id) t
+			         join dnasovpfp.sortsystems ss on ss.ss_id = t.ss_id
+			     where correct
+			order by stanId, stan_1
+		]]>
+    </Query>диапозоны
+    <Comm>Какие рода подвижного состава порожних корреспонденций разъезжаются с гружеными по каждой сортировочной
+        системе
+    </Comm>
+    <Query ID="LOAD_CALC_DEST_RPS_STAN">
+        <![CDATA[
+			SELECT DISTINCT ss1.station_stan_id as stanId,
+                CASE WHEN ds.gr_fl = 1 then 0 else ss.rps end as rps
+			FROM dnspf2.stream_desc sd
+			         JOIN dnspf2.destinations ds on ds.dest_id = sd.dest_id
+			         JOIN DNASOVPFP.sortsystems ss1 on ss1.ss_id = ds.ss_id1
+			         JOIN dnspf2.streams ss on ss.stream_id = sd.stream_id
+			WHERE sd.VAR_ID = $VAR_ID$
+			  and sd.fact_fl = 0
+			ORDER BY stanId, rps
+		]]>
+    </Query>
+    <Query ID="LOAD_ROAD_BASE_COST">
+        <![CDATA[
+			SELECT ds.dor_kod as dor,
+			       sgr_eu     as sgrEu,
+			       spr_eu     as sprEu
+			FROM DNSPF2.dor_stat ds
+			         join dncnsi.dor dr on dr.dor_kod = ds.dor_kod
+			where adm_kod = 20
+		]]>
+    </Query>
+    <Query ID="REQUEST_DEST_ID">
+        <![CDATA[
+			select nextval('dnspf2.destinations_dest_id_seq') from generate_series(1,?)
+		]]>
+    </Query>
+    <Query ID="UPDATE_LOCAL_DIAP">
+        <![CDATA[
+			--Обновляем диапазоны местного плана
+			WITH VAR AS (SELECT VAR_ID, date_cr
+			             FROM DNSPF2.VARS
+			             WHERE VAR_ID = $VAR_ID$),
+			     STATIONS AS (SELECT DISTINCT STAN_ID, st_kod
+			                  FROM VAR V
+			                           JOIN dnspf2.sortsystems_data sd ON SD.var_id = V.VAR_ID
+			                           JOIN dnspf2.vw_sortsystems vs on vs.ss_id = sd.ss_id),
+			     ORDERED_ALL AS (SELECT LAG(stan_id) OVER (ORDER BY code) as prev_stan_id,
+			                            LAG(code) OVER (ORDER BY code)    as prev_st_kod,
+			                            STAN_ID,
+			                            code                              AS ST_KOD
+			                     FROM dnasovpfp.stations st
+			                     WHERE cor_tip != 'D'
+			                       AND code > 0
+			                       AND space_flag = 1),
+			     SETEV as (SELECT ss_id, start_esr, end_esr, oa1.prev_st_kod, oa2.ST_KOD
+			               FROM var v
+			                        JOIN DNSPF2.DESTINATION_DIAP DD ON DD.VAR_ID = V.VAR_ID AND RPS = 0
+			                        JOIN ORDERED_ALL OA1 ON OA1.ST_KOD = START_ESR
+			                        JOIN ORDERED_ALL OA2 ON OA2.PREV_ST_KOD = END_ESR),
+			     prelocal as (SELECT DISTINCT v.var_id,
+			                                  Pg.form_ss_id as ss_id,
+			                                  pe.stan_1     as start_esr,
+			                                  pe.stan_2     as end_esr,
+			                                  ld.ldest_id
+			                  FROM VAR V
+			                           CROSS JOIN STATIONS st
+			                           JOIN dnasovpfp.pf_export pe ON pe.dest_stan_fr_id = st.stan_id
+			                           JOIN (SELECT *
+			                                 FROM dnasovpfp.pln_destinations
+			                                 UNION ALL
+			                                 SELECT *
+			                                 FROM dnasovpfp.arh_destinations) PD
+			                                ON pd.dest_id = pe.dest_id
+			                           JOIN (SELECT * FROM dnasovpfp.pln_groups UNION ALL SELECT * FROM dnasovpfp.arh_groups) Pg
+			                                ON pg.group_id = pe.group_id
+			                           join dnspf2.loc_destinations ld
+			                                on ld.ss_id1 = pg.form_ss_id and ld.ss_id2 = pg.unform_ss_id and ld.var_id = v.var_id
+			                  WHERE date_cr BETWEEN pf_date AND pf_date_end
+			                    AND base = 1),
+			     local as (SELECT pl.*,
+			                      st.start_esr                                                                              as st1,
+			                      st.end_esr                                                                                as st2,
+			                      st.prev_st_kod,
+			                      st.ST_KOD,
+			                      row_number() over (PARTITION by pl.ss_id, pl.start_esr, pl.end_esr order by st.start_esr) as index
+			               FROM prelocal pl
+			                        LEFT JOIN SETEV st
+			                                  ON st.ss_id = pl.ss_id and (st.start_esr between pl.start_esr and pl.end_esr or
+			                                                              pl.start_esr between st.start_esr and st.end_esr)
+			               order by pl.ss_id, pl.start_esr, st.start_esr), --SELECT * FrOM local order by ss_id, start_esr;
+			     RESULT as (SELECT T.*, lag(st_kod) over (partition by ss_id, start_esr order by order_fl) as start_st_kod
+			                FROM (SELECT var_id,
+			                             ss_id,
+			                             ldest_id,
+			                             start_esr,
+			                             end_esr,
+			                             start_esr as st_kod,
+			                             0         as order_fl,
+			                             true      as start_fl
+			                      FROM prelocal
+			                      UNION ALL
+			                      SELECT var_id,
+			                             ss_id,
+			                             ldest_id,
+			                             start_esr,
+			                             end_esr,
+			                             end_esr as st_kod,
+			                             999999  as order_fl,
+			                             false   as start_fl
+			                      FROM prelocal
+			                      UNION ALL
+			                      SELECT var_id,
+			                             ss_id,
+			                             ldest_id,
+			                             start_esr,
+			                             end_esr,
+			                             st_kod as st_kod,
+			                             index   as order_fl,
+			                             true    as start_fl
+			                      FROM local
+			                      where st1 is not null
+			                      UNION ALL
+			                      SELECT var_id,
+			                             ss_id,
+			                             ldest_id,
+			                             start_esr,
+			                             end_esr,
+			                             prev_st_kod as st_kod,
+			                             index   as order_fl,
+			                             false   as start_fl
+			                      FROM local
+			                      where st1 is not null
+			                      order by ss_id, start_esr, order_fl, st_kod) T)
+			Insert into dnspf2.loc_dest_diap (var_id, ss_id, start_esr, end_esr, ldest_id, rps)
+			SELECT var_id, ss_id, start_st_kod, st_kod, ldest_id, 0
+			FROM RESULT
+			WHERE not start_fl
+			  and start_st_kod <= st_kod;
+		]]>
+    </Query>
+    <Query ID="REQUEST_JOIN_DEST_ID">
+        <![CDATA[
+			select nextval('dnspf2.join_dest_join_dest_id_seq') from generate_series(1,?)
+		]]>
+    </Query>
+    <Query ID="REQUEST_RM_ID">
+        <![CDATA[
+			select nextval('dnspf2.remove_small_rm_id_seq') from generate_series(1,?)
+		]]>
+    </Query>
+    <Query ID="INSERT_NEW_DEST">
+        <![CDATA[
+			INSERT INTO dnspf2.destinations(dest_id, ss_id1, ss_id2, nazn_id, stks, gr_fl, rps, var_id, bearings, fact_fl, dls, new_fl)
+			WITH Dest(dest_id, ss_id1, ss_id2, nazn_id, stks, gr_fl, rps, var_id, fact_fl, bearings, dls, new_fl) as (SELECT ?,?,?,?,?,?,0,$VAR_ID$, $FACT_FL$, ?, ?,?)
+			  SELECT d.dest_id, d.ss_id1, d.ss_id2, d.nazn_id, d.stks, d.gr_fl, d.rps, d.var_id, COALESCE(d.bearings, STAN_DESC, STAN_DESC_OLD), fact_fl, d.dls, d.new_fl
+			  FROM dest d LEFT join DNasovpfp.nazn n on n.nazn_id = d.nazn_id
+		]]>
+    </Query>
+    <Query ID="INSERT_ALT_DEST_ROUTE">
+        <![CDATA[
+			INSERT INTO dnspf2.dest_routes (var_id, dest_id,
+			                                st1_urlb, st2_urlb, st1, st2, dor, len_urlb, len, num, ves, dls, pr_per, pr_sttex,
+			                                stk_type_1, stk_type_2, upath, tuch, euch_gr, euch_pr, ves_max, tst, est)
+			VALUES($VAR_ID$, ?,
+					 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+					 ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		]]>
+    </Query>
+    <Query ID="INSERT_STREAM_DESC">
+        <![CDATA[
+			INSERT INTO dnspf2.STREAM_DESC (stream_id, num, dest_id, var_id, fact_fl) VALUES (?,?,?,$VAR_ID$, $FACT_FL$)
+		]]>
+    </Query>
+    <Query ID="INSERT_ROUTE">
+        <![CDATA[
+			INSERT INTO dnspf2.routes (pred_stream_id, upath, num, dls, var_id) VALUES (?,?,?,?,$VAR_ID$)
+		]]>
+    </Query>
+    <Query ID="INSERT_TRACE_ITEM">
+        <![CDATA[
+			INSERT INTO dnspf2.trace_log(stream_id, dest_id, num, gnum, snum, base_value, penalty, sum_value, use_fl, descr, var_id)
+			 VALUES (?,?,?,?,?,?,?,?,?,?,$VAR_ID$)
+		]]>
+    </Query>
+    <Query ID="INSERT_STATION_ZAGR">
+        <![CDATA[
+			INSERT INTO dnspf2.stan_zagr (ss_id, current_kolvag, max_dest, current_dest, max_kolvag, mest_dest, udzatr, var_id, fact_fl)  VALUES (?,?,?,?,?,?,?,$VAR_ID$,$FACT_FL$)
+		]]>
+    </Query>
+    <Query ID="INSERT_URLB_RESULT">
+        <![CDATA[
+			INSERT INTO dnspf2.urlb_result(stan_id1, stan_id2, train_count, vag_count, var_id)  VALUES (?,?,?,?,$VAR_ID$)
+		]]>
+    </Query>
+    <Query ID="INSERT_DESTINATION_DIAPASONE">
+        <![CDATA[
+			INSERT INTO dnspf2.destination_diap(ss_id, start_esr, end_esr, dest_id, rps, descr, var_id)  VALUES (?,?,?,?,?,?,$VAR_ID$)
+		]]>
+    </Query>
+    <Query ID="INSERT_JOIN_DEST">
+        <![CDATA[
+			INSERT INTO dnspf2.join_dest(join_dest_id, new_dest_id, stan_reserve, dests_old, stan_per, delta, var_id, fact_fl)  VALUES (?,?,?,?,?,?,$VAR_ID$,$FACT_FL$)
+		]]>
+    </Query>
+    <Query ID="INSERT_JOIN_STREAM">
+        <![CDATA[
+			INSERT INTO dnspf2.join_streams(join_dest_id, stream_id, var_id)  VALUES (?,?,$VAR_ID$)
+		]]>
+    </Query>
+    <Query ID="INSERT_RM">
+        <![CDATA[
+			INSERT INTO dnspf2.remove_small(rm_id, dest_id, num, min_size, var_id,fact_fl)  VALUES (?,?,?,?,$VAR_ID$,$FACT_FL$)
+		]]>
+    </Query>
+    <Query ID="INSERT_RM_STREAM">
+        <![CDATA[
+			INSERT INTO dnspf2.remove_streams(rm_id, stream_id, var_id)  VALUES (?,?,$VAR_ID$)
+		]]>
+    </Query>
+
+    <Query ID="LOAD_THIRD_BOOK">
+        <![CDATA[
+			SELECT id, stk_id as stanId, COALESCE(adm_from, 0) as admFrom, coalesce(adm_to, 0) as admTo
+			FROM dnnsi.ms_3book_stik
+			order by id, num
+		]]>
+    </Query>
+    <Query ID="LOAD_THIRD_BOOK_DIAP">
+        <![CDATA[
+			SELECT st_ot_1 as startCode1, st_ot_2 as startCode2, st_nz_1 as endCode1, st_nz_2 as endCode2, id
+			FROM dnnsi.ms_3book_diapasones
+			ORDER BY st_ot_1, st_nz_1
+		]]>
+    </Query>
+</Definitions>

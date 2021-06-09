@@ -1,29 +1,63 @@
 package com.rootmen.DatabaseController.Entities.Parameter;
 
+import com.rootmen.DatabaseController.Databse.DatabaseMethods;
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 public class Parameter {
-    private final String ID;                        //ID парметра
-    private final String parameterName;             //Имя параметра в SQL запросе
-    private final ParametersType parametersType;    //Тип парметра
-    private String currentValue = null;             //Текущее значение
+    private String ID;                      //ID РїР°СЂРјРµС‚СЂР°
+    private String parameterName;           //РРјСЏ РїР°СЂР°РјРµС‚СЂР° РІ SQL Р·Р°РїСЂРѕСЃРµ
+    private ParameterType parameterType;    //РўРёРї РїР°СЂРјРµС‚СЂР°
+    private ParameterWhen parameterWhen;    //РўРёРї РїР°СЂРјРµС‚СЂР°
+    private String currentValue = null;     //РўРµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ
 
-    protected Parameter(String ID, String name, ParametersType type) {
-        this.ID = ID;
-        this.parameterName = name;
-        this.parametersType = type;
+    public Parameter(String ID, String name, ParameterType type, String value) {
+        setParameters(ID.trim(), name.trim(), type, new ParameterWhen(), value.trim());
     }
 
-    protected Parameter(String ID, String name, ParametersType type, String value) {
-        this.ID = ID;
-        this.parameterName = name;
-        this.parametersType = type;
-        this.currentValue = value;
+    public Parameter(String ID, String name, ParameterType type, ParameterWhen when, String value) {
+        setParameters(ID.trim(), name.trim(), type, when, value.trim());
     }
+
+    public Parameter(String ID, String name, ParameterType type, String query, Connection connection, HashMap<String, Parameter> parameters) {
+        try {
+            String value = DatabaseMethods.getText(DatabaseMethods.generatedPreparedStatement(query, connection, parameters)).trim();
+            setParameters(ID.trim(), name.trim(), type, new ParameterWhen(), value.trim());
+        } catch (SQLException error) {
+            error.printStackTrace();
+            throw new RuntimeException("Error in create parameter " + name + " query execute error");
+        }
+    }
+
+    public Parameter(String ID, String name, ParameterType type, ParameterWhen when, String query, Connection connection, HashMap<String, Parameter> parameters) {
+        try {
+            String value = DatabaseMethods.getText(DatabaseMethods.generatedPreparedStatement(query, connection, parameters)).trim();
+            setParameters(ID.trim(), name.trim(), type, when, value.trim());
+        } catch (SQLException error) {
+            error.printStackTrace();
+            throw new RuntimeException("Error in create parameter " + name + " query execute error");
+        }
+    }
+
+    private void setParameters(String ID, String name, ParameterType type, ParameterWhen when, String value) {
+        if ((ID == null || ID.equals("")) || (name == null || name.equals("")) || (value == null) || (type == null) || (when == null)) {
+            throw new RuntimeException("Parameter is invalid");
+        } else {
+            this.ID = ID;
+            this.parameterName = name;
+            this.parameterWhen = when;
+            this.parameterType = type;
+            this.currentValue = value;
+        }
+    }
+
 
     public void updateParameter(String parameter) {
-        this.currentValue = parameter;
+        String when = parameterWhen.getNewValue(parameter);
+        this.currentValue = (when == null) ? parameter : when;
     }
 
     public String getID() {
@@ -39,6 +73,6 @@ public class Parameter {
     }
 
     public void addParameterToStatement(PreparedStatement statement, int index) throws SQLException {
-        parametersType.addParameterToStatement(statement, index, this.getValue());
+        parameterType.addParameterToStatement(statement, index, this.getValue());
     }
 }

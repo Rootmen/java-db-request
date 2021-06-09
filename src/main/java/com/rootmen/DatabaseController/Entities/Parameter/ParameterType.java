@@ -3,7 +3,7 @@ package com.rootmen.DatabaseController.Entities.Parameter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public enum ParametersType {
+public enum ParameterType {
     String {
         public String getType() {
             return "string";

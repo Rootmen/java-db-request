@@ -1,20 +1,15 @@
 package com.rootmen.DatabaseController.Entities;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.DatabaseController.Databse.DatabaseMethods;
 import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
 import com.rootmen.DatabaseController.Entities.Parameter.ParameterFactory;
-import com.rootmen.DatabaseController.Entities.Parameter.ParametersType;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterType;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
  *
@@ -22,10 +17,10 @@ import java.util.regex.Pattern;
  *
  * */
 public class Queries {
-    private String ID = null;                           //ID запроса
-    private String result = null;                       //Результат запроса
-    private boolean async = false;                      //Асинхронный запрос
-    private boolean queriesReady = false;               //Тег готовности запроса
+    private String ID = null;                           //ID Р·Р°РїСЂРѕСЃР°
+    private ArrayNode result = null;                       //Р РµР·СѓР»СЊС‚Р°С‚ Р·Р°РїСЂРѕСЃР°
+    private boolean async = false;                      //РђСЃРёРЅС…СЂРѕРЅРЅС‹Р№ Р·Р°РїСЂРѕСЃ
+    private boolean queriesReady = false;               //РўРµРі РіРѕС‚РѕРІРЅРѕСЃС‚Рё Р·Р°РїСЂРѕСЃР°
 
     /*
      *
@@ -35,29 +30,10 @@ public class Queries {
     Queries(String ID, String SQL, boolean async, HashMap<String, Parameter> parameters, Connection connection) throws SQLException {
         this.ID = ID;
         this.async = async;
-        System.out.println(this.runQueries(connection, SQL, parameters));
+        //this.result = DatabaseExecutor.runQuery(SQL, connection, parameters);
+        DatabaseMethods.generatedPreparedStatement(SQL, connection, parameters);
     }
 
-    public ArrayNode runQueries(Connection connection, String SQL, HashMap<String, Parameter> parameters) throws SQLException {
-        String tokensSQL = SQL;
-        ArrayList<String> tokenOrder = new ArrayList<String>();
-        Pattern pattern = Pattern.compile("\\$.*?\\$");
-        Matcher matcher = pattern.matcher(SQL);
-        while (matcher.find()) {
-            String token = matcher.group();
-            tokensSQL = tokensSQL.replaceFirst("\\$.*?\\$", "?");
-            tokenOrder.add(token.substring(1, token.length() - 1));
-        }
-        PreparedStatement statement = connection.prepareStatement(tokensSQL);
-        for (int g = 0; g < tokenOrder.size(); g++) {
-            Parameter current = parameters.get(tokenOrder.get(g));
-            if (current == null) {
-                throw new RuntimeException("Parameters " + tokenOrder.get(g) + " is null");
-            }
-            current.addParameterToStatement(statement, g + 1);
-        }
-        return executeStatement(statement);
-    }
 
     private static ArrayNode executeStatement(PreparedStatement statement) throws SQLException {
         statement.execute();
@@ -75,8 +51,7 @@ public class Queries {
                 String column_name = metaData.getColumnName(i);
                 if (metaData.getColumnType(i) == java.sql.Types.ARRAY) {
                     ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-                    arrayNode.addAll((ArrayNode) resultSet.getArray(column_name));
-                    object.put(column_name, arrayNode);
+                    object.set(column_name, arrayNode.addAll((ArrayNode) resultSet.getArray(column_name)));
                 } else if (metaData.getColumnType(i) == java.sql.Types.BIGINT) {
                     object.put(column_name, resultSet.getInt(column_name));
                 } else if (metaData.getColumnType(i) == java.sql.Types.BOOLEAN) {
@@ -110,7 +85,7 @@ public class Queries {
         return json;
     }
 
-    public String getResult() {
+    public ArrayNode getResult() {
         return result;
     }
 
@@ -120,18 +95,17 @@ public class Queries {
 
     public static void main(String[] args) throws SQLException {
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        Parameter INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", ParametersType.Int, "1");
-        Parameter INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", ParametersType.Int, "2");
-        Parameter STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", ParametersType.String, "s1");
-        Parameter STRING_VALUE2 = ParameterFactory.getParameter("STRING_VALUE2", "STRING_VALUE2", ParametersType.String, "s2");
+        Parameter INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", ParameterType.Int, "1");
+        Parameter INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", ParameterType.Int, "2");
+        Parameter STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", ParameterType.String, "s1");
+        Parameter STRING_VALUE2 = ParameterFactory.getParameter("STRING_VALUE2", "STRING_VALUE2", ParameterType.String, "s2");
         HashMap<String, Parameter> parameters = new HashMap<>();
         parameters.put("INT_VALUE", INT_VALUE);
         parameters.put("INT_VALUE2", INT_VALUE2);
         parameters.put("STRING_VALUE1", STRING_VALUE1);
         parameters.put("STRING_VALUE2", STRING_VALUE2);
-        
-        Queries queries = new Queries("Main", "SELECT $INT_VALUE$ as aws, $STRING_VALUE1$ as aws2, $STRING_VALUE2$ as aws3, $STRING_VALUE1$ as aws4, $INT_VALUE$ as aws5,$INT_VALUE2$ as aws6;", false, parameters, connection);
-        System.out.println(queries.getResult());
+        Parameter STRING_VALUE3 = ParameterFactory.getParameter("STRING_VALUE2", "STRING_VALUE2", ParameterType.String, "SELECT $INT_VALUE$ as aws, $STRING_VALUE1$ as aws2, $STRING_VALUE2$ as aws3, $STRING_VALUE1$ as aws4, $INT_VALUE$ as aws5,$INT_VALUE2$ as aws6;", connection, parameters);
+        System.out.println(STRING_VALUE3.getValue());
     }
 
 }
