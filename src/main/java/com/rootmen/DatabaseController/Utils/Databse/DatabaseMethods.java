@@ -3,7 +3,7 @@ package com.rootmen.DatabaseController.Utils.Databse;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
 
 import java.sql.*;
 import java.util.AbstractMap.SimpleEntry;

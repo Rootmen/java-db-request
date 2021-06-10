@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.DatabaseController.Utils.Databse.DatabaseMethods;
-import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
 import com.rootmen.DatabaseController.Entities.Parameter.ParameterFactory;
-import com.rootmen.DatabaseController.Entities.Parameter.ParameterType;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.ParameterType;
 
 import java.sql.*;
 import java.util.HashMap;

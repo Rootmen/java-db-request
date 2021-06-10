@@ -1,7 +1,7 @@
-package com.rootmen.DatabaseController.DocumentReader;
+package com.rootmen.DatabaseController.DocumentReader.Parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
 import com.rootmen.DatabaseController.Entities.Parameter.ParameterFactory;
 
 import java.sql.Connection;
@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-abstract public class ParserLogic {
-    JsonNode root;
-    JsonNode refs;
-    Connection connection;
+abstract public class ParserJSON {
+    public JsonNode root;
+    public JsonNode refs;
+    public Connection connection;
     HashMap<String, Parameter> parametersGlobal = new HashMap<>();
 
     protected void parseQuerySet(JsonNode querySet) {

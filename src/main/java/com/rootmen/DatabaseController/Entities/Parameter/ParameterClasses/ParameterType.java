@@ -1,4 +1,4 @@
-package com.rootmen.DatabaseController.Entities.Parameter;
+package com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -1,7 +1,7 @@
 package com.rootmen.DatabaseController.Entities;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
 
 import java.sql.Connection;
 import java.util.ArrayList;

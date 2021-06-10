@@ -4,12 +4,16 @@ package com.rootmen.DatabaseController.Entities.Parameter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.ParameterPOJO;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.ParameterType;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.ParameterWhen;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashMap;
 
-import static com.rootmen.DatabaseController.Utils.DocumentParser.Parser.generatedPOJO;
+import static com.rootmen.DatabaseController.DocumentReader.Parser.Utils.ParserMethods.generatedPOJO;
+
 
 public class ParameterFactory {
 
@@ -79,12 +83,12 @@ public class ParameterFactory {
 
     public static Parameter getParameter(ObjectNode parameter) {
         ObjectMapper mapper = new ObjectMapper();
-        Parameter.ParameterPOJO pojo = mapper.convertValue(parameter, Parameter.ParameterPOJO.class);
+        ParameterPOJO pojo = mapper.convertValue(parameter, ParameterPOJO.class);
         return new Parameter(pojo);
     }
 
     public static Parameter getParameter(JsonNode parameter, Connection connection, HashMap<String, Parameter> parameters) {
-        Parameter.ParameterPOJO config = generatedPOJO(parameter, Parameter.ParameterPOJO.class);
+        ParameterPOJO config = generatedPOJO(parameter, ParameterPOJO.class);
         if (config.ref != null) {
             throw new RuntimeException("POJO parameter have ref links");
         }

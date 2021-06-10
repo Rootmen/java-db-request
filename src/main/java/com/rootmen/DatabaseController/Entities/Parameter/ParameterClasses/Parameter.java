@@ -1,12 +1,9 @@
-package com.rootmen.DatabaseController.Entities.Parameter;
+package com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.DatabaseController.Entities.Parameter.ParameterFactory;
 import com.rootmen.DatabaseController.Utils.Databse.DatabaseMethods;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -46,7 +43,7 @@ public class Parameter {
                 setParameters(parameter.id.trim(), parameter.name.trim(), parameterType, parameter.getParameterWhen(), value.trim());
             } catch (SQLException error) {
                 error.printStackTrace();
-                throw new RuntimeException("Error in create parameter " + parameter.name + " query execute error in POJO parser");
+                throw new RuntimeException("Error in create parameter " + parameter.name + " query execute error in POJO parser SQL error");
             }
 
         }
@@ -76,7 +73,7 @@ public class Parameter {
             setParameters(ID.trim(), name.trim(), type, when, value.trim());
         } catch (SQLException error) {
             error.printStackTrace();
-            throw new RuntimeException("Error in create parameter " + name + " query execute error");
+            throw new RuntimeException("Error in create parameter " + name + " query execute error\n" + error.getSQLState() + "\n" + error.getMessage());
         }
     }
 
@@ -111,34 +108,10 @@ public class Parameter {
     }
 
     public void addParameterToStatement(PreparedStatement statement, int index) throws SQLException {
+        if (parameterType == null) {
+            throw new RuntimeException("In run SQL parameter dont have initialize type");
+        }
         parameterType.addParameterToStatement(statement, index, this.getValue());
     }
 
-    public static class ParameterPOJO implements Serializable {
-        public String ref;
-        //-----------------------------------------------------------//
-        public String id;
-        public String raw;
-        public String name;
-        public String type;
-        public String query;
-        public String nodeType;
-        public JsonNode when;
-
-        public ParameterPOJO() {
-            super();
-        }
-
-        public boolean isValid() {
-            return (raw != null || query != null) && id != null && name != null && type != null;
-        }
-
-        public ParameterWhen getParameterWhen()  {
-            if (when == null) {
-                return new ParameterWhen();
-            } else {
-                return new ParameterWhen(when);
-            }
-        }
-    }
 }
