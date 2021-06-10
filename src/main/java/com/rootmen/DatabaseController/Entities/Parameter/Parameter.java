@@ -1,7 +1,12 @@
 package com.rootmen.DatabaseController.Entities.Parameter;
 
-import com.rootmen.DatabaseController.Databse.DatabaseMethods;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.DatabaseController.Utils.Databse.DatabaseMethods;
+
+import java.io.IOException;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -13,6 +18,39 @@ public class Parameter {
     private ParameterType parameterType;    //Тип парметра
     private ParameterWhen parameterWhen;    //Тип парметра
     private String currentValue = null;     //Текущее значение
+
+    public Parameter(ParameterPOJO parameter) {
+        this.parseParameterPOJO(parameter, null, null);
+    }
+
+    public Parameter(ParameterPOJO parameter, Connection connection, HashMap<String, Parameter> parameters) {
+        this.parseParameterPOJO(parameter, connection, parameters);
+    }
+
+    protected void parseParameterPOJO(ParameterPOJO parameter, Connection connection, HashMap<String, Parameter> parameters) {
+        if (!parameter.isValid()) {
+            throw new RuntimeException("Parameter POJO config is invalid");
+        }
+        ParameterType parameterType = ParameterFactory.searchParameterType(parameter.type);
+        if (parameterType == null) {
+            throw new RuntimeException("Parameter type is not valid");
+        }
+        if (parameter.raw != null) {
+            setParameters(parameter.id.trim(), parameter.name.trim(), parameterType, parameter.getParameterWhen(), parameter.raw.trim());
+        } else if (parameter.query != null && connection != null) {
+            try {
+                if (parameters == null) {
+                    parameters = new HashMap<>();
+                }
+                String value = DatabaseMethods.getText(DatabaseMethods.generatedPreparedStatement(parameter.query, connection, parameters)).trim();
+                setParameters(parameter.id.trim(), parameter.name.trim(), parameterType, parameter.getParameterWhen(), value.trim());
+            } catch (SQLException error) {
+                error.printStackTrace();
+                throw new RuntimeException("Error in create parameter " + parameter.name + " query execute error in POJO parser");
+            }
+
+        }
+    }
 
     public Parameter(String ID, String name, ParameterType type, String value) {
         setParameters(ID.trim(), name.trim(), type, new ParameterWhen(), value.trim());
@@ -74,5 +112,33 @@ public class Parameter {
 
     public void addParameterToStatement(PreparedStatement statement, int index) throws SQLException {
         parameterType.addParameterToStatement(statement, index, this.getValue());
+    }
+
+    public static class ParameterPOJO implements Serializable {
+        public String ref;
+        //-----------------------------------------------------------//
+        public String id;
+        public String raw;
+        public String name;
+        public String type;
+        public String query;
+        public String nodeType;
+        public JsonNode when;
+
+        public ParameterPOJO() {
+            super();
+        }
+
+        public boolean isValid() {
+            return (raw != null || query != null) && id != null && name != null && type != null;
+        }
+
+        public ParameterWhen getParameterWhen()  {
+            if (when == null) {
+                return new ParameterWhen();
+            } else {
+                return new ParameterWhen(when);
+            }
+        }
     }
 }

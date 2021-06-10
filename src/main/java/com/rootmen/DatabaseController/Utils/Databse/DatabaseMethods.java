@@ -1,10 +1,9 @@
-package com.rootmen.DatabaseController.Databse;
+package com.rootmen.DatabaseController.Utils.Databse;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.DatabaseController.Entities.Parameter.Parameter;
-import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.*;
 import java.util.AbstractMap.SimpleEntry;
@@ -14,11 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseMethods {
-    public static DatabaseMethods INSTANCE = new DatabaseMethods();
 
-    private static HikariDataSource ConnectionPool = new HikariDataSource();
-
-    private DatabaseMethods() {
+    public DatabaseMethods() {
     }
 
     public static ArrayNode getJSON(PreparedStatement statement) throws SQLException {
@@ -109,10 +105,9 @@ public class DatabaseMethods {
         }
     }
 
-    public static PreparedStatement generatedPreparedStatement(String query, Connection
-            connection, HashMap<String, Parameter> parameters) throws SQLException {
+    public static PreparedStatement generatedPreparedStatement(String query, Connection connection, HashMap<String, Parameter> parameters) throws SQLException {
         if (connection == null) {
-            connection = ConnectionPool.getConnection();
+            throw new RuntimeException("connection is null");
         }
         SimpleEntry<StringBuilder, ArrayList<String>> queryConfig = generateStatementText(query, parameters);
         PreparedStatement statement = connection.prepareStatement(queryConfig.getKey().toString());
@@ -122,8 +117,7 @@ public class DatabaseMethods {
         return statement;
     }
 
-    public static SimpleEntry<StringBuilder, ArrayList<String>> generateStatementText(String
-                                                                                              queryRaw, HashMap<String, Parameter> parameters) {
+    public static SimpleEntry<StringBuilder, ArrayList<String>> generateStatementText(String queryRaw, HashMap<String, Parameter> parameters) {
         StringBuilder query = new StringBuilder(queryRaw);
         ArrayList<String> parametersOrder = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\$.*?\\$");
@@ -140,8 +134,7 @@ public class DatabaseMethods {
         return new SimpleEntry<>(query, parametersOrder);
     }
 
-    public static boolean insertParameters(PreparedStatement
-                                                   statement, ArrayList<String> tokenOrder, HashMap<String, Parameter> parameters) {
+    public static boolean insertParameters(PreparedStatement statement, ArrayList<String> tokenOrder, HashMap<String, Parameter> parameters) {
         try {
             for (int g = 0; g < tokenOrder.size(); g++) {
                 Parameter current = parameters.get(tokenOrder.get(g));
