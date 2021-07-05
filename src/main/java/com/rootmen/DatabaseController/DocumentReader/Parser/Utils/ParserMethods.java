@@ -2,6 +2,7 @@ package com.rootmen.DatabaseController.DocumentReader.Parser.Utils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +41,11 @@ public class ParserMethods {
 
     public static <T> T convertValue(Object parameter, TypeReference<?> toValueTypeRef) {
         ObjectMapper mapper = generatorObjectMapper();
-        return (T) mapper.convertValue(parameter, toValueTypeRef);
+        return (T) mapper.convertValue(parameter,  toValueTypeRef);
+    }
+
+    public static <T> T convertValue(Object parameter, JavaType toValueType) {
+        ObjectMapper mapper = generatorObjectMapper();
+        return mapper.convertValue(parameter,  toValueType);
     }
 }

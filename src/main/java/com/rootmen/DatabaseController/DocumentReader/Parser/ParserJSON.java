@@ -1,21 +1,33 @@
 package com.rootmen.DatabaseController.DocumentReader.Parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.rootmen.DatabaseController.DocumentReader.Parser.Utils.Parser;
 import com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses.Parameter;
 import com.rootmen.DatabaseController.Entities.Parameter.ParameterFactory;
+import com.rootmen.DatabaseController.Entities.QuerySet;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-abstract public class ParserJSON {
+public class ParserJSON extends Parser {
     public JsonNode root;
     public JsonNode refs;
     public Connection connection;
     HashMap<String, Parameter> parametersGlobal = new HashMap<>();
 
-    protected void parseQuerySet(JsonNode querySet) {
+    protected ParserJSON(String patch) throws IOException {
+        super(patch);
+    }
+
+    @Override
+    public void parseFile(String patch) throws IOException {
+
+    }
+
+    public QuerySet parseQuerySet(JsonNode querySet) {
         boolean hasRefs = refs != null;
         if (querySet == null) {
             throw new RuntimeException("QuerySet is not find");
@@ -27,6 +39,7 @@ abstract public class ParserJSON {
         for (Map.Entry<String, Parameter> entry : parametersGlobal.entrySet()) {
             System.out.println(entry.getValue().getValue());
         }
+        return null;
     }
 
 

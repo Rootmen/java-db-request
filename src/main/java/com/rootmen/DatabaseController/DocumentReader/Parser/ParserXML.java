@@ -13,13 +13,6 @@ public class ParserXML extends Parser {
         super(patch);
     }
 
-    /*ParserXML(String patch) throws IOException {
-        super(patch);
-        XmlMapper xmlMapper = new XmlMapper();
-        JsonNode node = xmlMapper.readValue(new File(patch), JsonNode.class);
-        System.out.println(node.toString());
-    }*/
-
 
     public static void main(String[] args) throws IOException {
         String patch = "C:\\Users\\Rootmen\\Documents\\GitHub\\JSON-db-request\\src\\main\\resources\\query\\query.xml";

@@ -10,7 +10,8 @@ import java.sql.SQLException;
 
 public class DatabaseFileExecute /*extends ParserLogicJSON*/ {
 
-    /*DatabaseFileExecute(String filename, String id) throws SQLException, IOException {
+    /*
+    DatabaseFileExecute(String filename, String id) throws SQLException, IOException {
         initialization(filename, id);
     }
 
@@ -28,5 +29,6 @@ public class DatabaseFileExecute /*extends ParserLogicJSON*/ {
 
     public static void main(String[] args) throws ParserConfigurationException, IOException, SQLException {
         new DatabaseFileExecute("C:\\Users\\Shinderov\\Documents\\GitHub\\JSON-db-request\\src\\main\\resources\\query\\query.json5", "main");
-    }*/
+    }
+    */
 }

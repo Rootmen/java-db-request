@@ -14,9 +14,8 @@ public class ParameterPOJO implements Serializable {
     public String nodeType;
     public JsonNode when;
 
-
     public boolean isValid() {
-        return (raw != null || query != null) && id != null && name != null && type != null && nodeType.contentEquals("parameter");
+        return (raw != null || query != null) && id != null && name != null && type != null && nodeType.equalsIgnoreCase("parameter");
     }
 
     public ParameterWhen getParameterWhen() {
