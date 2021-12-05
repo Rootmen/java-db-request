@@ -1,4 +1,4 @@
-package com.rootmen.DatabaseController.Entities.Parameter.ParameterClasses;
+package com.rootmen.Database.DatabaseQuery.Parameter.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -16,12 +16,5 @@ public class ParameterPOJO implements Serializable {
 
     public boolean isValid() {
         return (raw != null || query != null) && id != null && name != null && type != null && nodeType.equalsIgnoreCase("parameter");
-    }
-
-    public ParameterWhen getParameterWhen() {
-        if (when == null) {
-            return new ParameterWhen();
-        }
-        return new ParameterWhen(when);
     }
 }

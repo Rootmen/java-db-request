@@ -1,4 +1,4 @@
-package com.rootmen.DatabaseController.DocumentReader.Parser.Utils;
+package com.rootmen.Parser;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
