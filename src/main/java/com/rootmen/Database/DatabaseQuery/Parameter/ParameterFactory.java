@@ -1,12 +1,13 @@
 package com.rootmen.Database.DatabaseQuery.Parameter;
 
+import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterTypes.ParameterInteger;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterTypes.ParameterString;
 
 
 public class ParameterFactory {
 
-    public static Parameter getParameter(String ID, String name, String type, String value) {
+    public static Parameter getParameter(String ID, String name, String type, String value) throws ParameterException {
         switch (type.toLowerCase()) {
             case "int":
             case "integer":

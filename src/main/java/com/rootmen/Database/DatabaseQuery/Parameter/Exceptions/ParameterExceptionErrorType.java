@@ -1,9 +1,9 @@
 package com.rootmen.Database.DatabaseQuery.Parameter.Exceptions;
 
-public class ErrorValueType extends Exception {
+public class ParameterExceptionErrorType extends ParameterException {
     Exception origin = null;
 
-    public ErrorValueType(String value, String toConvert, Exception error) {
+    public ParameterExceptionErrorType(String value, String toConvert, Exception error) {
         super("Error in convert " + value + " to type " + toConvert);
     }
 }

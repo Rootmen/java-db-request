@@ -1,7 +1,8 @@
 package com.rootmen.Database.DatabaseQuery.Parameter;
 
 
-import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ErrorValueType;
+import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
+import com.rootmen.Database.DatabaseQuery.Query;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,10 +12,10 @@ public abstract class Parameter {
     private String parameterName;           //Имя параметра в SQL запросе
     private String currentValue = null;     //Текущее значение
 
-    public Parameter(String ID, String name, String value) {
+    public Parameter(String ID, String name, String value) throws ParameterException {
         setParameters(ID.trim(), name.trim(), value.trim());
-        Exception exception = this.valueVerification();
-        if (exception) {
+        ParameterException exception = this.getExceptionError();
+        if (exception != null) {
             throw exception;
         }
     }
@@ -47,5 +48,5 @@ public abstract class Parameter {
 
     public abstract void addParameterToStatement(PreparedStatement statement, int index) throws SQLException;
 
-    public abstract Exception valueVerification();
+    public abstract ParameterException getExceptionError();
 }
