@@ -4,13 +4,10 @@ import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptio
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptionErrorType;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterFactory;
-import com.rootmen.Database.DatabaseQuery.Parameter.ParameterTypes.ParameterInteger;
-import com.rootmen.Database.DatabaseQuery.Parameter.ParameterTypes.ParameterString;
-import org.junit.AfterClass;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterInteger;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterString;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
 
 import static org.hamcrest.CoreMatchers.is;
 
@@ -20,15 +17,15 @@ public class ParameterTest {
         System.out.println("Testing FactoryInt");
         Parameter parameter = ParameterFactory.getParameter("test", "test", "Int", "1");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is("1"));
+        Assert.assertThat(parameter.getValue(), is(1));
 
         parameter = ParameterFactory.getParameter("test", "test", "Int", "2");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is("2"));
+        Assert.assertThat(parameter.getValue(), is(2));
 
         parameter = ParameterFactory.getParameter("test", "test", "Int", "3");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is("3"));
+        Assert.assertThat(parameter.getValue(), is(3));
     }
 
     @Test

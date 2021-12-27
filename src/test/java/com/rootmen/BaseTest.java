@@ -1,7 +1,6 @@
 package com.rootmen;
 
 import java.util.HashMap;
-import java.util.Locale;
 
 public class BaseTest {
 
