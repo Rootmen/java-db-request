@@ -15,9 +15,11 @@ public class ParameterInteger extends ParameterObjects<Integer> {
         this(ID, name, parseString(value));
     }
 
+
     public ParameterInteger(String ID, String name, Integer value) throws ParameterException {
         super(ID, name, value);
     }
+
 
     @Override
     public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException {
@@ -32,6 +34,7 @@ public class ParameterInteger extends ParameterObjects<Integer> {
         }
         return null;
     }
+
 
     static Integer parseString(String integer) throws ParameterException {
         try {

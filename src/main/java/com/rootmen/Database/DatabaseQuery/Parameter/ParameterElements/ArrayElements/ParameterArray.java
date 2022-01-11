@@ -29,14 +29,14 @@ public class ParameterArray extends ParameterAbstract {
 
     @Override
     public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException {
-        Array array = connection.createArrayOf("text", this.currentValue.toArray());
+        Array array = connection.createArrayOf(this.arrayType, this.currentValue.toArray());
         statement.setArray(index, array);
     }
 
 
     @Override
     public <T> T getValue() {
-        return null;
+        return (T) currentValue;
     }
 
 
