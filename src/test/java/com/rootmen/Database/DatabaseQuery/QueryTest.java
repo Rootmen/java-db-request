@@ -94,21 +94,5 @@ public class QueryTest extends BaseTest {
         Assert.assertThat(query.runQuery().toString(), is("[{\"string_value\":[\"1\",\"2\",\"3\"]}]"));
     }
 
-    @Test
-    public void testMatrix() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
-        ArrayList<Integer> array = new ArrayList<>();
-        array.add(1);
-        array.add(2);
-        array.add(3);
-        ArrayList<ArrayList<Integer>> matrix = new ArrayList<>();
-        matrix.add(array);
-        matrix.add(array);
-        matrix.add(array);
-        Parameter STRING_VALUE = ParameterFactory.getArrayParameter("STRING_VALUE", "STRING_VALUE", "int", matrix);
-        HashMap<String, Parameter> parameters = new HashMap<>();
-        parameters.put("$STRING_VALUE$", STRING_VALUE);
-        Query query = new Query(new StringBuilder("SELECT $STRING_VALUE$ as STRING_VALUE;"), parameters, connectionsManager);
-        Assert.assertThat(query.runQuery().toString(), is("[{\"string_value\":[\"[1, 2, 3]\",\"[1, 2, 3]\",\"[1, 2, 3]\"]}]"));
-    }
+
 }

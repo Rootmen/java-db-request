@@ -2,6 +2,7 @@ package com.rootmen.Database.DatabaseQuery.Parameter;
 
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ArrayElements.ParameterArray;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ArrayElements.Type.ParameterArrayInteger;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterInteger;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterString;
 
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 
 public class ParameterFactory {
 
-    public static Parameter getParameter(String ID, String name, String type, String value) throws ParameterException {
+    public static Parameter<?> getParameter(String ID, String name, String type, String value) throws ParameterException {
         switch (type.toLowerCase()) {
             case "int":
             case "integer":
@@ -22,7 +23,7 @@ public class ParameterFactory {
         throw new RuntimeException("Type " + type + "is not allowed");
     }
 
-    public static Parameter getArrayParameter(String ID, String name, String type, ArrayList<?> value) throws ParameterException {
-        return (Parameter) new ParameterArray(ID, name, value, type);
+    public static Parameter<?> getArrayParameter(String ID, String name, String type, ArrayList<Integer> value) throws ParameterException {
+        return new ParameterArrayInteger(ID, name, value, type);
     }
 }

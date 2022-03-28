@@ -5,11 +5,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public interface Parameter {
-
-    void parameterCalculate(Connection connection) throws SQLException;
+/**
+ * Интерфейс для параметра в запросе.
+ *
+ * @version 1.0
+ */
+public interface Parameter<T> {
 
     void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException;
 
-    <T> T getValue();
+    T parameterCalculate(Connection connection) throws SQLException;
+
+    T getValue();
 }

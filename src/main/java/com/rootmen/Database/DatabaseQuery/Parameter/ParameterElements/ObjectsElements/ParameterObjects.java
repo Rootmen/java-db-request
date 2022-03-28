@@ -7,15 +7,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-abstract public class ParameterObjects<T> extends ParameterAbstract {
+abstract public class ParameterObjects<T> extends ParameterAbstract<T> {
 
-    T currentValue;
-    String arrayType;
+    protected T currentValue;
 
 
     public ParameterObjects(String ID, String name, T value) throws ParameterException {
         super(ID, name);
-        this.arrayType = arrayType;
         this.currentValue = value;
         ParameterException exception = this.getExceptionError();
         if (exception != null) {
@@ -24,20 +22,17 @@ abstract public class ParameterObjects<T> extends ParameterAbstract {
     }
 
 
-
     abstract public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException;
 
 
-
-    public void parameterCalculate(Connection connection) throws SQLException {
-
+    public T parameterCalculate(Connection connection) throws SQLException {
+        return currentValue;
     }
-
 
 
     abstract public ParameterException getExceptionError();
 
-
+    @Override
     public T getValue() {
         return currentValue;
     }

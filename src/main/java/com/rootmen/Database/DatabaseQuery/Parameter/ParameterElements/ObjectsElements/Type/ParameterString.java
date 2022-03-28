@@ -21,11 +21,10 @@ public class ParameterString extends ParameterObjects<String> {
 
     @Override
     public ParameterException getExceptionError() {
-        try {
-            return null;
-        } catch (Exception e) {
-            return new ParameterExceptionErrorType(this.getValue(), "Integer", e);
+        if (this.getValue() == null) {
+            return new ParameterExceptionErrorType(this.getValue(), "String", new NullPointerException());
         }
+        return null;
     }
 
 }
