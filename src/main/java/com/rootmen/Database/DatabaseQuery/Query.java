@@ -16,18 +16,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Query {
-    private Connection connection = null;
     private StringBuilder query = null;
-    private HashMap<String, Parameter> parameters = null;
+    private Connection connection = null;
+    private HashMap<String, Parameter<?>> parameters = null;
     private final ArrayList<String> parametersArray = new ArrayList<>();
 
 
-    public Query(StringBuilder query, HashMap<String, Parameter> parameters, ConnectionsManager connection) throws SQLException {
+    public Query(StringBuilder query, HashMap<String, Parameter<?>> parameters, ConnectionsManager connection) throws SQLException {
         this.connection = connection.getConnection();
         this.generateQuery(query, parameters);
     }
 
-    public Query(StringBuilder query, HashMap<String, Parameter> parameters) throws SQLException {
+    public Query(StringBuilder query, HashMap<String, Parameter<?>> parameters) throws SQLException {
         this.connection = (new ConnectionsManager()).getConnection();
         this.generateQuery(query, parameters);
     }
@@ -39,7 +39,7 @@ public class Query {
     }
 
 
-    private void generateQuery(StringBuilder text, HashMap<String, Parameter> parameters) {
+    private void generateQuery(StringBuilder text, HashMap<String, Parameter<?>> parameters) {
         this.parameters = parameters;
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(text);
         while (matcher.find()) {
@@ -55,7 +55,7 @@ public class Query {
     private PreparedStatement getStatement() throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement(query.toString());
         for (int g = 0; g < this.parametersArray.size(); g++) {
-            Parameter current = this.parameters.get(parametersArray.get(g));
+            Parameter<?> current = this.parameters.get(parametersArray.get(g));
             if (current != null) {
                 current.addParameterToStatement(statement, g + 1, this.connection);
             }

@@ -15,42 +15,42 @@ public class ParameterTest {
     @Test
     public void testParameterFactoryInt() throws Exception {
         System.out.println("Testing FactoryInt");
-        Parameter parameter = ParameterFactory.getParameter("test", "test", "Int", "1");
+        Parameter<?> parameter = ParameterFactory.getParameter("test", "test", "Int", "1");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is(1));
+        Assert.assertEquals(parameter.getValue(), 1);
 
         parameter = ParameterFactory.getParameter("test", "test", "Int", "2");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is(2));
+        Assert.assertEquals(parameter.getValue(),2);
 
         parameter = ParameterFactory.getParameter("test", "test", "Int", "3");
         Assert.assertSame(parameter.getClass(), ParameterInteger.class);
-        Assert.assertThat(parameter.getValue(), is(3));
+        Assert.assertEquals(parameter.getValue(), 3);
     }
 
     @Test
     public void testParameterFactoryString() throws Exception {
         System.out.println("Testing FactoryString");
-        Parameter parameter = ParameterFactory.getParameter("test", "test", "String", "1");
+        Parameter<?> parameter = ParameterFactory.getParameter("test", "test", "String", "1");
         Assert.assertSame(parameter.getClass(), ParameterString.class);
-        Assert.assertThat(parameter.getValue(), is("1"));
+        Assert.assertEquals(parameter.getValue(), "1");
 
         parameter = ParameterFactory.getParameter("test", "test", "String", "2");
         Assert.assertSame(parameter.getClass(), ParameterString.class);
-        Assert.assertThat(parameter.getValue(), is("2"));
+        Assert.assertEquals(parameter.getValue(), "2");
 
         parameter = ParameterFactory.getParameter("test", "test", "String", "3");
         Assert.assertSame(parameter.getClass(), ParameterString.class);
-        Assert.assertThat(parameter.getValue(), is("3"));
+        Assert.assertEquals(parameter.getValue(), "3");
     }
 
     @Test(expected = ParameterExceptionErrorType.class)
     public void whenExceptionThrown_thenExpectationSatisfied() throws ParameterExceptionErrorType {
-        Parameter parameter = null;
+        Parameter<?> parameter = null;
         try {
             parameter = ParameterFactory.getParameter("test", "test", "Int", "фии");
             Assert.assertSame(parameter.getClass(), ParameterString.class);
-            Assert.assertThat(parameter.getValue(), is("3"));
+            Assert.assertEquals(parameter.getValue(), "3");
         } catch (ParameterException e) {
             System.out.println(e.getClass());
             throw (ParameterExceptionErrorType) e;
