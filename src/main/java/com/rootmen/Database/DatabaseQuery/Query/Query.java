@@ -1,10 +1,11 @@
-package com.rootmen.Database.DatabaseQuery;
+package com.rootmen.Database.DatabaseQuery.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.Database.DatabaseQuery.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 
 import java.sql.*;
@@ -20,7 +21,9 @@ public class Query {
     private Connection connection = null;
     private HashMap<String, Parameter<?>> parameters = null;
     private final ArrayList<String> parametersArray = new ArrayList<>();
-
+    private boolean hasMoreResults;
+    PreparedStatement statement;
+    private boolean isCompleted = false;
 
     public Query(StringBuilder query, HashMap<String, Parameter<?>> parameters, ConnectionsManager connection) throws SQLException {
         this.connection = connection.getConnection();
@@ -28,14 +31,33 @@ public class Query {
     }
 
     public Query(StringBuilder query, HashMap<String, Parameter<?>> parameters) throws SQLException {
-        this.connection = (new ConnectionsManager()).getConnection();
+        this.connection = new ConnectionsManager().getConnection();
         this.generateQuery(query, parameters);
     }
 
 
     public JsonNode runQuery() throws SQLException {
-        PreparedStatement statement = this.getStatement();
-        return this.execute(statement);
+        if (isCompleted) {
+            return null;
+        }
+        this.statement = this.getStatement();
+        this.hasMoreResults = this.statement.execute();
+        isCompleted = true;
+        return this.executeAll();
+    }
+
+    public void runQueryByLine() throws SQLException {
+        if (isCompleted) {
+            return;
+        }
+        this.statement = this.getStatement();
+    }
+
+    public JsonNode nextLine() throws SQLException {
+        if (isCompleted) {
+            return null;
+        }
+        return this.executeLine();
     }
 
 
@@ -64,12 +86,11 @@ public class Query {
     }
 
 
-    private JsonNode execute(PreparedStatement statement) throws SQLException {
-        boolean hasMoreResults = statement.execute();
-        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+    private JsonNode executeAll() throws SQLException {
         int index = 0;
-        while (hasMoreResults || statement.getUpdateCount() > -1) {
-            SimpleEntry<ResultSetMetaData, ResultSet> data = this.getNextData(statement);
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        while (this.hasMoreResults || this.statement.getUpdateCount() > -1) {
+            SimpleEntry<ResultSetMetaData, ResultSet> data = this.getNextData(this.statement);
             ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
             if (data != null && data.getValue() != null) {
                 while (data.getValue().next()) {
@@ -117,7 +138,64 @@ public class Query {
                 }
                 objectNode.set(String.valueOf(index++), arrayNode);
             }
-            hasMoreResults = statement.getMoreResults();
+            this.hasMoreResults = this.statement.getMoreResults();
+        }
+        return (objectNode.size() == 1) ? objectNode.get("0") : objectNode;
+    }
+
+    private JsonNode executeLine() throws SQLException {
+        int index = 0;
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        while (this.hasMoreResults || this.statement.getUpdateCount() > -1) {
+            SimpleEntry<ResultSetMetaData, ResultSet> data = this.getNextData(this.statement);
+            ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
+            if (data != null && data.getValue() != null) {
+                while (data.getValue().next()) {
+                    int numColumns = data.getKey().getColumnCount();
+                    ObjectNode object = JsonNodeFactory.instance.objectNode();
+                    for (int i = 1; i < numColumns + 1; i++) {
+                        String column_name = data.getKey().getColumnName(i);
+                        if (data.getKey().getColumnType(i) == java.sql.Types.ARRAY) {
+                            Array array = data.getValue().getArray(column_name);
+                            if (array != null) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                object.set(column_name, mapper.valueToTree(new ArrayList<>(Arrays.asList((Object[]) array.getArray()))));
+                            } else {
+                                object.set(column_name, null);
+                            }
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.BIGINT) {
+                            object.put(column_name, data.getValue().getInt(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.BOOLEAN) {
+                            object.put(column_name, data.getValue().getBoolean(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.BLOB) {
+                            object.put(column_name, data.getValue().getBlob(column_name).toString());
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.DOUBLE) {
+                            object.put(column_name, data.getValue().getDouble(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.FLOAT) {
+                            object.put(column_name, data.getValue().getFloat(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.INTEGER) {
+                            object.put(column_name, data.getValue().getInt(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.NVARCHAR) {
+                            object.put(column_name, data.getValue().getNString(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.VARCHAR) {
+                            object.put(column_name, data.getValue().getString(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.TINYINT) {
+                            object.put(column_name, data.getValue().getInt(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.SMALLINT) {
+                            object.put(column_name, data.getValue().getInt(column_name));
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.DATE) {
+                            object.put(column_name, data.getValue().getDate(column_name).toString());
+                        } else if (data.getKey().getColumnType(i) == java.sql.Types.TIMESTAMP) {
+                            object.put(column_name, data.getValue().getTimestamp(column_name).toString());
+                        } else {
+                            object.put(column_name, String.valueOf(data.getValue().getObject(column_name)));
+                        }
+                    }
+                    arrayNode.add(object);
+                }
+                objectNode.set(String.valueOf(index++), arrayNode);
+            }
+            this.hasMoreResults = this.statement.getMoreResults();
         }
         return (objectNode.size() == 1) ? objectNode.get("0") : objectNode;
     }

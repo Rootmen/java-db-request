@@ -1,9 +1,11 @@
 package com.rootmen.Database.DatabaseQuery;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.BaseTest;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterFactory;
 import com.rootmen.Database.DatabaseQuery.Query.Query;
+import com.rootmen.Database.DatabaseQuery.Query.QueryController;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +21,7 @@ import java.util.HashMap;
  * @since 2021-12-16
  **/
 
-public class QueryTest extends BaseTest {
+public class QueryTest2 extends BaseTest {
 
     String url = "jdbc:postgresql://176.99.11.235:5432/main";
     String user = "authorization_app";
@@ -72,10 +74,16 @@ public class QueryTest extends BaseTest {
         parameters.put("$INT_VALUE2$", INT_VALUE2);
         parameters.put("$STRING_VALUE1$", STRING_VALUE1);
         parameters.put("$STRING_VALUE2$", STRING_VALUE2);
-        Query query = new Query(new StringBuilder("(SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1 union all SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1); SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1;"), parameters, connectionsManager);
-        Assert.assertEquals(query.runQuery().toString(), "{\"0\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"},{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}],\"1\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}]}");
-        query = new Query(new StringBuilder("SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1;"), parameters, connectionsManager);
-        Assert.assertEquals(query.runQuery().toString(), "[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}]");
+        QueryController query = new QueryController(new StringBuilder("(SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1 union all SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1); SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1;"), parameters, connectionsManager);
+        Assert.assertEquals(query.getResult().toString(), "{\"0\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"},{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}],\"1\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}]}");
+        query = new QueryController(new StringBuilder("SELECT * FROM generate_series(2,100);;"), parameters, connectionsManager);
+        while (true) {
+            ObjectNode node = query.getNextLine();
+            if (node == null) {
+                break;
+            }
+            System.out.println(node.toString());
+        }
     }
 
     @Test
