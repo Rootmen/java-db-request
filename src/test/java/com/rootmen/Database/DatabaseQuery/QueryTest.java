@@ -27,7 +27,7 @@ public class QueryTest extends BaseTest {
 
     @Test
     public void testGenerateOneQuery() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         printText("Базовый запрос на возращение одного ResultSet", "blue");
         Parameter<?> INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", "Int", "1");
         Parameter<?> STRING_VALUE = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", "String", "s1");
@@ -58,7 +58,7 @@ public class QueryTest extends BaseTest {
 
     @Test
     public void testGenerateQuery2() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         Parameter<?> INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", "Int", "1");
         Parameter<?> INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", "Int", "2");
         Parameter<?> STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", "String", "s1");
@@ -80,7 +80,7 @@ public class QueryTest extends BaseTest {
 
     @Test
     public void testArray() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         ArrayList<Integer> array = new ArrayList<>();
         array.add(1);
         array.add(2);

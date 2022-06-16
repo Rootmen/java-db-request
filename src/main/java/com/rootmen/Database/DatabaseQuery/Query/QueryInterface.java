@@ -10,6 +10,7 @@ import java.sql.SQLException;
  * @version 1.0
  */
 public interface QueryInterface {
+    public boolean runQuery() throws SQLException;
     public JsonNode getResult() throws SQLException;
     public JsonNode getNextLine() throws SQLException;
 }

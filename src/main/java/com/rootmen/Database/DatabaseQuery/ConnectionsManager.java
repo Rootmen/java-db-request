@@ -1,34 +1,43 @@
 package com.rootmen.Database.DatabaseQuery;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionsManager {
-    private String url = null;
-    private String user = null;
-    private String pass = null;
-    boolean isOneConnection = false;
-    Connection activeConnection = null;
+    HikariDataSource dataSource = null;
+    boolean isCloseConnection = false;
+    HikariConfig config = null;
 
-    public ConnectionsManager() {
+
+    public ConnectionsManager(String url, String user, String pass) throws SQLException {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(user);
+        config.setPassword(pass);
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.setMaximumPoolSize(10);
+        config.setAutoCommit(false);
+        dataSource = new HikariDataSource(config);
     }
 
-    public ConnectionsManager(String url, String user, String pass, boolean oneConnection) throws SQLException {
-        this.url = url;
-        this.user = user;
-        this.pass = pass;
-        this.isOneConnection = oneConnection;
+
+    public ConnectionsManager(HikariConfig config) throws SQLException {
+        dataSource = new HikariDataSource(config);
     }
 
 
     public Connection getConnection() throws SQLException {
-        if (this.isOneConnection) {
-            if (this.activeConnection == null) {
-                this.activeConnection = DriverManager.getConnection(url, user, pass);
-            }
-            return this.activeConnection;
-        }
-        return DriverManager.getConnection(url, user, pass);
+        return dataSource.getConnection();
+    }
+
+
+    public boolean closeConnectionsPool() {
+        dataSource.close();
+        return true;
     }
 }

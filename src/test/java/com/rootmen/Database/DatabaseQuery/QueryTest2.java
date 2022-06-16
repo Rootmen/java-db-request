@@ -29,7 +29,7 @@ public class QueryTest2 extends BaseTest {
 
     @Test
     public void testGenerateOneQuery() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         printText("Базовый запрос на возращение одного ResultSet", "blue");
         Parameter<?> INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", "Int", "1");
         Parameter<?> STRING_VALUE = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", "String", "s1");
@@ -60,7 +60,7 @@ public class QueryTest2 extends BaseTest {
 
     @Test
     public void testGenerateQuery2() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         Parameter<?> INT_VALUE = ParameterFactory.getParameter("INT_VALUE", "INT_VALUE", "Int", "1");
         Parameter<?> INT_VALUE2 = ParameterFactory.getParameter("INT_VALUE2", "INT_VALUE2", "Int", "2");
         Parameter<?> STRING_VALUE1 = ParameterFactory.getParameter("STRING_VALUE1", "STRING_VALUE1", "String", "s1");
@@ -74,9 +74,9 @@ public class QueryTest2 extends BaseTest {
         parameters.put("$INT_VALUE2$", INT_VALUE2);
         parameters.put("$STRING_VALUE1$", STRING_VALUE1);
         parameters.put("$STRING_VALUE2$", STRING_VALUE2);
-        QueryController query = new QueryController(new StringBuilder("(SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1 union all SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1); SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1;"), parameters, connectionsManager);
+        QueryController query = new QueryController(new StringBuilder("(SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1 union all SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1); SELECT $INT_VALUE$ as INT_VALUE, $INT_VALUE2$ as INT_VALUE2, $INT_VALUE$ as INT_VALUE3, $INT_VALUE2$ as INT_VALUE4, $STRING_VALUE1$ as STRING_VALUE1, $STRING_VALUE2$  as STRING_VALUE1;"), parameters, connectionsManager.getConnection());
         Assert.assertEquals(query.getResult().toString(), "{\"0\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"},{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}],\"1\":[{\"int_value\":1,\"int_value2\":2,\"int_value3\":1,\"int_value4\":2,\"string_value1\":\"s1\"}]}");
-        query = new QueryController(new StringBuilder("SELECT * FROM generate_series(2,100);;"), parameters, connectionsManager);
+        query = new QueryController(new StringBuilder("SELECT * FROM generate_series(2,100);;"), parameters, connectionsManager.getConnection());
         while (true) {
             ObjectNode node = query.getNextLine();
             if (node == null) {
@@ -88,7 +88,7 @@ public class QueryTest2 extends BaseTest {
 
     @Test
     public void testArray() throws Exception {
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, true);
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         ArrayList<Integer> array = new ArrayList<>();
         array.add(1);
         array.add(2);

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rootmen.Database.DatabaseQuery.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 
 import java.sql.*;
@@ -17,22 +16,38 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryController implements QueryInterface {
+    protected boolean hasMoreResults;
+    protected boolean isCompleted = false;
+    protected boolean noCloseConnection = false;
+    Connection connection;
     PreparedStatement statement;
     AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> activeResultSet = null;
-    private boolean hasMoreResults;
-    private boolean isCompleted = false;
 
 
-    public QueryController(StringBuilder query, HashMap<String, Parameter<?>> parameters, ConnectionsManager connection) throws SQLException {
-        this.statement = generatePreparedStatement(query, parameters, connection.getConnection());
+    public QueryController(StringBuilder query, HashMap<String, Parameter<?>> parameters, Connection connection) throws SQLException {
+        this.connection = connection;
+        this.statement = generatePreparedStatement(query, parameters);
         this.hasMoreResults = this.statement.execute();
+    }
+
+    public QueryController(StringBuilder query, HashMap<String, Parameter<?>> parameters, Connection connection, boolean noCloseConnection) throws SQLException {
+        this.connection = connection;
+        this.noCloseConnection = noCloseConnection;
+        this.statement = generatePreparedStatement(query, parameters);
+        this.hasMoreResults = this.statement.execute();
+    }
+
+
+    @Override
+    public boolean runQuery() {
+        return true;
     }
 
 
     @Override
     public JsonNode getResult() throws SQLException {
         if (this.isCompleted) {
-            throw new Error();
+            throw new SQLException("Транзакция завершена");
         }
         return this.executeAll();
     }
@@ -41,13 +56,13 @@ public class QueryController implements QueryInterface {
     @Override
     public ObjectNode getNextLine() throws SQLException {
         if (this.isCompleted) {
-            throw new Error();
+            throw new SQLException("Транзакция завершена");
         }
         return this.executeLine();
     }
 
 
-    private PreparedStatement generatePreparedStatement(StringBuilder text, HashMap<String, Parameter<?>> parameters, Connection connection) throws SQLException {
+    protected PreparedStatement generatePreparedStatement(StringBuilder text, HashMap<String, Parameter<?>> parameters) throws SQLException {
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(text);
         ArrayList<String> parametersArray = new ArrayList<>();
         while (matcher.find()) {
@@ -56,18 +71,18 @@ public class QueryController implements QueryInterface {
                 parametersArray.add(token);
             }
         }
-        PreparedStatement statement = connection.prepareStatement(text.toString().replaceAll("\\$.*?\\$", "?"));
+        PreparedStatement statement = this.connection.prepareStatement(text.toString().replaceAll("\\$.*?\\$", "?"));
         for (int g = 0; g < parametersArray.size(); g++) {
             Parameter<?> current = parameters.get(parametersArray.get(g));
             if (current != null) {
-                current.addParameterToStatement(statement, g + 1, connection);
+                current.addParameterToStatement(statement, g + 1, this.connection);
             }
         }
         return statement;
     }
 
 
-    private JsonNode executeAll() throws SQLException {
+    protected JsonNode executeAll() throws SQLException {
         int index = 0;
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
         while (this.hasMoreResults || this.statement.getUpdateCount() > -1) {
@@ -81,12 +96,12 @@ public class QueryController implements QueryInterface {
             }
             this.hasMoreResults = this.statement.getMoreResults();
         }
-        this.isCompleted = true;
+        this.close();
         return (objectNode.size() == 1) ? objectNode.get("0") : objectNode;
     }
 
 
-    private ObjectNode executeLine() throws SQLException {
+    protected ObjectNode executeLine() throws SQLException {
         while (this.hasMoreResults || this.statement.getUpdateCount() > -1) {
             if (this.activeResultSet == null) {
                 this.activeResultSet = this.getNextData(this.statement);
@@ -98,12 +113,12 @@ public class QueryController implements QueryInterface {
             }
             this.hasMoreResults = this.statement.getMoreResults();
         }
-        this.isCompleted = true;
+        this.close();
         return null;
     }
 
 
-    private static ObjectNode getJsonObject(AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> data) throws SQLException {
+    protected static ObjectNode getJsonObject(AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> data) throws SQLException {
         int numColumns = data.getKey().getColumnCount();
         ObjectNode object = JsonNodeFactory.instance.objectNode();
         for (int i = 1; i < numColumns + 1; i++) {
@@ -151,5 +166,14 @@ public class QueryController implements QueryInterface {
     public AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> getNextData(PreparedStatement statement) throws SQLException {
         ResultSet resultSet = statement.getResultSet();
         return (resultSet == null) ? null : new AbstractMap.SimpleEntry<>(resultSet.getMetaData(), resultSet);
+    }
+
+    protected void close() throws SQLException {
+        this.isCompleted = true;
+        this.statement.close();
+        this.statement = null;
+        if (!this.noCloseConnection) {
+            this.connection.close();
+        }
     }
 }

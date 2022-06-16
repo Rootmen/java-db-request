@@ -30,11 +30,6 @@ public class Query {
         this.generateQuery(query, parameters);
     }
 
-    public Query(StringBuilder query, HashMap<String, Parameter<?>> parameters) throws SQLException {
-        this.connection = new ConnectionsManager().getConnection();
-        this.generateQuery(query, parameters);
-    }
-
 
     public JsonNode runQuery() throws SQLException {
         if (isCompleted) {

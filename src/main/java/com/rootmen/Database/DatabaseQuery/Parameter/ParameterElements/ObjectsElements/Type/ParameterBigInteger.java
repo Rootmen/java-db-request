@@ -1,6 +1,13 @@
 package com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type;
 
-import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptionErrorType;import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.ParameterObjects;import java.math.BigInteger;import java.sql.Connection;import java.sql.PreparedStatement;import java.sql.SQLException;
+import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
+import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptionErrorType;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.ParameterObjects;
+
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 
 public class ParameterBigInteger extends ParameterObjects<BigInteger> {
