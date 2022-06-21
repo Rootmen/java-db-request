@@ -36,4 +36,5 @@ abstract public class ParameterObjects<T> extends ParameterAbstract<T> {
     public T getValue() {
         return currentValue;
     }
+
 }

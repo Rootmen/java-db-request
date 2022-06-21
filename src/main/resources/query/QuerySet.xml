@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Definitions>
+    <QuerySet ID="ASOUV_ERROR">
+        <QUERY name="DEF+">
+            <TextParam ID="ERROR_STR" name="ERROR_STR" type="string">
+                <when value="">NULL</when>
+                <when value="undefined">NULL</when>
+                <when value="null">NULL</when>
+                <otherwise>$ERROR_STR$</otherwise>
+                <default>123</default>
+            </TextParam>
+            <TextParam ID="ERROR_STRD" name="ERROR_STRD" type="string">
+                <when value="">NULL</when>
+                <when value="undefined">NULL</when>
+                <when value="null">NULL</when>
+                <otherwise>$ERROR_STRD$</otherwise>
+                <default>123</default>
+            </TextParam>
+            <SQL name="main1">
+                <![CDATA[
+				SELECT $ERROR_STR$ as text1, $ERROR_STRD$ as text2;
+				]]>
+            </SQL>
+            <SQL name="main2">
+                <![CDATA[
+				SELECT $ERROR_STR$ as text2, $ERROR_STRD$ as text;
+				]]>
+            </SQL>
+            <SQL name="main3">
+                <![CDATA[
+				SELECT $ERROR_STR$ as text3, $ERROR_STRD$ as text2;
+				]]>
+            </SQL>
+        </QUERY>
+        <QUERY name="R1">
+            <TextParam ID="ERROR_STR" name="ERROR_STR" type="string">
+                <when value="">NULL</when>
+                <when value="undefined">NULL</when>
+                <when value="null">NULL</when>
+                <otherwise>$ERROR_STR$</otherwise>
+            </TextParam>
+            <SQL>
+                <![CDATA[
+				SELECT 2;
+				]]>
+            </SQL>
+        </QUERY>
+        <QUERY name="R2">
+            <TextParam ID="ERROR_STR3" name="ERROR_STR" type="string">
+                <when value="">NULL</when>
+                <when value="undefined">NULL</when>
+                <when value="null">NULL</when>
+                <default>123</default>
+            </TextParam>
+            <SQL name="T1">
+                <![CDATA[
+				SELECT 3;
+				]]>
+            </SQL>
+            <SQL name="T1">
+                <![CDATA[
+				SELECT 3;
+				]]>
+            </SQL>
+        </QUERY>
+    </QuerySet>
+
+    <QuerySet ID="ASOUV_ERROR2">
+        <QUERY>
+            <TextParam ID="ERROR_STR" name="ERROR_STR" type="string">
+                <when value="">NULL</when>
+                <when value="undefined">NULL</when>
+                <when value="null">NULL</when>
+                <otherwise>$ERROR_STR$</otherwise>
+            </TextParam>
+            <SQL>
+                <![CDATA[
+				SELECT 1;
+				]]>
+            </SQL>
+        </QUERY>
+        <QUERY>
+            <TextParam ID="ERROR_STR" name="ERROR_STR">
+            </TextParam>
+            <SQL>
+                <![CDATA[
+				SELECT 2;
+				]]>
+            </SQL>
+        </QUERY>
+        <QUERY>
+            <TextParam ID="ERROR_STR" name="ERROR_STR">
+            </TextParam>
+            <SQL>
+                <![CDATA[
+				SELECT 3;
+				]]>
+            </SQL>
+        </QUERY>
+    </QuerySet>
+
+</Definitions>

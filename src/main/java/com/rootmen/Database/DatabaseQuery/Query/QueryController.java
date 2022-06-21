@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 
 import java.sql.*;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,6 +60,17 @@ public class QueryController implements QueryInterface {
 
 
     protected PreparedStatement generatePreparedStatement(StringBuilder text, HashMap<String, Parameter<?>> parameters) throws SQLException {
+        String update = text.toString();
+        for (Parameter<?> parameter : parameters.values()) {
+            HashMap<String, String> when = parameter.getWhen();
+            if (when == null || when.size() == 0) continue;
+            if (when.get(parameter.getValue().toString()) == null && when.get(null) != null) {
+                update = update.replaceAll("\\$" + parameter.getParameterName() + "\\$", Matcher.quoteReplacement(when.get(null)));
+            } else if (when.get(parameter.getValue().toString()) != null) {
+                update = update.replaceAll("\\$" + parameter.getParameterName() + "\\$", Matcher.quoteReplacement(when.get(parameter.getValue().toString())));
+            }
+        }
+        text = new StringBuilder(update);
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(text);
         ArrayList<String> parametersArray = new ArrayList<>();
         while (matcher.find()) {

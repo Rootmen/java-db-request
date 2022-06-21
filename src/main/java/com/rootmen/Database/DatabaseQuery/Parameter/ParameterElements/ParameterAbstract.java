@@ -7,10 +7,12 @@ import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 public abstract class ParameterAbstract<T> implements Parameter<T> {
-    private String ID;                                  //ID параметра
-    private String parameterName;                       //Имя параметра в SQL запросе
+    protected String ID;                                      //ID параметра
+    protected String parameterName;                           //Имя параметра в SQL запросе
+    protected HashMap<String, String> when = new HashMap<>(); //Условия замены
 
     /**
      * <p>Абстрактный конструктор для параметра запроса</p>.
@@ -36,6 +38,7 @@ public abstract class ParameterAbstract<T> implements Parameter<T> {
      *
      * @return текстовое название параметра.
      */
+    @Override
     public String getParameterName() {
         return parameterName;
     }
@@ -78,4 +81,14 @@ public abstract class ParameterAbstract<T> implements Parameter<T> {
     public abstract T getValue();
 
     public abstract T parameterCalculate(Connection connection) throws SQLException;
+
+    @Override
+    public void setWhen(HashMap<String, String> when) {
+        this.when = when;
+    }
+
+    @Override
+    public HashMap<String, String> getWhen() {
+        return this.when;
+    }
 }

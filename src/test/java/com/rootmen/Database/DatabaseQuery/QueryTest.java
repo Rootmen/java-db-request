@@ -1,9 +1,12 @@
 package com.rootmen.Database.DatabaseQuery;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.rootmen.BaseTest;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterFactory;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterInput;
 import com.rootmen.Database.DatabaseQuery.Query.Query;
+import com.rootmen.Database.DatabaseQuery.XmlParser.XmlQueryParser;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -93,4 +96,13 @@ public class QueryTest extends BaseTest {
     }
 
 
+    @Test
+    public void testXmlQuery2() throws Exception {
+        ArrayList<ParameterInput> parameters = new ArrayList<>();
+        parameters.add(new ParameterInput("ERROR_STR", "2"));
+        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
+        XmlQueryParser xmlQueryParser = new XmlQueryParser();
+        JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResourceAsStream("query/QuerySet.xml"), "ASOUV_ERROR", parameters, connectionsManager);
+        System.out.println(objectNode);
+    }
 }
