@@ -101,9 +101,9 @@ public class XmlQueryParser {
 
         for (QueryList query : queryList) {
             if (query.name == null) {
-                mainNode.put("rows", executeSQL(query.queryList, query.parameters, connectionsManager));
+                mainNode.set("rows", executeSQL(query.queryList, query.parameters, connectionsManager));
             } else {
-                mainNode.put(query.name, executeSQL(query.queryList, query.parameters, connectionsManager));
+                mainNode.set(query.name, executeSQL(query.queryList, query.parameters, connectionsManager));
             }
         }
         return mainNode;
@@ -115,7 +115,7 @@ public class XmlQueryParser {
         Connection connection = connectionsManager.getConnection();
         for (QueryList.SQL sql : sqlLists) {
             QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connection, true);
-            mainNode.put(sql.name, queryController.getResult());
+            mainNode.set(sql.name, queryController.getResult());
         }
         connection.close();
         return mainNode;

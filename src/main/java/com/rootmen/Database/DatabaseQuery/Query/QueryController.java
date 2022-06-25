@@ -164,7 +164,11 @@ public class QueryController implements QueryInterface {
             } else if (data.getKey().getColumnType(i) == java.sql.Types.TIMESTAMP) {
                 object.put(column_name, data.getValue().getTimestamp(column_name).toString());
             } else {
-                object.put(column_name, String.valueOf(data.getValue().getObject(column_name)));
+                try {
+                    object.put(column_name, new ObjectMapper().readTree(String.valueOf(data.getValue().getObject(column_name))));
+                } catch (Exception e) {
+                    object.put(column_name, String.valueOf(data.getValue().getObject(column_name)));
+                }
             }
         }
         return object;
