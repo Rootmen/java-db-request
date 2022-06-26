@@ -65,9 +65,9 @@ public class QueryController implements QueryInterface {
             HashMap<String, String> when = parameter.getWhen();
             if (when == null || when.size() == 0) continue;
             if (when.get(parameter.getValue().toString()) == null && when.get(null) != null) {
-                update = update.replaceAll("\\$" + parameter.getParameterName() + "\\$", Matcher.quoteReplacement(when.get(null)));
+                update = update.replaceAll("\\$" + parameter.getParameterName().substring(1, parameter.getParameterName().length() - 1) + "\\$", Matcher.quoteReplacement(when.get(null)));
             } else if (when.get(parameter.getValue().toString()) != null) {
-                update = update.replaceAll("\\$" + parameter.getParameterName() + "\\$", Matcher.quoteReplacement(when.get(parameter.getValue().toString())));
+                update = update.replaceAll("\\$" + parameter.getParameterName().substring(1, parameter.getParameterName().length() - 1) + "\\$", Matcher.quoteReplacement(when.get(parameter.getValue().toString())));
             }
         }
         text = new StringBuilder(update);

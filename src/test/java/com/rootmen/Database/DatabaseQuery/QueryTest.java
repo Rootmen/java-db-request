@@ -99,7 +99,7 @@ public class QueryTest extends BaseTest {
     @Test
     public void testXmlQuery2() throws Exception {
         ArrayList<ParameterInput> parameters = new ArrayList<>();
-        parameters.add(new ParameterInput("ERROR_STR", "2"));
+        parameters.add(new ParameterInput("GET_MESSAGE", "2"));
         ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         XmlQueryParser xmlQueryParser = new XmlQueryParser();
         JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResourceAsStream("query/QuerySet.xml"), "ASOUV_ERROR", parameters, connectionsManager);

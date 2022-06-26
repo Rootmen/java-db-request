@@ -98,5 +98,31 @@
             </SQL>
         </QUERY>
     </QuerySet>
-
+    <QuerySet ID="GET_MESSAGE">
+        <QUERY>
+            <TextParam ID="ROOM_ID" name="ROOM_ID" type="int"/>
+            <TextParam ID="START_ID" name="START_ID" type="bigint">
+                <when value="0"/>
+                <otherwise><![CDATA[AND MESSAGE_ID < $START_ID$]]></otherwise>
+            </TextParam>
+            <SQL>
+                <![CDATA[
+                SELECT *
+                FROM (SELECT MESSAGE_ID                                                                                      AS _id,
+                             CONTENT                                                                                         AS content,
+                             SENDER_ID                                                                                       AS "senderId",
+                             TIME::DATE::TEXT                                                                                AS date,
+                             true                                                                                            AS distributed,
+                             RIGHT('00' || DATE_PART('HOUR', TIME), 2) || ':' ||
+                             RIGHT('00' || DATE_PART('MINUTE', TIME), 2)                                                     AS timestamp
+                      FROM DBCHAT.MESSAGE
+                               LEFT JOIN DBAUTSCHEMA.USERS AS SENDER_USERS ON SENDER_USERS.ID = SENDER_ID
+                      WHERE ROOM_ID = $ROOM_ID$ $START_ID$
+                      ORDER BY MESSAGE_ID DESC
+                      LIMIT 25) AS DATA
+                ORDER BY _ID;
+				]]>
+            </SQL>
+        </QUERY>
+    </QuerySet>
 </Definitions>

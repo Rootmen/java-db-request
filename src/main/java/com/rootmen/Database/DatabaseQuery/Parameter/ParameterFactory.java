@@ -16,6 +16,13 @@ public class ParameterFactory {
             case "int":
             case "integer":
                 return new ParameterInteger(ID, name, value);
+            case "int_array":
+            case "integer_array":
+                ArrayList<Integer> array = new ArrayList<>();
+                for (String item : value.split(",")) {
+                    array.add(Integer.parseInt(item));
+                }
+                return new ParameterArrayInteger(ID, name, array, "int");
             case "bigint":
             case "biginteger":
                 return new ParameterBigInteger(ID, name, value);
