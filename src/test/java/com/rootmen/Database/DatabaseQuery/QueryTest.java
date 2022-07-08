@@ -10,8 +10,10 @@ import com.rootmen.Database.DatabaseQuery.XmlParser.XmlQueryParser;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -24,7 +26,7 @@ import java.util.HashMap;
 
 public class QueryTest extends BaseTest {
 
-    String url = "jdbc:postgresql://176.99.11.235:5432/main";
+    String url = "jdbc:postgresql://176.99.11.235:5432/postgres";
     String user = "authorization_app";
     String pass = "ga4kHTswrjcqwWDi51QA";
 
@@ -99,10 +101,12 @@ public class QueryTest extends BaseTest {
     @Test
     public void testXmlQuery2() throws Exception {
         ArrayList<ParameterInput> parameters = new ArrayList<>();
-        parameters.add(new ParameterInput("GET_MESSAGE", "2"));
+        parameters.add(new ParameterInput("INTNUM", "NULL"));
         ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass);
         XmlQueryParser xmlQueryParser = new XmlQueryParser();
-        JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResourceAsStream("query/QuerySet.xml"), "ASOUV_ERROR", parameters, connectionsManager);
-        System.out.println(objectNode);
+        System.out.println(Objects.requireNonNull( Paths.get(Objects.requireNonNull(QueryTest.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query");
+        xmlQueryParser.getQuery(Objects.requireNonNull(Paths.get(Objects.requireNonNull(QueryTest.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query", "TEST", parameters);
+        //JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResource().getResourceAsStream("query/Query/QuerySet.xml"), "TEST", parameters, connectionsManager);
+        //System.out.println(objectNode);
     }
 }

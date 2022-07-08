@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Definitions>
+    <QuerySet ID="TEST">
+        <QUERY>
+            <TextParam ID="INTNUM" name="INTNUM" type="int"/>
+            <SQL>
+                <![CDATA[
+				INSERT INTO dbchat.test
+                SELECT *
+                FROM (VALUES ($INTNUM$)) T
+				]]>
+            </SQL>
+        </QUERY>
+    </QuerySet>
     <QuerySet ID="ASOUV_ERROR">
         <QUERY name="DEF+">
             <TextParam ID="ERROR_STR" name="ERROR_STR" type="string">
