@@ -160,7 +160,7 @@ public class XmlQueryParser {
         if (Files.notExists(Paths.get(directory + "/CONNECTIONS.xml"))) {
             return new ExceptionNoConnectionConfig(directory);
         }
-        //Проверка количества файлов CONNECTIONS.xml
+        //Проверка количества файлов
         try (Stream<Path> files = Files.list(Paths.get(directory))) {
             long count = files.count();
             if (count < 1) {
