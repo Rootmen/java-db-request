@@ -18,7 +18,7 @@ public class ExceptionNoFilesInDirectory extends ParserXMLErrors {
     }
 
     @Override
-    public String getError() {
+    public String getMessage() {
         if (this.ioException == null) {
             return "Директория " + directory + " не содержит файлов XMLQuery";
         } else {

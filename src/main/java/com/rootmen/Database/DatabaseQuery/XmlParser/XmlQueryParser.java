@@ -3,12 +3,14 @@ package com.rootmen.Database.DatabaseQuery.XmlParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rootmen.Database.DatabaseQuery.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
-import com.rootmen.Database.DatabaseQuery.Parameter.ParameterFactory;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterInput;
-import com.rootmen.Database.DatabaseQuery.Query.QueryController;
+import com.rootmen.Database.DatabaseQuery.Query.Binder.ResultSetWrapper;
+import com.rootmen.Database.DatabaseQuery.Query.ConnectionsManager;
+import com.rootmen.Database.DatabaseQuery.Query.Controller.QueryController;
+import com.rootmen.Database.DatabaseQuery.XmlParser.Caching.Entity.QueryList;
+import com.rootmen.Database.DatabaseQuery.XmlParser.Caching.QuerySet;
 import com.rootmen.Database.DatabaseQuery.XmlParser.Errors.ParserXMLErrors;
 import com.rootmen.Database.DatabaseQuery.XmlParser.Errors.Types.*;
 import org.jdom2.Document;
@@ -18,8 +20,8 @@ import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.xpath.XPathFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,44 +32,38 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.rootmen.Database.DatabaseQuery.XmlParser.Caching.Entity.QueryList.generateParameters;
+
 public class XmlQueryParser {
     SAXBuilder builder = new SAXBuilder();
     XPathFactory xpath = XPathFactory.instance();
 
-    public JsonNode getQuery(InputStream querySetFile, String querySetName, ArrayList<ParameterInput> parameterInput, ConnectionsManager connectionsManager) throws SQLException {
-        ArrayList<QueryList> queryList = getQuerySet(querySetFile, querySetName, parameterInput);
-        return executeQuery(queryList, connectionsManager);
+    public static XmlQueryParser getInstance() {
+        return new XmlQueryParser();
     }
 
-    public JsonNode getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput) throws SQLException, ParserXMLErrors {
+    public JsonNode getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
         //Проверка директории на правильность
-        ParserXMLErrors errors = this.checkDirectory(directory);
-        if (errors != null) {
-            throw errors;
-        }
-        //Получение фала с XMLQuery запросом
-        String filename = this.findFile(directory, querySetName);
-        System.out.println(filename);
-        return null;
-        /*ArrayList<QueryList> queryList = getQuerySet(querySetFile, querySetName, parameterInput);
-        return executeQuery(queryList, connectionsManager);*/
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
+        return executeQuery(queryList, connectionsManagerHashMap, parameterInput);
     }
 
-    private ArrayList<QueryList> getQuerySet(InputStream querySetFile, String querySetName, ArrayList<ParameterInput> parameterInput) {
+    private LinkedList<QueryList> getQuerySet(String querySetName, Document document) {
         try {
-            Document document = builder.build(querySetFile);
             List<Element> querySetNodes = xpath.compile("/Definitions/QuerySet[@ID='" + querySetName + "']", Filters.element()).evaluate(document);
             if (querySetNodes.size() != 1) {
                 throw new Exception("Ошибка документа");
             }
-            List<Element> queryNodes = xpath.compile("QUERY", Filters.element()).evaluate(querySetNodes);
-            ArrayList<QueryList> queryList = new ArrayList<>();
-            HashMap<String, ParameterInput> parameterInputHasMap = new HashMap<>();
-            for (ParameterInput parameter : parameterInput) {
-                parameterInputHasMap.put(parameter.name, parameter);
-            }
+            LinkedList<QueryList> queryList = new LinkedList<>();
+            List<Element> queryNodes = querySetNodes.get(0).getChildren();
+            String connection = null;
             for (Element queryNode : queryNodes) {
-                queryList.add(parseQuery(queryNode, parameterInputHasMap));
+                if (Objects.equals(queryNode.getName(), "CONNECTION")) {
+                    connection = queryNode.getAttributeValue("REFID");
+                } else if (Objects.equals(queryNode.getName(), "QUERY")) {
+                    queryList.add(parseQuery(queryNode, connection));
+                }
             }
             return queryList;
         } catch (Exception e) {
@@ -76,72 +72,224 @@ public class XmlQueryParser {
         }
     }
 
-    private QueryList parseQuery(Element queryNodes, HashMap<String, ParameterInput> parameterInput) throws ParameterException {
-        HashMap<String, Parameter<?>> parameters = new HashMap<>();
-        List<Element> parameterNodes = xpath.compile("TextParam", Filters.element()).evaluate(queryNodes);
-        for (Element parameterNode : parameterNodes) {
-            String name = "$" + parameterNode.getAttributeValue("name") + "$";
-            String ID = parameterNode.getAttributeValue("ID");
-            String type = parameterNode.getAttributeValue("type");
-            List<Element> whenNodes = xpath.compile("when", Filters.element()).evaluate(parameterNode);
-            HashMap<String, String> when = new HashMap<>();
-            for (Element whenNode : whenNodes) {
-                when.put(whenNode.getAttributeValue("value"), whenNode.getValue());
-            }
-            Element otherwise = xpath.compile("otherwise", Filters.element()).evaluateFirst(parameterNode);
-            if (otherwise != null) {
-                when.put(null, otherwise.getValue());
-            }
-            String value = "";
-            if (parameterInput.containsKey(ID)) {
-                value = parameterInput.get(ID).value;
-            } else {
-                Element defaultNode = xpath.compile("default", Filters.element()).evaluateFirst(parameterNode);
+    private QueryList parseQuery(Element queryNodes, String connection) throws ParameterException {
+        List<Element> elementList = queryNodes.getChildren();
+        LinkedList<QueryList.ParameterCaching> parameters = new LinkedList<>();
+        LinkedList<QueryList.SQL> sqlList = new LinkedList<>();
+        for (Element element : elementList) {
+            if (Objects.equals(element.getName(), "TextParam")) {
+                String name = "$" + element.getAttributeValue("name") + "$";
+                String ID = element.getAttributeValue("ID");
+                String type = element.getAttributeValue("type");
+                List<Element> whenNodes = xpath.compile("when", Filters.element()).evaluate(element);
+                HashMap<String, String> when = new HashMap<>();
+                for (Element whenNode : whenNodes) {
+                    when.put(whenNode.getAttributeValue("value"), whenNode.getValue());
+                }
+                Element otherwise = xpath.compile("otherwise", Filters.element()).evaluateFirst(element);
+                if (otherwise != null) {
+                    when.put(null, otherwise.getValue());
+                }
+                String value = "";
+                Element defaultNode = xpath.compile("default", Filters.element()).evaluateFirst(element);
                 if (defaultNode != null) {
                     value = defaultNode.getValue();
                 }
+                parameters.add(new QueryList.ParameterCaching(ID, name, type, when, value));
+            } else if (Objects.equals(element.getName(), "SQL")) {
+                sqlList.add(new QueryList.SQL(element.getValue(), element.getAttributeValue("name", "rows"), connection));
+            } else if (Objects.equals(element.getName(), "CONNECTION")) {
+                connection = element.getAttributeValue("REFID");
             }
-            Parameter<?> parameter = ParameterFactory.getParameter(ID, name, type, value);
-            parameter.setWhen(when);
-            parameters.put(name, parameter);
-        }
-        List<Element> sqlNodes = xpath.compile("SQL", Filters.element()).evaluate(queryNodes);
-        LinkedList<QueryList.SQL> sqlList = new LinkedList<>();
-        for (Element sql : sqlNodes) {
-            sqlList.add(new QueryList.SQL(sql.getValue(), sql.getAttributeValue("name", "rows")));
         }
         return new QueryList(sqlList, parameters, queryNodes.getAttributeValue("name"));
     }
 
-    static private JsonNode executeQuery(ArrayList<QueryList> queryList, ConnectionsManager connectionsManager) throws SQLException {
+    static private JsonNode executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode mainNode = mapper.createObjectNode();
         if (queryList.size() == 1 && queryList.get(0).name == null) {
-            return executeSQL(queryList.get(0).queryList, queryList.get(0).parameters, connectionsManager);
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
+            return executeSQL(queryList.get(0).queryList, parametersHasMap, connectionsManager);
         }
 
         for (QueryList query : queryList) {
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, query.parameters);
             if (query.name == null) {
-                mainNode.set("rows", executeSQL(query.queryList, query.parameters, connectionsManager));
+                mainNode.set("rows", executeSQL(query.queryList, parametersHasMap, connectionsManager));
             } else {
-                mainNode.set(query.name, executeSQL(query.queryList, query.parameters, connectionsManager));
+                mainNode.set(query.name, executeSQL(query.queryList, parametersHasMap, connectionsManager));
             }
         }
         return mainNode;
     }
 
-    static private JsonNode executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, ConnectionsManager connectionsManager) throws SQLException {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode mainNode = mapper.createObjectNode();
-        Connection connection = connectionsManager.getConnection();
-        for (QueryList.SQL sql : sqlLists) {
-            QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connection, true);
-            mainNode.set(sql.name, queryController.getResult());
+    static private JsonNode executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+        HashMap<String, Connection> connectionHashMap = new HashMap<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode mainNode = mapper.createObjectNode();
+            for (QueryList.SQL sql : sqlLists) {
+                String connectionId = sql.connection;
+                if (!connectionHashMap.containsKey(connectionId)) {
+                    ConnectionsManager connectionManager = connectionsManager.get(sql.connection);
+                    if (connectionManager == null) {
+                        throw new ExceptionNoConnectionID(sql.connection);
+                    }
+                    Connection connection = connectionManager.getConnection();
+                    connectionHashMap.put(connectionId, connection);
+                }
+                QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
+                mainNode.set(sql.name, queryController.getResult());
+            }
+            return mainNode;
+        } finally {
+            for (Connection connection : connectionHashMap.values()) {
+                connection.close();
+            }
         }
-        connection.close();
-        return mainNode;
     }
 
+
+    public <T> ArrayList<T> getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+        //Проверка директории на правильность
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
+        return executeQuery(queryList, connectionsManagerHashMap, parameterInput, resultSetWrapper);
+    }
+
+    static private <T> ArrayList<T> executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+        if (queryList.size() == 1 && queryList.get(0).name == null) {
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
+            return executeSQL(queryList.get(0).queryList, parametersHasMap, connectionsManager, resultSetWrapper);
+        }
+
+        ArrayList<T> resultSetWrapperArrayList = new ArrayList<>();
+        for (QueryList query : queryList) {
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
+            resultSetWrapperArrayList.addAll(executeSQL(query.queryList, parametersHasMap, connectionsManager, resultSetWrapper));
+        }
+        return resultSetWrapperArrayList;
+    }
+
+    static private <T> ArrayList<T> executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+        HashMap<String, Connection> connectionHashMap = new HashMap<>();
+        try {
+            ArrayList<T> resultSetWrapperArrayList = new ArrayList<>();
+            for (QueryList.SQL sql : sqlLists) {
+                String connectionId = sql.connection;
+                if (!connectionHashMap.containsKey(connectionId)) {
+                    ConnectionsManager connectionManager = connectionsManager.get(sql.connection);
+                    if (connectionManager == null) {
+                        throw new ExceptionNoConnectionID(sql.connection);
+                    }
+                    Connection connection = connectionManager.getConnection();
+                    connectionHashMap.put(connectionId, connection);
+                }
+                QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
+                resultSetWrapperArrayList = queryController.getResult(resultSetWrapper);
+            }
+            return resultSetWrapperArrayList;
+        } finally {
+            for (Connection connection : connectionHashMap.values()) {
+                connection.close();
+            }
+        }
+    }
+
+
+    private HashMap<String, ConnectionsManager> getConnections(String directory) throws ParserXMLErrors, IOException, JDOMException {
+        if (QuerySet.cachedConnection.containsKey(directory)) {
+            return QuerySet.cachedConnection.get(directory);
+        } else {
+            HashMap<String, ConnectionsManager> connectionsManagerHashMap = getConnectionsMap(directory);
+            QuerySet.cachedConnection.put(directory, connectionsManagerHashMap);
+            return connectionsManagerHashMap;
+        }
+    }
+
+    private LinkedList<QueryList> getQueryList(String querySetName, String directory) throws ParserXMLErrors, IOException, JDOMException {
+        if (QuerySet.cachedQuery.containsKey(querySetName)) {
+            return QuerySet.cachedQuery.get(querySetName);
+        } else {
+            Document document = this.getFileDocument(directory, querySetName);
+            LinkedList<QueryList> queryList = getQuerySet(querySetName, document);
+            QuerySet.cachedQuery.put(querySetName, queryList);
+            return queryList;
+        }
+    }
+
+    /**
+     * Функция получения {@link HashMap} со списком подключений к БД
+     * из файла CONNECTIONS.xml
+     *
+     * @param directory проверяемая директория расположения запроса и фала CONNECTIONS.xml
+     * @return возвращает {@link HashMap<String, ConnectionsManager>} со списком подключений.
+     */
+    private HashMap<String, ConnectionsManager> getConnectionsMap(String directory) throws IOException, JDOMException, ParserXMLErrors {
+        Document connectionsFile = builder.build(new FileInputStream(directory + "/CONNECTIONS.xml"));
+        List<Element> driverList = xpath.compile("/Definitions/DRIVER", Filters.element()).evaluate(connectionsFile);
+        HashMap<String, String> driverHashMap = new HashMap<>();
+        for (Element drive : driverList) {
+            String driverId = drive.getAttributeValue("ID");
+            List<Element> driverClassName = xpath.compile("ClassName", Filters.element()).evaluate(drive);
+            if (driverClassName.size() > 0) {
+                driverHashMap.put(driverId, driverClassName.get(0).getValue());
+            }
+        }
+        List<Element> connectionList = xpath.compile("/Definitions/CONNECTION", Filters.element()).evaluate(connectionsFile);
+        HashMap<String, ConnectionsManager> connectionsManagerHashMap = new HashMap<>();
+        for (Element connection : connectionList) {
+            String connectionId = connection.getAttributeValue("ID");
+            List<Element> connectionParameter = connection.getChildren();
+            String url = null, password = null, username = null, className = null;
+            for (Element parameter : connectionParameter) {
+                switch (parameter.getName()) {
+                    case "URL":
+                        url = parameter.getValue();
+                        break;
+                    case "USER":
+                        username = parameter.getValue();
+                        break;
+                    case "PWD":
+                        password = parameter.getValue();
+                        break;
+                    case "DRIVER":
+                        className = parameter.getAttributeValue("REFID");
+                        break;
+                }
+            }
+            className = driverHashMap.get(className);
+            if (url != null && password != null && username != null && className != null) {
+                connectionsManagerHashMap.put(connectionId, new ConnectionsManager(url, username, password, className));
+            } else {
+                throw new ExceptionConfigParseError(directory, connectionId);
+            }
+        }
+        return connectionsManagerHashMap;
+    }
+
+    /**
+     * Функция получения потока для фала хранящего запрос
+     *
+     * @param directory директория с файлами.
+     * @return возвращает ошибку {@link ParserXMLErrors} если что-то не так или null если все хорошо.
+     */
+    private Document getFileDocument(String directory, String querySetName) throws ParserXMLErrors {
+        //Проверка директории на правильность
+        ParserXMLErrors errors = this.checkDirectory(directory);
+        if (errors != null) {
+            throw errors;
+        }
+        //Получение фала с XMLQuery запросом
+        String filename = this.findFile(directory, querySetName);
+        try (FileInputStream fileInputStream = new FileInputStream(filename)) {
+            return builder.build(fileInputStream);
+        } catch (IOException | JDOMException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * Функция проверки правильности пути к директории хранения запросов
@@ -205,16 +353,18 @@ public class XmlQueryParser {
         }
     }
 
-    public static void main(String[] args) throws URISyntaxException, SQLException, ParserXMLErrors {
-        ArrayList<ParameterInput> parameters = new ArrayList<>();
-        parameters.add(new ParameterInput("INTNUM", "NULL"));
+    public static void main(String[] args) throws URISyntaxException, SQLException, ParserXMLErrors, ClassNotFoundException {
+        /*ArrayList<ParameterInput> parameters = new ArrayList<>();
+        parameters.add(new ParameterInput("PASSPORT_ID", "720"));
         XmlQueryParser xmlQueryParser = new XmlQueryParser();
-        System.out.println(Objects.requireNonNull(Paths.get(Objects.requireNonNull(XmlQueryParser.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query");
         try {
-            xmlQueryParser.getQuery(Objects.requireNonNull(Paths.get(Objects.requireNonNull(XmlQueryParser.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query", "TEST4", parameters);
-        } catch (ParserXMLErrors E) {
-            System.out.println(E.getError());
-        }
+            String directory = Objects.requireNonNull(Paths.get(Objects.requireNonNull(XmlQueryParser.class.getClassLoader().getResource("")).toURI())) + "\\query\\PASSPORT";
+            //ArrayList<Fragment> jsonNode = xmlQueryParser.getQuery(directory, "GET_PASSPORT_ID_NSI_FRAGMENTS", parameters, Fragment.class);
+            //System.out.println(jsonNode);
+        } catch (ParserXMLErrors| IOException | JDOMException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }*/
         //JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResource().getResourceAsStream("query/Query/QuerySet.xml"), "TEST", parameters, connectionsManager);
 
     }

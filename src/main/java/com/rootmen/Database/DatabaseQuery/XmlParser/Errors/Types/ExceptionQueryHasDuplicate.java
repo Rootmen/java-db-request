@@ -17,7 +17,7 @@ public class ExceptionQueryHasDuplicate extends ParserXMLErrors {
 
 
     @Override
-    public String getError() {
+    public String getMessage() {
         return "При поиске запроса в директория " + directory + " файлы " + file1 + " и " + file2 + " содержат одинаковые названия запросов";
     }
 }

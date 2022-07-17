@@ -14,7 +14,7 @@ public class ExceptionDirectoryInWork extends ParserXMLErrors {
     }
 
     @Override
-    public String getError() {
+    public String getMessage() {
         return "Во время работы с директорией " + directory + " произошла ошибка \n" + ioException.getMessage();
 
     }

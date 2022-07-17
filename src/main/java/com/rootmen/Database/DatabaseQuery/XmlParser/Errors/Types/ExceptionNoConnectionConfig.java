@@ -10,7 +10,7 @@ public class ExceptionNoConnectionConfig extends ParserXMLErrors {
     }
 
     @Override
-    public String getError() {
+    public String getMessage() {
         return "Не найден файл CONNECTIONS.xml с конфигурацией параметров подключения в директории: "+ directory;
     }
 }

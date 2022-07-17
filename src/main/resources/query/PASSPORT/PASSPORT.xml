@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Definitions>
+    <QuerySet ID="GET_PASSPORT_ID_NSI_FRAGMENTS">
+        <CONNECTION REFID="PG_CONNECT"/>
+        <QUERY>
+            <CONNECTION REFID="PG_CONNECT"/>
+            <TextParam ID="PASSPORT_ID" name="PASSPORT_ID" type="int"/>
+            <SQL>
+                <![CDATA[
+				SELECT STAN1.VNAME  AS NAME_BEGIN,
+                         STAN1.ST_KOD AS ESR1,
+                         STAN2.VNAME  AS NAME_END,
+                         STAN2.ST_KOD AS ESR2,
+                         NSI_FRAGMENTS.PASSPORT_ID,
+                         NSI_FRAGMENTS.NUM,
+                         NSI_FRAGMENTS.CNSI_BEGIN,
+                         NSI_FRAGMENTS.CNSI_END,
+                         NSI_FRAGMENTS.COUNT_SBORN_STANS_F,
+                         NSI_FRAGMENTS.COUNT_SBORN_STANS_B,
+                         NSI_FRAGMENTS.ID_DIRECTION,
+                         NSI_FRAGMENTS.CHETIR_PUT,
+                         NSI_FRAGMENTS.PRIM,
+                         KRIN.ID_FRAG,
+                         KRIN.TYAG,
+                         KRIN.R_UKL_TUDA,
+                         KRIN.R_UKL_OBRATNO,
+                         KRIN.SER_LOC,
+                         KRIN.MASSA_TUDA,
+                         KRIN.MASSA_OBRATNO,
+                         KRIN.MASSA_K_TUDA,
+                         KRIN.MASSA_K_OBRATNO,
+                         KRIN.DLINA_TUDA,
+                         KRIN.DLINA_OBRATNO,
+                         KRIN.DLINA_K_TUDA,
+                         KRIN.DLINA_K_OBRATNO,
+                         '1'          AS FLOR,
+                         ''           AS NOMER
+                  FROM DNEIM.NSI_FRAGMENTS AS NSI_FRAGMENTS
+                           LEFT JOIN
+                       DNCNSI.STAN AS STAN1
+                       ON
+                           STAN1.STAN_ID = NSI_FRAGMENTS.CNSI_BEGIN
+                           LEFT JOIN
+                       DNCNSI.STAN AS STAN2
+                       ON
+                           STAN2.STAN_ID = NSI_FRAGMENTS.CNSI_END
+                           LEFT JOIN
+                       DNEIM.KRIN AS KRIN
+                       ON
+                           NSI_FRAGMENTS.ID_FRAG = KRIN.ID_FRAG
+                  WHERE NSI_FRAGMENTS.PASSPORT_ID = $PASSPORT_ID$
+                  ORDER BY NSI_FRAGMENTS.NUM
+				]]>
+            </SQL>
+        </QUERY>
+    </QuerySet>
+</Definitions>

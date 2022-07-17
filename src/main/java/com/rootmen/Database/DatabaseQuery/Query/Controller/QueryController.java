@@ -1,4 +1,4 @@
-package com.rootmen.Database.DatabaseQuery.Query;
+package com.rootmen.Database.DatabaseQuery.Query.Controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
+import com.rootmen.Database.DatabaseQuery.Query.Binder.ResultSetWrapper;
 
 import java.sql.*;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +51,14 @@ public class QueryController implements QueryInterface {
             throw new SQLException("Транзакция завершена");
         }
         return this.executeAll();
+    }
+
+    @Override
+    public <T> ArrayList<T> getResult(Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException {
+        if (this.isCompleted) {
+            throw new SQLException("Транзакция завершена");
+        }
+        return this.executeAll(resultSetWrapper);
     }
 
 
@@ -89,6 +101,27 @@ public class QueryController implements QueryInterface {
         return statement;
     }
 
+
+    protected <T> ArrayList<T> executeAll(Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException {
+        ArrayList<T> resultSetWrapperArrayList = new ArrayList<>();
+        while (this.hasMoreResults || this.statement.getUpdateCount() > -1) {
+            AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> data = this.getNextData(this.statement);
+            if (data != null && data.getValue() != null) {
+                while (data.getValue().next()) {
+                    try {
+                        ResultSetWrapper<T> tResultSetWrapper = resultSetWrapper.newInstance();
+                        tResultSetWrapper.wrapperResultSet(data.getValue());
+                        resultSetWrapperArrayList.add((T)tResultSetWrapper);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            this.hasMoreResults = this.statement.getMoreResults();
+        }
+        this.close();
+        return resultSetWrapperArrayList;
+    }
 
     protected JsonNode executeAll() throws SQLException {
         int index = 0;
@@ -140,7 +173,7 @@ public class QueryController implements QueryInterface {
                     object.set(column_name, null);
                 }
             } else if (data.getKey().getColumnType(i) == java.sql.Types.BIGINT) {
-                object.put(column_name, data.getValue().getInt(column_name));
+                object.put(column_name, data.getValue().getBigDecimal(column_name));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.BOOLEAN) {
                 object.put(column_name, data.getValue().getBoolean(column_name));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.BLOB) {
