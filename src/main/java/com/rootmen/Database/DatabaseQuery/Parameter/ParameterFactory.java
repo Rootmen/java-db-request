@@ -4,6 +4,7 @@ import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptio
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ArrayElements.Type.ParameterArrayInteger;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterBigInteger;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterInteger;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterLong;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.ParameterString;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class ParameterFactory {
             case "bigint":
             case "biginteger":
                 return new ParameterBigInteger(ID, name, value);
+            case "long":
+                return new ParameterLong(ID, name, value);
             case "str":
             case "string":
                 return new ParameterString(ID, name, value);

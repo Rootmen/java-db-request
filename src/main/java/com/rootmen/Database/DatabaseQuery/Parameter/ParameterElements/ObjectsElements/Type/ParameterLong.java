@@ -4,29 +4,28 @@ import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptio
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterExceptionErrorType;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.ParameterObjects;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 
-public class ParameterBigInteger extends ParameterObjects<BigInteger> {
+public class ParameterLong extends ParameterObjects<Long> {
 
 
-    public ParameterBigInteger(String ID, String name, String value) throws ParameterException {
+    public ParameterLong(String ID, String name, String value) throws ParameterException {
         this(ID, name, parseString(value));
     }
 
 
-    public ParameterBigInteger(String ID, String name, BigInteger value) throws ParameterException {
+    public ParameterLong(String ID, String name, Long value) throws ParameterException {
         super(ID, name, value);
     }
 
 
     @Override
     public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException {
-        statement.setBigDecimal(index, new BigDecimal(this.getValue()));
+        statement.setLong(index, this.getValue());
     }
 
 
@@ -39,9 +38,9 @@ public class ParameterBigInteger extends ParameterObjects<BigInteger> {
     }
 
 
-    static BigInteger parseString(String integer) throws ParameterException {
+    static Long parseString(String integer) throws ParameterException {
         try {
-            return new BigInteger(integer);
+            return new BigInteger(integer).longValue();
         } catch (Exception e) {
             throw new ParameterExceptionErrorType(integer, "BigInteger", e);
         }

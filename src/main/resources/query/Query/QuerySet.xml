@@ -6,7 +6,6 @@
             <TextParam ID="INTNUM" name="INTNUM" type="int"/>
             <SQL>
                 <![CDATA[
-				INSERT INTO dbchat.test
                 SELECT *
                 FROM (VALUES ($INTNUM$)) T
 				]]>

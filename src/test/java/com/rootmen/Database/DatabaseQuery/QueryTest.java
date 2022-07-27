@@ -7,6 +7,7 @@ import com.rootmen.Database.DatabaseQuery.Query.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.XmlParser.XmlQueryParser;
 import org.junit.Test;
 
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -32,8 +33,9 @@ public class QueryTest extends BaseTest {
         parameters.add(new ParameterInput("INTNUM", "1"));
         ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, "org.postgresql.Driver");
         XmlQueryParser xmlQueryParser = new XmlQueryParser();
-        System.out.println(Objects.requireNonNull( Paths.get(Objects.requireNonNull(QueryTest.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query");
-        JsonNode jsonNode = xmlQueryParser.getQuery(Objects.requireNonNull(Paths.get(Objects.requireNonNull(QueryTest.class.getClassLoader().getResource("")).toURI())).toString() + "\\query\\Query", "TEST", parameters);
+        URL resource = QueryTest.class.getResource("/query/Query");
+        String directory = Paths.get(Objects.requireNonNull(resource).toURI()).toString();
+        JsonNode jsonNode = xmlQueryParser.getQuery(directory, "TEST", parameters);
         //JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResource().getResourceAsStream("query/Query/QuerySet.xml"), "TEST", parameters, connectionsManager);
         //System.out.println(objectNode);
     }

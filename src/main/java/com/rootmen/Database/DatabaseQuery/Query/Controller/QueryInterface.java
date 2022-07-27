@@ -14,8 +14,6 @@ import java.util.ArrayList;
 public interface QueryInterface {
     public boolean runQuery() throws SQLException;
     public JsonNode getResult() throws SQLException;
-
     <T> ArrayList<T> getResult(Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException;
-
     public JsonNode getNextLine() throws SQLException;
 }
