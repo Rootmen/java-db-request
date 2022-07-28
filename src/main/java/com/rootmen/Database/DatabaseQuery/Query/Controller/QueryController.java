@@ -65,7 +65,7 @@ public class QueryController implements QueryInterface {
     @Override
     public ObjectNode getNextLine() throws SQLException {
         if (this.isCompleted) {
-            throw new SQLException("Транзакция завершена");
+            return null;
         }
         return this.executeLine();
     }
@@ -155,6 +155,7 @@ public class QueryController implements QueryInterface {
             this.hasMoreResults = this.statement.getMoreResults();
         }
         this.close();
+        this.isCompleted = true;
         return null;
     }
 

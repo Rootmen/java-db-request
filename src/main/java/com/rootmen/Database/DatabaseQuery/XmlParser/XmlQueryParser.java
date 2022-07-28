@@ -22,6 +22,8 @@ import org.jdom2.xpath.XPathFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,12 +44,48 @@ public class XmlQueryParser {
         return new XmlQueryParser();
     }
 
+    public void getQuery(InputStream xmlQuery, PrintWriter output) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+        SAXBuilder builder = new SAXBuilder();
+        XPathFactory xpath = XPathFactory.instance();
+        Document xmlQueryDocument = builder.build(xmlQuery);
+        List<Element> querySetNodes = xpath.compile("/QuerySet", Filters.element()).evaluate(xmlQueryDocument);
+        if (!(querySetNodes.size() > 1)) {
+            throw new ExceptionXmlQueryInputParseError(xmlQuery.toString());
+        }
+        Element querySetNode = querySetNodes.get(0);
+        String querySetName = querySetNode.getAttributeValue("refid");
+        String directory = querySetNode.getAttributeValue("directory");
+        if (querySetName == null) {
+            throw new ExceptionXmlQueryInputParseError(xmlQuery.toString());
+        }
+        LinkedList<ParameterInput> parameterInput = new LinkedList<>();
+        for (Element parameterInputElement : querySetNode.getChildren()) {
+            if (Objects.equals(parameterInputElement.getName(), "TextParameter")) {
+                String id = parameterInputElement.getAttributeValue("ID"),
+                        value = parameterInputElement.getValue();
+                parameterInput.add(new ParameterInput(id, value));
+            }
+        }
+        //Проверка директории на правильность
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
+        executeQuery(queryList, connectionsManagerHashMap, new ArrayList<>(parameterInput), output);
+    }
+
     public JsonNode getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
         //Проверка директории на правильность
         LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
         HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
         return executeQuery(queryList, connectionsManagerHashMap, parameterInput);
     }
+
+    public <T> ArrayList<T> getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+        //Проверка директории на правильность
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
+        return executeQuery(queryList, connectionsManagerHashMap, parameterInput, resultSetWrapper);
+    }
+
 
     private LinkedList<QueryList> getQuerySet(String querySetName, Document document) {
         try {
@@ -105,6 +143,7 @@ public class XmlQueryParser {
         return new QueryList(sqlList, parameters, queryNodes.getAttributeValue("name"));
     }
 
+
     static private JsonNode executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode mainNode = mapper.createObjectNode();
@@ -130,16 +169,7 @@ public class XmlQueryParser {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode mainNode = mapper.createObjectNode();
             for (QueryList.SQL sql : sqlLists) {
-                String connectionId = sql.connection;
-                if (!connectionHashMap.containsKey(connectionId)) {
-                    ConnectionsManager connectionManager = connectionsManager.get(sql.connection);
-                    if (connectionManager == null) {
-                        throw new ExceptionNoConnectionID(sql.connection);
-                    }
-                    Connection connection = connectionManager.getConnection();
-                    connectionHashMap.put(connectionId, connection);
-                }
-                QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
+                QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 mainNode.set(sql.name, queryController.getResult());
             }
             return mainNode;
@@ -150,13 +180,6 @@ public class XmlQueryParser {
         }
     }
 
-
-    public <T> ArrayList<T> getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
-        //Проверка директории на правильность
-        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
-        HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
-        return executeQuery(queryList, connectionsManagerHashMap, parameterInput, resultSetWrapper);
-    }
 
     static private <T> ArrayList<T> executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
         if (queryList.size() == 1 && queryList.get(0).name == null) {
@@ -177,16 +200,7 @@ public class XmlQueryParser {
         try {
             ArrayList<T> resultSetWrapperArrayList = new ArrayList<>();
             for (QueryList.SQL sql : sqlLists) {
-                String connectionId = sql.connection;
-                if (!connectionHashMap.containsKey(connectionId)) {
-                    ConnectionsManager connectionManager = connectionsManager.get(sql.connection);
-                    if (connectionManager == null) {
-                        throw new ExceptionNoConnectionID(sql.connection);
-                    }
-                    Connection connection = connectionManager.getConnection();
-                    connectionHashMap.put(connectionId, connection);
-                }
-                QueryController queryController = new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
+                QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 resultSetWrapperArrayList = queryController.getResult(resultSetWrapper);
             }
             return resultSetWrapperArrayList;
@@ -195,6 +209,60 @@ public class XmlQueryParser {
                 connection.close();
             }
         }
+    }
+
+
+    static private void executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+        if (queryList.size() == 1 && queryList.get(0).name == null) {
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
+            executeSQL(queryList.get(0).queryList, parametersHasMap, connectionsManager, output);
+        }
+
+        for (QueryList query : queryList) {
+            HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, query.parameters);
+            if (query.name == null) {
+                output.write("{ rows: ");
+            } else {
+                output.write("{ " + query.name + ": ");
+            }
+            executeSQL(query.queryList, parametersHasMap, connectionsManager, output);
+            output.write("}");
+        }
+    }
+
+    static private void executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+        HashMap<String, Connection> connectionHashMap = new HashMap<>();
+        try {
+            for (QueryList.SQL sql : sqlLists) {
+                QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
+                ObjectNode jsonNode = queryController.getNextLine();
+                while (true) {
+                    output.write(jsonNode.toString());
+                    jsonNode = queryController.getNextLine();
+                    if (jsonNode == null) {
+                        break;
+                    }
+                    output.write(",");
+                }
+            }
+        } finally {
+            for (Connection connection : connectionHashMap.values()) {
+                connection.close();
+            }
+        }
+    }
+
+    private static QueryController getQueryController(HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, HashMap<String, Connection> connectionHashMap, QueryList.SQL sql) throws ExceptionNoConnectionID, SQLException, ClassNotFoundException {
+        String connectionId = sql.connection;
+        if (!connectionHashMap.containsKey(connectionId)) {
+            ConnectionsManager connectionManager = connectionsManager.get(sql.connection);
+            if (connectionManager == null) {
+                throw new ExceptionNoConnectionID(sql.connection);
+            }
+            Connection connection = connectionManager.getConnection();
+            connectionHashMap.put(connectionId, connection);
+        }
+        return new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
     }
 
 
