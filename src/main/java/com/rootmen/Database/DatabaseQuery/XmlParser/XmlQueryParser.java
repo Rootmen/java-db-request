@@ -1,8 +1,10 @@
 package com.rootmen.Database.DatabaseQuery.XmlParser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.Database.DatabaseQuery.JsonParser.MapperConfig;
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterInput;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,23 +47,24 @@ public class XmlQueryParser {
         return new XmlQueryParser();
     }
 
-    public void getQuery(InputStream xmlQuery, PrintWriter output) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+    public void getQuery(InputStream xmlQuery, PrintWriter output) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException, URISyntaxException {
         SAXBuilder builder = new SAXBuilder();
         XPathFactory xpath = XPathFactory.instance();
         Document xmlQueryDocument = builder.build(xmlQuery);
         List<Element> querySetNodes = xpath.compile("/QuerySet", Filters.element()).evaluate(xmlQueryDocument);
-        if (!(querySetNodes.size() > 1)) {
+        if (querySetNodes.size() != 1) {
             throw new ExceptionXmlQueryInputParseError(xmlQuery.toString());
         }
         Element querySetNode = querySetNodes.get(0);
         String querySetName = querySetNode.getAttributeValue("refid");
-        String directory = querySetNode.getAttributeValue("directory");
+        URL resource = XmlQueryParser.class.getResource("/" + querySetNode.getAttributeValue("directory"));
+        String directory = Paths.get(Objects.requireNonNull(resource).toURI()).toString();
         if (querySetName == null) {
             throw new ExceptionXmlQueryInputParseError(xmlQuery.toString());
         }
         LinkedList<ParameterInput> parameterInput = new LinkedList<>();
         for (Element parameterInputElement : querySetNode.getChildren()) {
-            if (Objects.equals(parameterInputElement.getName(), "TextParameter")) {
+            if (Objects.equals(parameterInputElement.getName(), "TextParam")) {
                 String id = parameterInputElement.getAttributeValue("ID"),
                         value = parameterInputElement.getValue();
                 parameterInput.add(new ParameterInput(id, value));
@@ -145,7 +149,7 @@ public class XmlQueryParser {
 
 
     static private JsonNode executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = MapperConfig.getMapper();
         ObjectNode mainNode = mapper.createObjectNode();
         if (queryList.size() == 1 && queryList.get(0).name == null) {
             HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
@@ -166,7 +170,7 @@ public class XmlQueryParser {
     static private JsonNode executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
         HashMap<String, Connection> connectionHashMap = new HashMap<>();
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MapperConfig.getMapper();
             ObjectNode mainNode = mapper.createObjectNode();
             for (QueryList.SQL sql : sqlLists) {
                 QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
@@ -212,32 +216,36 @@ public class XmlQueryParser {
     }
 
 
-    static private void executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+    static private void executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException, JsonProcessingException {
         if (queryList.size() == 1 && queryList.get(0).name == null) {
+            output.write("{ rows: [");
             HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
             executeSQL(queryList.get(0).queryList, parametersHasMap, connectionsManager, output);
+            output.write("]}");
+            return;
         }
 
         for (QueryList query : queryList) {
             HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, query.parameters);
             if (query.name == null) {
-                output.write("{ rows: ");
+                output.write("{ rows: [");
             } else {
-                output.write("{ " + query.name + ": ");
+                output.write("{ " + query.name + ": [");
             }
             executeSQL(query.queryList, parametersHasMap, connectionsManager, output);
-            output.write("}");
+            output.write("]}");
         }
     }
 
-    static private void executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException {
+    static private void executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException, JsonProcessingException {
         HashMap<String, Connection> connectionHashMap = new HashMap<>();
         try {
             for (QueryList.SQL sql : sqlLists) {
                 QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 ObjectNode jsonNode = queryController.getNextLine();
+                ObjectMapper objectMapper = MapperConfig.getMapper();
                 while (true) {
-                    output.write(jsonNode.toString());
+                    output.write(objectMapper.writeValueAsString(jsonNode));
                     jsonNode = queryController.getNextLine();
                     if (jsonNode == null) {
                         break;

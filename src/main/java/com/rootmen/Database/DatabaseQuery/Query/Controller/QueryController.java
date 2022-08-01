@@ -1,13 +1,16 @@
 package com.rootmen.Database.DatabaseQuery.Query.Controller;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.rootmen.Database.DatabaseQuery.JsonParser.MapperConfig;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Query.Binder.ResultSetWrapper;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -162,13 +165,13 @@ public class QueryController implements QueryInterface {
 
     protected static ObjectNode getJsonObject(AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> data) throws SQLException {
         int numColumns = data.getKey().getColumnCount();
-        ObjectNode object = JsonNodeFactory.instance.objectNode();
+        ObjectMapper mapper = MapperConfig.getMapper();
+        ObjectNode object = mapper.createObjectNode();
         for (int i = 1; i < numColumns + 1; i++) {
             String column_name = data.getKey().getColumnName(i);
             if (data.getKey().getColumnType(i) == java.sql.Types.ARRAY) {
                 Array array = data.getValue().getArray(column_name);
                 if (array != null) {
-                    ObjectMapper mapper = new ObjectMapper();
                     object.set(column_name, mapper.valueToTree(new ArrayList<>(Arrays.asList((Object[]) array.getArray()))));
                 } else {
                     object.set(column_name, null);
@@ -180,9 +183,9 @@ public class QueryController implements QueryInterface {
             } else if (data.getKey().getColumnType(i) == java.sql.Types.BLOB) {
                 object.put(column_name, data.getValue().getBlob(column_name).toString());
             } else if (data.getKey().getColumnType(i) == java.sql.Types.DOUBLE) {
-                object.put(column_name, data.getValue().getDouble(column_name));
+                object.put(column_name, BigDecimal.valueOf(data.getValue().getDouble(column_name)));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.FLOAT) {
-                object.put(column_name, data.getValue().getFloat(column_name));
+                object.put(column_name, BigDecimal.valueOf(data.getValue().getFloat(column_name)));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.INTEGER) {
                 object.put(column_name, data.getValue().getInt(column_name));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.NVARCHAR) {
@@ -199,7 +202,7 @@ public class QueryController implements QueryInterface {
                 object.put(column_name, data.getValue().getTimestamp(column_name).toString());
             } else {
                 try {
-                    object.put(column_name, new ObjectMapper().readTree(String.valueOf(data.getValue().getObject(column_name))));
+                    object.put(column_name, MapperConfig.getMapper().readTree(String.valueOf(data.getValue().getObject(column_name))));
                 } catch (Exception e) {
                     object.put(column_name, String.valueOf(data.getValue().getObject(column_name)));
                 }
