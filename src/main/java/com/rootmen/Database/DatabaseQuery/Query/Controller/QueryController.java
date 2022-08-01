@@ -114,7 +114,7 @@ public class QueryController implements QueryInterface {
                     try {
                         ResultSetWrapper<T> tResultSetWrapper = resultSetWrapper.newInstance();
                         tResultSetWrapper.wrapperResultSet(data.getValue());
-                        resultSetWrapperArrayList.add((T)tResultSetWrapper);
+                        resultSetWrapperArrayList.add((T) tResultSetWrapper);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -189,9 +189,17 @@ public class QueryController implements QueryInterface {
             } else if (data.getKey().getColumnType(i) == java.sql.Types.INTEGER) {
                 object.put(column_name, data.getValue().getInt(column_name));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.NVARCHAR) {
-                object.put(column_name, data.getValue().getNString(column_name));
+                String result = data.getValue().getNString(column_name);
+                if (result != null) {
+                    result = result.trim();
+                }
+                object.put(column_name, result);
             } else if (data.getKey().getColumnType(i) == java.sql.Types.VARCHAR) {
-                object.put(column_name, data.getValue().getString(column_name));
+                String result = data.getValue().getString(column_name);
+                if (result != null) {
+                    result = result.trim();
+                }
+                object.put(column_name, result);
             } else if (data.getKey().getColumnType(i) == java.sql.Types.TINYINT) {
                 object.put(column_name, data.getValue().getInt(column_name));
             } else if (data.getKey().getColumnType(i) == java.sql.Types.SMALLINT) {
@@ -199,7 +207,7 @@ public class QueryController implements QueryInterface {
             } else if (data.getKey().getColumnType(i) == java.sql.Types.DATE) {
                 object.put(column_name, data.getValue().getDate(column_name).toString());
             } else if (data.getKey().getColumnType(i) == java.sql.Types.TIMESTAMP) {
-                object.put(column_name, data.getValue().getTimestamp(column_name).toString());
+                object.put(column_name, data.getValue().getTimestamp(column_name).toString().trim());
             } else {
                 try {
                     object.put(column_name, MapperConfig.getMapper().readTree(String.valueOf(data.getValue().getObject(column_name))));
