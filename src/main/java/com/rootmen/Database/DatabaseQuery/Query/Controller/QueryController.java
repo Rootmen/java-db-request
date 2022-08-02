@@ -1,6 +1,5 @@
 package com.rootmen.Database.DatabaseQuery.Query.Controller;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -222,7 +221,11 @@ public class QueryController implements QueryInterface {
 
     public AbstractMap.SimpleEntry<ResultSetMetaData, ResultSet> getNextData(PreparedStatement statement) throws SQLException {
         ResultSet resultSet = statement.getResultSet();
-        return (resultSet == null) ? null : new AbstractMap.SimpleEntry<>(resultSet.getMetaData(), resultSet);
+        if (resultSet == null) {
+            return null;
+        }
+        resultSet.setFetchSize(10);
+        return new AbstractMap.SimpleEntry<>(resultSet.getMetaData(), resultSet);
     }
 
     protected void close() throws SQLException {
