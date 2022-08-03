@@ -157,7 +157,6 @@ public class QueryController implements QueryInterface {
             this.hasMoreResults = this.statement.getMoreResults();
         }
         this.close();
-        this.isCompleted = true;
         return null;
     }
 

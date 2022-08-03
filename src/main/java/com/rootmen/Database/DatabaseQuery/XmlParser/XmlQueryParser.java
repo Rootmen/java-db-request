@@ -218,7 +218,7 @@ public class XmlQueryParser {
 
     static private void executeQuery(LinkedList<QueryList> queryList, HashMap<String, ConnectionsManager> connectionsManager, ArrayList<ParameterInput> parameters, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException, JsonProcessingException {
         if (queryList.size() == 1 && queryList.get(0).name == null) {
-            output.write("{ rows: [");
+            output.write("{ \"rows\": [");
             HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, queryList.get(0).parameters);
             executeSQL(queryList.get(0).queryList, parametersHasMap, connectionsManager, output);
             output.write("]}");
@@ -228,9 +228,9 @@ public class XmlQueryParser {
         for (QueryList query : queryList) {
             HashMap<String, Parameter<?>> parametersHasMap = generateParameters(parameters, query.parameters);
             if (query.name == null) {
-                output.write("{ rows: [");
+                output.write("{ \"rows\": [");
             } else {
-                output.write("{ " + query.name + ": [");
+                output.write("{ \"" + query.name + "\": [");
             }
             executeSQL(query.queryList, parametersHasMap, connectionsManager, output);
             output.write("]}");
