@@ -22,6 +22,7 @@ import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.xpath.XPathFactory;
 
+import javax.naming.NamingException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -273,17 +274,6 @@ public class XmlQueryParser {
         return new QueryController(new StringBuilder(sql.query), parameters, connectionHashMap.get(connectionId), true);
     }
 
-
-    private HashMap<String, ConnectionsManager> getConnections(String directory) throws ParserXMLErrors, IOException, JDOMException {
-        if (QuerySet.cachedConnection.containsKey(directory)) {
-            return QuerySet.cachedConnection.get(directory);
-        } else {
-            HashMap<String, ConnectionsManager> connectionsManagerHashMap = getConnectionsMap(directory);
-            QuerySet.cachedConnection.put(directory, connectionsManagerHashMap);
-            return connectionsManagerHashMap;
-        }
-    }
-
     private LinkedList<QueryList> getQueryList(String querySetName, String directory) throws ParserXMLErrors, IOException, JDOMException {
         if (QuerySet.cachedQuery.containsKey(querySetName)) {
             return QuerySet.cachedQuery.get(querySetName);
@@ -302,7 +292,7 @@ public class XmlQueryParser {
      * @param directory проверяемая директория расположения запроса и фала CONNECTIONS.xml
      * @return возвращает {@link HashMap<String, ConnectionsManager>} со списком подключений.
      */
-    private HashMap<String, ConnectionsManager> getConnectionsMap(String directory) throws IOException, JDOMException, ParserXMLErrors {
+    private HashMap<String, ConnectionsManager> getConnections(String directory) throws IOException, JDOMException, ParserXMLErrors {
         Document connectionsFile = builder.build(new FileInputStream(directory + "/CONNECTIONS.xml"));
         List<Element> driverList = xpath.compile("/Definitions/DRIVER", Filters.element()).evaluate(connectionsFile);
         HashMap<String, String> driverHashMap = new HashMap<>();
@@ -318,25 +308,48 @@ public class XmlQueryParser {
         for (Element connection : connectionList) {
             String connectionId = connection.getAttributeValue("ID");
             List<Element> connectionParameter = connection.getChildren();
-            String url = null, password = null, username = null, className = null;
+            String url = null, password = null, username = null, className = null, jndi = null;
             for (Element parameter : connectionParameter) {
-                switch (parameter.getName()) {
-                    case "URL":
+                switch (parameter.getName().toLowerCase()) {
+                    case "url":
                         url = parameter.getValue();
                         break;
-                    case "USER":
+                    case "user":
                         username = parameter.getValue();
                         break;
-                    case "PWD":
+                    case "pwd":
                         password = parameter.getValue();
                         break;
-                    case "DRIVER":
+                    case "driver":
                         className = parameter.getAttributeValue("REFID");
+                        break;
+                    case "jndi":
+                        jndi = parameter.getValue();
                         break;
                 }
             }
             className = driverHashMap.get(className);
-            if (url != null && password != null && username != null && className != null) {
+            if (password != null && username != null && jndi != null) {
+                try {
+                    ConnectionsManager connectionsManager = new ConnectionsManager(jndi, username, password);
+                    if (className != null) {
+                        connectionsManager.setClassName(className);
+                    }
+                    connectionsManagerHashMap.put(connectionId, connectionsManager);
+                } catch (NamingException e) {
+                    throw new ExceptionConfigParseError(directory, connectionId + e.getMessage());
+                }
+            } else if (jndi != null) {
+                try {
+                    ConnectionsManager connectionsManager = new ConnectionsManager(jndi, username, password);
+                    if (className != null) {
+                        connectionsManager.setClassName(className);
+                    }
+                    connectionsManagerHashMap.put(connectionId, connectionsManager);
+                } catch (NamingException e) {
+                    throw new ExceptionConfigParseError(directory, connectionId + e.getMessage());
+                }
+            } else if (url != null && password != null && username != null && className != null) {
                 connectionsManagerHashMap.put(connectionId, new ConnectionsManager(url, username, password, className));
             } else {
                 throw new ExceptionConfigParseError(directory, connectionId);
