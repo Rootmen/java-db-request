@@ -241,10 +241,15 @@ public class XmlQueryParser {
     static private void executeSQL(List<QueryList.SQL> sqlLists, HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connectionsManager, PrintWriter output) throws SQLException, ExceptionNoConnectionID, ClassNotFoundException, JsonProcessingException {
         HashMap<String, Connection> connectionHashMap = new HashMap<>();
         try {
+            boolean first = true;
             for (QueryList.SQL sql : sqlLists) {
                 QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 ObjectNode jsonNode = queryController.getNextLine();
                 ObjectMapper objectMapper = MapperConfig.getMapper();
+                if (!first) {
+                    output.write(",");
+                }
+                first = false;
                 while (true) {
                     output.write(objectMapper.writeValueAsString(jsonNode));
                     jsonNode = queryController.getNextLine();
@@ -275,14 +280,18 @@ public class XmlQueryParser {
     }
 
     private LinkedList<QueryList> getQueryList(String querySetName, String directory) throws ParserXMLErrors, IOException, JDOMException {
-        if (QuerySet.cachedQuery.containsKey(querySetName)) {
+        Document document = this.getFileDocument(directory, querySetName);
+        LinkedList<QueryList> queryList = getQuerySet(querySetName, document);
+        QuerySet.cachedQuery.put(querySetName, queryList);
+        return queryList;
+       /* if (QuerySet.cachedQuery.containsKey(querySetName)) {
             return QuerySet.cachedQuery.get(querySetName);
         } else {
             Document document = this.getFileDocument(directory, querySetName);
             LinkedList<QueryList> queryList = getQuerySet(querySetName, document);
             QuerySet.cachedQuery.put(querySetName, queryList);
             return queryList;
-        }
+        }*/
     }
 
     /**

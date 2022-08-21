@@ -29,13 +29,13 @@ public class QueryTest extends BaseTest {
 
     @Test
     public void testXmlQuery2() throws Exception {
-        ArrayList<ParameterInput> parameters = new ArrayList<>();
+       /* ArrayList<ParameterInput> parameters = new ArrayList<>();
         parameters.add(new ParameterInput("INTNUM", "1"));
         ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, "org.postgresql.Driver");
         XmlQueryParser xmlQueryParser = new XmlQueryParser();
         URL resource = QueryTest.class.getResource("/query/Query");
         String directory = Paths.get(Objects.requireNonNull(resource).toURI()).toString();
-        JsonNode jsonNode = xmlQueryParser.getQuery(directory, "TEST", parameters);
+        JsonNode jsonNode = xmlQueryParser.getQuery(directory, "TEST", parameters);*/
         //JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResource().getResourceAsStream("query/Query/QuerySet.xml"), "TEST", parameters, connectionsManager);
         //System.out.println(objectNode);
     }
