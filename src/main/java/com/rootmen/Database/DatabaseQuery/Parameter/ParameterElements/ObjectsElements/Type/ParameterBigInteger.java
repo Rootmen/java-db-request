@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 
 public class ParameterBigInteger extends ParameterObjects<BigInteger> {
@@ -26,7 +27,7 @@ public class ParameterBigInteger extends ParameterObjects<BigInteger> {
 
     @Override
     public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException {
-        statement.setBigDecimal(index, new BigDecimal(this.getValue()));
+        statement.setObject(index, this.getValue(), Types.BIGINT);
     }
 
 
