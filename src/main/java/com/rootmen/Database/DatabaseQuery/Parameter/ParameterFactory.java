@@ -20,8 +20,10 @@ public class ParameterFactory {
             case "int_array":
             case "integer_array":
                 ArrayList<Integer> array = new ArrayList<>();
-                for (String item : value.split(",")) {
-                    array.add(Integer.parseInt(item));
+                if (value != null && !value.equals("")) {
+                    for (String item : value.split(",")) {
+                        array.add(Integer.parseInt(item));
+                    }
                 }
                 return new ParameterArrayInteger(ID, name, array, "int");
             case "bigint":
