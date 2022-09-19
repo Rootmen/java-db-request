@@ -8,11 +8,11 @@ import com.rootmen.Database.DatabaseQuery.JsonParser.MapperConfig;
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.Parameter;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterInput;
+import com.rootmen.Database.DatabaseQuery.Query.Binder.QueryWrapperClass;
 import com.rootmen.Database.DatabaseQuery.Query.Binder.ResultSetWrapper;
 import com.rootmen.Database.DatabaseQuery.Query.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.Query.Controller.QueryController;
 import com.rootmen.Database.DatabaseQuery.XmlParser.Caching.Entity.QueryList;
-import com.rootmen.Database.DatabaseQuery.XmlParser.Caching.QuerySet;
 import com.rootmen.Database.DatabaseQuery.XmlParser.Errors.ParserXMLErrors;
 import com.rootmen.Database.DatabaseQuery.XmlParser.Errors.Types.*;
 import org.jdom2.Document;
@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -71,8 +72,20 @@ public class XmlQueryParser {
                 parameterInput.add(new ParameterInput(id, value));
             }
         }
-        //Проверка директории на правильность
         LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        for (QueryList query : queryList) {
+            for (QueryList.ParameterCaching parameter : query.parameters) {
+                if (parameter.isRequired()) {
+                    Optional<ParameterInput> parameterInputOptional
+                            = parameterInput.stream()
+                            .filter(input -> input.name
+                                    .equals(parameter.getID())).findFirst();
+                    if (!parameterInputOptional.isPresent()) {
+                        throw new ExceptionConfigNoRequired(querySetName, parameter.getID());
+                    }
+                }
+            }
+        }
         HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
         executeQuery(queryList, connectionsManagerHashMap, new ArrayList<>(parameterInput), output);
     }
@@ -124,6 +137,7 @@ public class XmlQueryParser {
                 String name = "$" + element.getAttributeValue("name") + "$";
                 String ID = element.getAttributeValue("ID");
                 String type = element.getAttributeValue("type");
+                String required = element.getAttributeValue("required");
                 List<Element> whenNodes = xpath.compile("when", Filters.element()).evaluate(element);
                 HashMap<String, String> when = new HashMap<>();
                 for (Element whenNode : whenNodes) {
@@ -138,9 +152,9 @@ public class XmlQueryParser {
                 if (defaultNode != null) {
                     value = defaultNode.getValue();
                 }
-                parameters.add(new QueryList.ParameterCaching(ID, name, type, when, value));
+                parameters.add(new QueryList.ParameterCaching(ID, name, type, when, value, Objects.equals(required, "true")));
             } else if (Objects.equals(element.getName(), "SQL")) {
-                sqlList.add(new QueryList.SQL(element.getValue(), element.getAttributeValue("name", "rows"), connection));
+                sqlList.add(new QueryList.SQL(element.getValue(), element.getAttributeValue("name", "rows"), connection, element.getAttributeValue("wrapperClass", "")));
             } else if (Objects.equals(element.getName(), "CONNECTION")) {
                 connection = element.getAttributeValue("REFID");
             }
@@ -246,11 +260,27 @@ public class XmlQueryParser {
                 QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 ObjectNode jsonNode = queryController.getNextLine();
                 ObjectMapper objectMapper = MapperConfig.getMapper();
+                QueryWrapperClass instance = null;
+                if (!Objects.equals(sql.wrapperClass, "")) {
+                    try {
+                        Class<?> wrapperClass = Class.forName(sql.wrapperClass);
+                        instance = (QueryWrapperClass) wrapperClass.getDeclaredConstructor().newInstance();
+                        instance.initialize(parameters);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (jsonNode == null) {
+                    continue;
+                }
                 if (!first) {
                     output.write(",");
                 }
                 first = false;
                 while (true) {
+                    if (instance != null) {
+                        jsonNode = instance.rowsLine(jsonNode);
+                    }
                     output.write(objectMapper.writeValueAsString(jsonNode));
                     jsonNode = queryController.getNextLine();
                     if (jsonNode == null) {
@@ -281,9 +311,7 @@ public class XmlQueryParser {
 
     private LinkedList<QueryList> getQueryList(String querySetName, String directory) throws ParserXMLErrors, IOException, JDOMException {
         Document document = this.getFileDocument(directory, querySetName);
-        LinkedList<QueryList> queryList = getQuerySet(querySetName, document);
-        QuerySet.cachedQuery.put(querySetName, queryList);
-        return queryList;
+        return getQuerySet(querySetName, document);
        /* if (QuerySet.cachedQuery.containsKey(querySetName)) {
             return QuerySet.cachedQuery.get(querySetName);
         } else {

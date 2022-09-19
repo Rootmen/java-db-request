@@ -7,6 +7,9 @@ import com.rootmen.Database.DatabaseQuery.Query.ConnectionsManager;
 import com.rootmen.Database.DatabaseQuery.XmlParser.XmlQueryParser;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,14 +32,9 @@ public class QueryTest extends BaseTest {
 
     @Test
     public void testXmlQuery2() throws Exception {
-       /* ArrayList<ParameterInput> parameters = new ArrayList<>();
-        parameters.add(new ParameterInput("INTNUM", "1"));
-        ConnectionsManager connectionsManager = new ConnectionsManager(url, user, pass, "org.postgresql.Driver");
-        XmlQueryParser xmlQueryParser = new XmlQueryParser();
-        URL resource = QueryTest.class.getResource("/query/Query");
-        String directory = Paths.get(Objects.requireNonNull(resource).toURI()).toString();
-        JsonNode jsonNode = xmlQueryParser.getQuery(directory, "TEST", parameters);*/
-        //JsonNode objectNode = xmlQueryParser.getQuery(QueryTest.class.getClassLoader().getResource().getResourceAsStream("query/Query/QuerySet.xml"), "TEST", parameters, connectionsManager);
-        //System.out.println(objectNode);
+        /*try (PrintWriter output = new PrintWriter(System.out)) {
+            InputStream xmlQuery = new ByteArrayInputStream("<QuerySet refid=\"GET_TECH_FORM\" directory=\"EIM\"><TextParam ID=\"VAR_ID\">1</TextParam><TextParam ID=\"YEARS\">2021</TextParam></QuerySet>".getBytes());
+            XmlQueryParser.getInstance().getQuery(xmlQuery, output);
+        }*/
     }
 }

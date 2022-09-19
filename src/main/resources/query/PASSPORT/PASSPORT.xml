@@ -1,57 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Definitions>
-    <QuerySet ID="GET_PASSPORT_ID_NSI_FRAGMENTS">
+
+    <QuerySet ID="GET_TECH_FORM">
         <CONNECTION REFID="PG_CONNECT"/>
         <QUERY>
             <CONNECTION REFID="PG_CONNECT"/>
-            <TextParam ID="PASSPORT_ID" name="PASSPORT_ID" type="int"/>
-            <SQL>
+            <TextParam ID="VAR_ID" name="VAR_ID" type="bigint"/>
+            <TextParam ID="YEARS" name="YEARS" type="int_array">
+                <when value="[0]">
+                    <![CDATA[
+                    (SELECT ARRAY_AGG(CALCULATION_YEARS)
+                    FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
+                    WHERE VARIANT.VAR_ID = $VAR_ID$)
+                    ]]>
+                </when>
+                <default><![CDATA[0]]></default>
+            </TextParam>
+            <TextParam ID="ST1" name="ST1" type="int">
+                <default><![CDATA[0]]></default>
+            </TextParam>
+            <TextParam ID="ST2" name="ST2" type="int">
+                <default>0</default>
+            </TextParam>
+            <SQL wrapperClass="com.rootmen.Database.DatabaseQuery.WrapperPassport">
                 <![CDATA[
-				SELECT STAN1.VNAME  AS NAME_BEGIN,
-                         STAN1.ST_KOD AS ESR1,
-                         STAN2.VNAME  AS NAME_END,
-                         STAN2.ST_KOD AS ESR2,
-                         NSI_FRAGMENTS.PASSPORT_ID,
-                         NSI_FRAGMENTS.NUM,
-                         NSI_FRAGMENTS.CNSI_BEGIN,
-                         NSI_FRAGMENTS.CNSI_END,
-                         NSI_FRAGMENTS.COUNT_SBORN_STANS_F,
-                         NSI_FRAGMENTS.COUNT_SBORN_STANS_B,
-                         NSI_FRAGMENTS.ID_DIRECTION,
-                         NSI_FRAGMENTS.CHETIR_PUT,
-                         NSI_FRAGMENTS.PRIM,
-                         KRIN.ID_FRAG,
-                         KRIN.TYAG,
-                         KRIN.R_UKL_TUDA,
-                         KRIN.R_UKL_OBRATNO,
-                         KRIN.SER_LOC,
-                         KRIN.MASSA_TUDA,
-                         KRIN.MASSA_OBRATNO,
-                         KRIN.MASSA_K_TUDA,
-                         KRIN.MASSA_K_OBRATNO,
-                         KRIN.DLINA_TUDA,
-                         KRIN.DLINA_OBRATNO,
-                         KRIN.DLINA_K_TUDA,
-                         KRIN.DLINA_K_OBRATNO,
-                         '1'          AS FLOR,
-                         ''           AS NOMER
-                  FROM DNEIM.NSI_FRAGMENTS AS NSI_FRAGMENTS
-                           LEFT JOIN
-                       DNCNSI.STAN AS STAN1
-                       ON
-                           STAN1.STAN_ID = NSI_FRAGMENTS.CNSI_BEGIN
-                           LEFT JOIN
-                       DNCNSI.STAN AS STAN2
-                       ON
-                           STAN2.STAN_ID = NSI_FRAGMENTS.CNSI_END
-                           LEFT JOIN
-                       DNEIM.KRIN AS KRIN
-                       ON
-                           NSI_FRAGMENTS.ID_FRAG = KRIN.ID_FRAG
-                  WHERE NSI_FRAGMENTS.PASSPORT_ID = $PASSPORT_ID$
-                  ORDER BY NSI_FRAGMENTS.NUM
+                SELECT SPAN.START_STAN_ID,
+                       SPAN.END_STAN_ID,
+                       (SELECT DOR_KOD FROM DNCNSI.STAN WHERE STAN_ID = SPAN.START_STAN_ID AND STAN.COR_TIP != 'D' LIMIT 1) AS DOR_KOD,
+                       UNNEST($YEARS$)                                                      AS CALCULATION_YEARS,
+                       SPAN.GLP,
+                       SPAN.SIGN,
+                       SPAN.TYAG,
+                       FRAGMENTS.R_UKL_TUDA                                                 AS R_UKL_TO,
+                       FRAGMENTS.R_UKL_OBRATNO                                              AS R_UKL_NO,
+                       FRAGMENTS.MASSA_TUDA                                                 AS MASS_TO,
+                       FRAGMENTS.MASSA_OBRATNO                                              AS MASS_NO,
+                       FRAGMENTS.MASSA_K_TUDA                                               AS MASS_K_TO,
+                       FRAGMENTS.MASSA_K_OBRATNO                                            AS MASS_K_NO,
+                       FRAGMENTS.DLINA_TUDA                                                 AS TARIN_LEN_TO,
+                       FRAGMENTS.DLINA_OBRATNO                                              AS TARIN_LEN_NO,
+                       FRAGMENTS.DLINA_K_TUDA                                               AS TARIN_LEN_K_TO,
+                       FRAGMENTS.DLINA_K_OBRATNO                                            AS TARIN_LEN_K_NO,
+                       SPAN.XGC                                                             AS GP_RUN_TIME_TO,
+                       SPAN.XGN                                                             AS GP_RUN_TIME_NO,
+                       SPAN.XPC                                                             AS PP_RUN_TIME_TO,
+                       SPAN.XPN                                                             AS PP_RUN_TIME_NO,
+                       SPAN.KOEFF_PAKETNOSTI                                                AS KOEFF_PAKETNOSTI,
+                       SPAN.RAZG_ZAMEDL                                                     AS RAZG_ZAMEDL,
+                       SPAN.STATION_INTERVAL_BEGIN                                          AS STATION_INTERVAL_TO,
+                       SPAN.STATION_INTERVAL_END                                            AS STATION_INTERVAL_NO,
+                       SPAN.TRAINS_INTERVAL_F                                               AS TRAINS_INTERVAL_TO,
+                       SPAN.TRAINS_INTERVAL_B                                               AS TRAINS_INTERVAL_NO,
+                       SPAN.TECHNOLOGICAL_WINDOW                                            AS TECHNOLOGICAL_WINDOW,
+                       SPAN.KOEFF_NADEZHN                                                   AS KOEFF_NADEZHN,
+                       SPAN.PERIOD_GRAF                                                     AS PERIOD_GRAF,
+                       SPAN.KOEFF_GRUZ_TUDA                                                 AS KOEFF_GRUZ_TO,
+                       SPAN.KOEFF_GRUZ_OBRATNO                                              AS KOEFF_GRUZ_NO,
+                       SPAN.KOEFF_SBORN_TUDA                                                AS KOEFF_SBORN_TO,
+                       SPAN.KOEFF_SBORN_OBRATNO                                             AS KOEFF_SBORN_NO,
+                       GREATEST(SPAN.KOEFF_DAL_MESTN_TUDA, SPAN.KOEFF_SEZON_RAZ_TUDA)       AS KOEFF_PASS_TO,
+                       GREATEST(SPAN.KOEFF_DAL_MESTN_OBRATNO, SPAN.KOEFF_SEZON_RAZ_OBRATNO) AS KOEFF_PASS_NO,
+                       SPAN.KOEFF_PRIGOR_TUDA                                               AS KOEFF_PRIGOR_TO,
+                       SPAN.KOEFF_PRIGOR_OBRATNO                                            AS KOEFF_PRIGOR_NO,
+                       SPAN.KOEFF_PRIGSKOR_TUDA                                             AS KOEFF_PRIGSKOR_TO,
+                       SPAN.KOEFF_PRIGSKOR_OBRATNO                                          AS KOEFF_PRIGSKOR_NO,
+                       SPAN.KOEFF_SKOR_TUDA                                                 AS KOEFF_SKOR_TO,
+                       SPAN.KOEFF_SKOR_OBRATNO                                              AS KOEFF_SKOR_NO,
+                       SPAN.PROPUSKNAYA_PARALLEL_TUDA                                       AS PP_PARALLEL_TO,
+                       SPAN.PROPUSKNAYA_PARALLEL_OBRATNO                                    AS PP_PARALLEL_NO,
+                       SPAN.PROPUSKNAYA_NEPARALLEL_GRUZ_TUDA                                AS PP_NPARALLEL_GRUZ_TO,
+                       SPAN.PROPUSKNAYA_NEPARALLEL_GRUZ_OBRATNO                             AS PP_NPARALLEL_GRUZ_NO,
+                       SPAN.PROPUSKNAYA_NEPARALLEL_PASS_TUDA                                AS PP_NPARALLEL_PASS_TO,
+                       SPAN.PROPUSKNAYA_NEPARALLEL_PASS_OBRATNO                             AS PP_NPARALLEL_PASS_NO
+                FROM DNEIM.INFRASTRUCTURAL_GRAPH_SPANS AS SPAN,
+                     LATERAL ( SELECT *
+                               FROM DNEIM.INFRASTRUCTURAL_GRAPH_FRAGMENTS AS FRAGMENTS
+                               WHERE SPAN.ID_FRAG = FRAGMENTS.ID_FRAG) AS FRAGMENTS
+                WHERE SPAN.VAR_ID = $VAR_ID$;
 				]]>
             </SQL>
         </QUERY>
     </QuerySet>
+
+
 </Definitions>

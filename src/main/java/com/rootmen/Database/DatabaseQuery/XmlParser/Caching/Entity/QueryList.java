@@ -25,11 +25,13 @@ public class QueryList {
         public String connection;
         public String query;
         public String name;
+        public String wrapperClass;
 
-        public SQL(String query, String name, String connection) {
+        public SQL(String query, String name, String connection, String wrapperClass) {
             this.query = query;
             this.name = name;
             this.connection = connection;
+            this.wrapperClass = wrapperClass;
         }
     }
 
@@ -38,14 +40,24 @@ public class QueryList {
         String name;
         String type;
         String defaults;
+        boolean required;
         HashMap<String, String> when;
 
-        public ParameterCaching(String ID, String name, String type, HashMap<String, String> when, String defaults) {
+        public ParameterCaching(String ID, String name, String type, HashMap<String, String> when, String defaults, boolean required) {
             this.ID = ID;
             this.name = name;
             this.type = type;
             this.when = when;
             this.defaults = defaults;
+            this.required = required;
+        }
+
+        public boolean isRequired() {
+            return this.required;
+        }
+
+        public String getID() {
+            return ID;
         }
     }
 

@@ -2,6 +2,7 @@ package com.rootmen.Database.DatabaseQuery.Query.Binder;
 
 import com.rootmen.Database.DatabaseQuery.Query.Binder.Error.Types.ExceptionDuplicateAnnotation;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
@@ -48,13 +49,27 @@ abstract public class ResultSetWrapper<T> implements POJOBinder<T> {
             value = value.trim();
             try {
                 Class<?> type = field.getType();
-                if (mapNumber.containsKey(type)) {
-                    value = value.replaceAll(",", ".");
-                }
-                if (type.isPrimitive()) {
-                    field.set(this, map.get(type).getConstructor(String.class).newInstance(value));
+                if (type.isArray()) {
+                    String[] values = value.split(",");
+                    Object array = Array.newInstance(type, values.length);
+                    for (int i = 0; i < values.length; i++) {
+                        Object val = map.get(type).getConstructor(String.class).newInstance(values[i]);
+                        Array.set(array, i, val);
+                    }
+                    if (type.isPrimitive()) {
+                        field.set(this, array);
+                    } else {
+                        field.set(this, map.get(type).getConstructor(array.getClass()).newInstance(array));
+                    }
                 } else {
-                    field.set(this, type.getConstructor(String.class).newInstance(value));
+                    if (mapNumber.containsKey(type)) {
+                        value = value.replaceAll(",", ".");
+                    }
+                    if (type.isPrimitive()) {
+                        field.set(this, map.get(type).getConstructor(String.class).newInstance(value));
+                    } else {
+                        field.set(this, type.getConstructor(String.class).newInstance(value));
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Поле " + name + " не удалось привязать к значению");
