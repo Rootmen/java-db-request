@@ -2,9 +2,11 @@ package com.rootmen.Database.DatabaseQuery.Parameter;
 
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ArrayElements.Type.ParameterArrayInteger;
+import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ArrayElements.Type.ParameterArrayString;
 import com.rootmen.Database.DatabaseQuery.Parameter.ParameterElements.ObjectsElements.Type.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class ParameterFactory {
@@ -16,13 +18,20 @@ public class ParameterFactory {
                 return new ParameterInteger(ID, name, value);
             case "int_array":
             case "integer_array":
-                ArrayList<Integer> array = new ArrayList<>();
+                ArrayList<Integer> arrayInt = new ArrayList<>();
                 if (value != null && !value.equals("")) {
                     for (String item : value.split(",")) {
-                        array.add(Integer.parseInt(item));
+                        arrayInt.add(Integer.parseInt(item));
                     }
                 }
-                return new ParameterArrayInteger(ID, name, array, "int");
+                return new ParameterArrayInteger(ID, name, arrayInt, "int");
+            case "str_array":
+            case "string_array":
+                ArrayList<String> arrayString = new ArrayList<>();
+                if (value != null && !value.equals("")) {
+                    arrayString.addAll(Arrays.asList(value.split(",")));
+                }
+                return new ParameterArrayString(ID, name, arrayString, "text");
             case "bigint":
             case "biginteger":
                 return new ParameterBigInteger(ID, name, value);
