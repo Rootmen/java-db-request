@@ -97,10 +97,22 @@ public class XmlQueryParser {
         return executeQuery(queryList, connectionsManagerHashMap, parameterInput);
     }
 
+    public JsonNode getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, HashMap<String, ConnectionsManager> connectionsManagerHashMap) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+        //Проверка директории на правильность
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
+        return executeQuery(queryList, connectionsManagerHashMap, parameterInput);
+    }
+
     public <T> ArrayList<T> getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, Class<? extends ResultSetWrapper<T>> resultSetWrapper) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
         //Проверка директории на правильность
         LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
         HashMap<String, ConnectionsManager> connectionsManagerHashMap = this.getConnections(directory);
+        return executeQuery(queryList, connectionsManagerHashMap, parameterInput, resultSetWrapper);
+    }
+
+    public <T> ArrayList<T> getQuery(String directory, String querySetName, ArrayList<ParameterInput> parameterInput, Class<? extends ResultSetWrapper<T>> resultSetWrapper, HashMap<String, ConnectionsManager> connectionsManagerHashMap) throws SQLException, ParserXMLErrors, ClassNotFoundException, IOException, JDOMException {
+        //Проверка директории на правильность
+        LinkedList<QueryList> queryList = this.getQueryList(querySetName, directory);
         return executeQuery(queryList, connectionsManagerHashMap, parameterInput, resultSetWrapper);
     }
 
@@ -265,7 +277,7 @@ public class XmlQueryParser {
                     try {
                         Class<?> wrapperClass = Class.forName(sql.wrapperClass);
                         instance = (QueryWrapperClass) wrapperClass.getDeclaredConstructor().newInstance();
-                        instance.initialize(parameters);
+                        instance.initialize(parameters, connectionsManager);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         e.printStackTrace();
                     }
