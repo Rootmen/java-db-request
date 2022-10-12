@@ -49,7 +49,6 @@ public class ConnectionsManager {
 
     public Connection getConnection() throws SQLException, ClassNotFoundException {
         if (this.connectionClass != null) {
-
             Class.forName(this.connectionClass);
         }
         if (this.dataSource == null) {
