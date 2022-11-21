@@ -11,4 +11,6 @@ public abstract class QueryWrapperClass {
     public abstract void initialize(HashMap<String, Parameter<?>> parameters, HashMap<String, ConnectionsManager> connection);
 
     public abstract ObjectNode rowsLine(ObjectNode node);
+
+    public abstract ObjectNode resultWrapper(ObjectNode node);
 }

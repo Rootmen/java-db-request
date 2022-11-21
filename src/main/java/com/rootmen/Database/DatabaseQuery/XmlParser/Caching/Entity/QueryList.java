@@ -26,6 +26,7 @@ public class QueryList {
         public String query;
         public String name;
         public String wrapperClass;
+        public String runClass;
 
         public SQL(String query, String name, String connection, String wrapperClass) {
             this.query = query;

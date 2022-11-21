@@ -282,6 +282,7 @@ public class XmlQueryParser {
                         e.printStackTrace();
                     }
                 }
+                if()
                 if (jsonNode == null) {
                     continue;
                 }
