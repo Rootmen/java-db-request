@@ -3,6 +3,7 @@ package com.rootmen.Database.DatabaseQuery.XmlParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rootmen.Database.DatabaseQuery.JsonParser.MapperConfig;
 import com.rootmen.Database.DatabaseQuery.Parameter.Exceptions.ParameterException;
@@ -166,7 +167,7 @@ public class XmlQueryParser {
                 }
                 parameters.add(new QueryList.ParameterCaching(ID, name, type, when, value, Objects.equals(required, "true")));
             } else if (Objects.equals(element.getName(), "SQL")) {
-                sqlList.add(new QueryList.SQL(element.getValue(), element.getAttributeValue("name", "rows"), connection, element.getAttributeValue("wrapperClass", "")));
+                sqlList.add(new QueryList.SQL(element.getValue(), element.getAttributeValue("name", "rows"), connection, element.getAttributeValue("wrapperClass", ""), element.getAttributeValue("runClass", "")));
             } else if (Objects.equals(element.getName(), "CONNECTION")) {
                 connection = element.getAttributeValue("REFID");
             }
@@ -269,6 +270,24 @@ public class XmlQueryParser {
         try {
             boolean first = true;
             for (QueryList.SQL sql : sqlLists) {
+                if (!Objects.equals(sql.runClass, "")) {
+                    try {
+                        Class<?> wrapperClass = Class.forName(sql.runClass);
+                        QueryWrapperClass instance = (QueryWrapperClass) wrapperClass.getDeclaredConstructor().newInstance();
+                        instance.initialize(parameters, connectionsManager);
+                        ArrayNode arrayNode = instance.resultWrapper();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        for (int g = 0; g < arrayNode.size(); g++) {
+                            output.write(objectMapper.writeValueAsString(arrayNode.get(g)));
+                            if (g != arrayNode.size() - 1) {
+                                output.write(",");
+                            }
+                        }
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
                 QueryController queryController = getQueryController(parameters, connectionsManager, connectionHashMap, sql);
                 ObjectNode jsonNode = queryController.getNextLine();
                 ObjectMapper objectMapper = MapperConfig.getMapper();
@@ -282,8 +301,10 @@ public class XmlQueryParser {
                         e.printStackTrace();
                     }
                 }
-                if()
                 if (jsonNode == null) {
+                    if (instance != null) {
+                        instance.additionalDates(output);
+                    }
                     continue;
                 }
                 if (!first) {
@@ -294,12 +315,19 @@ public class XmlQueryParser {
                     if (instance != null) {
                         jsonNode = instance.rowsLine(jsonNode);
                     }
-                    output.write(objectMapper.writeValueAsString(jsonNode));
+                    boolean skip = false;
+                    if (jsonNode != null) {
+                        skip = true;
+                        output.write(objectMapper.writeValueAsString(jsonNode));
+                    }
                     jsonNode = queryController.getNextLine();
                     if (jsonNode == null) {
                         break;
                     }
-                    output.write(",");
+                    if(skip) output.write(",");
+                }
+                if (instance != null) {
+                    instance.additionalDates(output);
                 }
             }
         } finally {

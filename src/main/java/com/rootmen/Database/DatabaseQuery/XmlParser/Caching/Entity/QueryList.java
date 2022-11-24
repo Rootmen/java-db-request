@@ -28,11 +28,12 @@ public class QueryList {
         public String wrapperClass;
         public String runClass;
 
-        public SQL(String query, String name, String connection, String wrapperClass) {
+        public SQL(String query, String name, String connection, String wrapperClass, String runClass) {
             this.query = query;
             this.name = name;
             this.connection = connection;
             this.wrapperClass = wrapperClass;
+            this.runClass = runClass;
         }
     }
 
