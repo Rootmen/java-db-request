@@ -65,10 +65,19 @@ abstract public class ResultSetWrapper<T> implements POJOBinder<T> {
                     if (mapNumber.containsKey(type)) {
                         value = value.replaceAll(",", ".");
                     }
-                    if (type.isPrimitive()) {
-                        field.set(this, map.get(type).getConstructor(String.class).newInstance(value));
+                    if (type == boolean.class || type == Boolean.class) {
+                        boolean booleanValue = Boolean.parseBoolean(value) || value.equals("t");
+                        if (type.isPrimitive()) {
+                            field.set(this, booleanValue);
+                        } else {
+                            field.set(this, booleanValue);
+                        }
                     } else {
-                        field.set(this, type.getConstructor(String.class).newInstance(value));
+                        if (type.isPrimitive()) {
+                            field.set(this, map.get(type).getConstructor(String.class).newInstance(value));
+                        } else {
+                            field.set(this, type.getConstructor(String.class).newInstance(value));
+                        }
                     }
                 }
             } catch (Exception e) {
