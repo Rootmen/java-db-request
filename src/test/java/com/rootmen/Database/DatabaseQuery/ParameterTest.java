@@ -45,7 +45,7 @@ public class ParameterTest {
     }
 
     @Test(expected = ParameterExceptionErrorType.class)
-    public void whenExceptionThrown_thenExpectationSatisfied() throws ParameterExceptionErrorType {
+    public void whenExceptionThrown_thenExpectationSatisfied() throws Exception {
         Parameter<?> parameter = null;
         try {
             parameter = ParameterFactory.getParameter("test", "test", "Int", "фии");

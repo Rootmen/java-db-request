@@ -8,6 +8,7 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public abstract class ParameterArray<T> extends ParameterAbstract<T> {
 
@@ -35,6 +36,13 @@ public abstract class ParameterArray<T> extends ParameterAbstract<T> {
     public T parameterCalculate(Connection connection) throws SQLException {
         return currentValue;
     }
+
+    @Override
+    public void addParameterToStatement(PreparedStatement statement, int index, Connection connection) throws SQLException {
+        Array array = connection.createArrayOf(this.arrayType, ((ArrayList<?>) this.currentValue).toArray());
+        statement.setArray(index, array);
+    }
+
 
     @Override
     public ParameterException getExceptionError() {
