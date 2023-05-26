@@ -1,2 +1,2 @@
-# JSON-db-request
-Модуль запросов к БД
+# java-XML-Based-Database-Query-Storage-System
+XML-Based Database Query Storage System
