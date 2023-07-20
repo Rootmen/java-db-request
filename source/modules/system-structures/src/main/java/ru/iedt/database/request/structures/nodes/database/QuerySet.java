@@ -1,4 +1,4 @@
-package ru.iedt.database.request.structures.nodes;
+package ru.iedt.database.request.structures.nodes.database;
 
 import ru.iedt.database.request.structures.base.Node;
 
@@ -8,7 +8,7 @@ public class QuerySet extends Node {
     ArrayList<Query> queries;
 
     public QuerySet(ArrayList<Query> queries) {
-        super("queryset");
+        super("QuerySet", "Definition");
         this.queries = queries;
     }
 }

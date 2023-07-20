@@ -11,6 +11,9 @@
     <name>java-db-request BOM</name>
     <description>Bill Of Materials to java-db-request</description>
 
+    <properties>
+        <jackson.version>2.15.1</jackson.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -18,19 +21,19 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.15.1</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.15.1</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.15.1</version>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>

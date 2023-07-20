@@ -1,14 +1,14 @@
-package ru.iedt.database.request.structures.nodes;
+package ru.iedt.database.request.structures.nodes.http;
 
 import ru.iedt.database.request.structures.base.Node;
 
-public class URL extends Node {
+public class HttpRequest extends Node {
     String url;
     String body;
     String requestType;
 
-    public URL(String url, String body, String requestType) {
-        super("url");
+    public HttpRequest(String url, String body, String requestType) {
+        super("HttpRequest", "Query");
         this.url = url;
         this.body = body;
         this.requestType = requestType;
