@@ -21,7 +21,7 @@ public class ParserTest {
     @Test
     void testCalcOne() {
         System.out.println("======TEST ONE EXECUTED=======");
-        ArrayList<QuerySet> result =  (new StaxXmlParser()).parseDefinitions(this.getClass().getResourceAsStream("/test.xml"));
+        ArrayList<QuerySet> result =  (new StaxXmlParser()).parseDefinitions(this.getClass().getResource("/test.xml"));
 
         System.out.println(result);
         //Assertions.assertEquals( 4 , Calculator.add(2, 2));

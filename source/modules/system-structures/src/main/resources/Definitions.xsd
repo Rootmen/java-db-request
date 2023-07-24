@@ -1,54 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="Definitions">
-        <xs:sequence>
-
-        </xs:sequence>
+        <xs:complexType>
+            <xs:sequence>
+              <xs:element name="SQL" minOccurs="0">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="ID" type="xs:string" use="required"/>
+                                <xs:attribute name="wrapperClass" type="xs:string"/>
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="QuerySet" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="CONNECTION">
+                                <xs:complexType>
+                                    <xs:attribute name="REFID" type="xs:string" use="required"/>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="QUERY" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="TextParam" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:attribute name="ID" type="xs:string" use="required"/>
+                                                <xs:attribute name="name" type="xs:string" use="required"/>
+                                                <xs:attribute name="type" use="required">
+                                                    <xs:simpleType>
+                                                        <xs:restriction base="xs:string">
+                                                            <xs:pattern
+                                                                    value="int|integer|int_array|integer_array|bigint_array|biginteger_array|str_array|string_array|bigint|biginteger|long|str|string|date|numeric"/>
+                                                        </xs:restriction>
+                                                    </xs:simpleType>
+                                                </xs:attribute>
+                                                <xs:attribute name="required" type="xs:boolean"/>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="SQL" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="ID" type="xs:string"/>
+                                                        <xs:attribute name="REFID" type="xs:string"/>
+                                                        <xs:attribute name="wrapperClass" type="xs:string"/>
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="ID" type="xs:string" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
     </xs:element>
-
-    <xs:complexType name="Connection">
-        <xs:attribute name="REFID" type="xs:string" use="required"/>
-    </xs:complexType>
-
-    <xs:complexType name="TextParam">
-        <xs:attribute name="ID" type="xs:string" use="required"/>
-        <xs:attribute name="name" type="xs:string" use="required"/>
-        <xs:attribute name="type" type="xs:string" use="required">
-            <xs:simpleType>
-                <xs:restriction base="xs:string">
-                    <xs:pattern
-                            value="int|integer|int_array|integer_array|bigint_array|biginteger_array|str_array|string_array|bigint|biginteger|long|str|string|date|numeric"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="required" type="xs:boolean" use="required"/>
-    </xs:complexType>
-
-
-    <xs:complexType name="QuerySet">
-        <xs:sequence>
-            <xs:element name="CONNECTION" type="Connection"/>
-            <xs:element name="QUERY" type="QUERY"/>
-        </xs:sequence>
-        <xs:attribute name="ID" type="xs:string" use="required"/>
-    </xs:complexType>
-
-    <xs:complexType name="QUERY">
-        <xs:attribute name="ID" type="xs:string" use="required"/>
-        <xs:attribute name="type" type="xs:string" use="required">
-            <xs:simpleType>
-                <xs:restriction base="xs:string">
-                    <xs:pattern
-                            value="int|integer|int_array|integer_array|bigint_array|biginteger_array|str_array|string_array|bigint|biginteger|long|str|string|date|numeric"/>
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="required" type="xs:boolean" use="required"/>
-    </xs:complexType>
-
-    <xs:complexType name="SQL">
-        <xs:attribute name="ID" type="xs:string" use="required"/>
-        <xs:attribute name="required" type="xs:boolean" use="required"/>
-    </xs:complexType>
-
 </xs:schema>
