@@ -13,10 +13,10 @@ public class StaxXmlParser {
 
     public ArrayList<QuerySet> parseDefinitions(InputStream io) {
         try (StaxStreamProcessor processor = new StaxStreamProcessor(io)) {
-            XMLStreamReader reader = processor.getReader();
+            ArrayList<QuerySet> result =
+                    XMLStreamReader reader = processor.getReader();
             while (reader.hasNext()) {
-                int event = reader.next();
-                if (event == XMLStreamConstants.START_ELEMENT &&  "TextParam".equals(reader.getLocalName())) {
+                if (reader.next() == XMLStreamConstants.START_ELEMENT &&  "QuerySet".equals(reader.getLocalName())) {
                     System.out.println(reader.getAttributeValue(null, "ID"));
                 }
             }
