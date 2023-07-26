@@ -1,6 +1,7 @@
 package ru.iedt.database.request.structures.xml.parser;
 
 import org.junit.jupiter.api.*;
+import ru.iedt.database.request.structures.nodes.database.Definition;
 import ru.iedt.database.request.structures.nodes.database.QuerySet;
 
 import java.io.FileInputStream;
@@ -19,9 +20,9 @@ public class ParserTest {
     }
 
     @Test
-    void testCalcOne() {
+    void testCalcOne() throws Exception {
         System.out.println("======TEST ONE EXECUTED=======");
-        ArrayList<QuerySet> result =  (new StaxXmlParser()).parseDefinitions(this.getClass().getResource("/test.xml"));
+        Definition result =  (new StaxStreamParser()).parseDefinitions(this.getClass().getResource("/test.xml").toURI());
 
         System.out.println(result);
         //Assertions.assertEquals( 4 , Calculator.add(2, 2));

@@ -13,4 +13,13 @@ public class Parameter extends Node {
         this.parameterName = parameterName;
         this.parameterType = parameterType;
     }
+
+    @Override
+    public String toString() {
+        return "Parameter{" +
+                "parameterValue='" + parameterValue + '\'' +
+                ", parameterName='" + parameterName + '\'' +
+                ", parameterType='" + parameterType + '\'' +
+                '}';
+    }
 }

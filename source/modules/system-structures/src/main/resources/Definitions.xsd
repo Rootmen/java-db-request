@@ -3,7 +3,7 @@
     <xs:element name="Definitions">
         <xs:complexType>
             <xs:sequence>
-              <xs:element name="SQL" minOccurs="0">
+                <xs:element name="SQL" minOccurs="0">
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
@@ -16,7 +16,7 @@
                 <xs:element name="QuerySet" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="CONNECTION">
+                            <xs:element name="CONNECTION" minOccurs="0">
                                 <xs:complexType>
                                     <xs:attribute name="REFID" type="xs:string" use="required"/>
                                 </xs:complexType>
@@ -24,6 +24,11 @@
                             <xs:element name="QUERY" maxOccurs="unbounded">
                                 <xs:complexType>
                                     <xs:sequence>
+                                        <xs:element name="CONNECTION" minOccurs="0">
+                                            <xs:complexType>
+                                                <xs:attribute name="REFID" type="xs:string" use="required"/>
+                                            </xs:complexType>
+                                        </xs:element>
                                         <xs:element name="TextParam" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:attribute name="ID" type="xs:string" use="required"/>

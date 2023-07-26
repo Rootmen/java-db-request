@@ -5,12 +5,18 @@ import ru.iedt.database.request.structures.base.Node;
 import java.util.ArrayList;
 
 public class Query extends Node {
-    ArrayList<Parameter> parameters;
-    ArrayList<String> text;
+    ArrayList<Parameter> parameters = new ArrayList<>();
+    ArrayList<SQL> sql = new ArrayList<>();
 
-    public Query(ArrayList<Parameter> parameters, ArrayList<String> text) {
+    public Query() {
         super("Query", "QuerySet");
-        this.parameters = parameters;
-        this.text = text;
+    }
+
+    @Override
+    public String toString() {
+        return "Query{" +
+                "\n\t\tparameters=" + parameters +
+                ",\n\t\t text=" + sql +
+                '}';
     }
 }
