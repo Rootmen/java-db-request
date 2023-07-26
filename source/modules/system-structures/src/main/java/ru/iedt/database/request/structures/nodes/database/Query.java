@@ -12,6 +12,14 @@ public class Query extends Node {
         super("Query", "QuerySet");
     }
 
+    public void addParameters(Parameter parameter) {
+        this.parameters.add(parameter);
+    }
+
+    public void addSql(SQL sql) {
+        this.sql.add(sql);
+    }
+
     @Override
     public String toString() {
         return "Query{" +

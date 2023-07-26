@@ -29,10 +29,11 @@ public class StaxStreamParser {
             ArrayList<SQL> sqlArrayList = new ArrayList<>();
             XMLStreamReader reader = processor.getReader();
             while (reader.hasNext()) {
-                if (reader.next() == XMLStreamConstants.START_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
+                int readCode = reader.next();
+                if (readCode == XMLStreamConstants.START_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
                     querySetsArrayList.add(StaxStreamParserElement.parseQuerySetNode(reader));
                 }
-                if (reader.next() == XMLStreamConstants.START_ELEMENT && "SQL".equals(reader.getLocalName())) {
+                if (readCode == XMLStreamConstants.START_ELEMENT && "SQL".equals(reader.getLocalName())) {
                     sqlArrayList.add(StaxStreamParserElement.parseSqlNode(reader));
                 }
             }
