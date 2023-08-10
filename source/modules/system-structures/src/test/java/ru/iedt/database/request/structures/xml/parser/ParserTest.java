@@ -6,6 +6,8 @@ import ru.iedt.database.request.structures.nodes.database.QuerySet;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class ParserTest {
 
@@ -22,9 +24,9 @@ public class ParserTest {
     @Test
     void testCalcOne() throws Exception {
         System.out.println("======TEST ONE EXECUTED=======");
+        Date date = new Date();ё
         Definition result =  (new StaxStreamParser()).parseDefinitions(this.getClass().getResource("/test.xml").toURI());
-
-        System.out.println(result);
+        System.out.println(TimeUnit.MILLISECONDS.convert(new Date().getTime() - date.getTime(), TimeUnit.MILLISECONDS) + " ms");
         //Assertions.assertEquals( 4 , Calculator.add(2, 2));
     }
 

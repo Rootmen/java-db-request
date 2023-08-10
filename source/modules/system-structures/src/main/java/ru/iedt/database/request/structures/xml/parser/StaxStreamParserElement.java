@@ -18,13 +18,11 @@ public class StaxStreamParserElement {
             if (parserCode == XMLStreamConstants.START_ELEMENT && "CONNECTION".equals(reader.getLocalName())) {
                 Connection connection = StaxStreamParserElement.parseConnectionNode(reader);
                 querySet.setConnection(connection);
-            }
-            if (parserCode == XMLStreamConstants.START_ELEMENT && "QUERY".equals(reader.getLocalName())) {
+            } else if (parserCode == XMLStreamConstants.START_ELEMENT && "QUERY".equals(reader.getLocalName())) {
                 Query query = StaxStreamParserElement.parseQueryNode(reader);
                 querySet.addQueries(query);
-            }
-            if (parserCode == XMLStreamConstants.END_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
-                break;
+            } else if (parserCode == XMLStreamConstants.END_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
+                break;   
             }
         }
         return querySet;
@@ -49,8 +47,7 @@ public class StaxStreamParserElement {
             if (parserCode == XMLStreamConstants.START_ELEMENT && "SQL".equals(reader.getLocalName())) {
                 SQL sql = StaxStreamParserElement.parseSqlNode(reader);
                 query.addSql(sql);
-            }
-            if (parserCode == XMLStreamConstants.END_ELEMENT && "QUERY".equals(reader.getLocalName())) {
+            } else if (parserCode == XMLStreamConstants.END_ELEMENT && "QUERY".equals(reader.getLocalName())) {
                 break;
             }
         }
@@ -60,7 +57,7 @@ public class StaxStreamParserElement {
     public static SQL parseSqlNode(XMLStreamReader reader) throws XMLStreamException {
         SQL sql = new SQL();
         sql.setRefid(reader.getAttributeValue(null, "REFID"));
-        sql.setValue(new StringBuilder(reader.getElementText()));
+        sql.setValue(reader.getElementText());
         while (reader.hasNext()) {
             int parserCode = reader.next();
             if (parserCode == XMLStreamConstants.END_ELEMENT && "SQL".equals(reader.getLocalName())) {

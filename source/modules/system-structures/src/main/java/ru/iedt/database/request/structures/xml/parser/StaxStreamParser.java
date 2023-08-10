@@ -32,8 +32,7 @@ public class StaxStreamParser {
                 int readCode = reader.next();
                 if (readCode == XMLStreamConstants.START_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
                     querySetsArrayList.add(StaxStreamParserElement.parseQuerySetNode(reader));
-                }
-                if (readCode == XMLStreamConstants.START_ELEMENT && "SQL".equals(reader.getLocalName())) {
+                } else if (readCode == XMLStreamConstants.START_ELEMENT && "SQL".equals(reader.getLocalName())) {
                     sqlArrayList.add(StaxStreamParserElement.parseSqlNode(reader));
                 }
             }

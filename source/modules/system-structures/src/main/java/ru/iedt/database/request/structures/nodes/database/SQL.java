@@ -9,7 +9,15 @@ public class SQL {
         this.refid = refid;
     }
 
-    public void setValue(StringBuilder value) {
-        this.value = value;
+    public void setValue(String value) {
+        this.value = new StringBuilder(value.trim());
+    }
+
+    @Override
+    public String toString() {
+        return "SQL{" +
+                "value='" + value + "'"+
+                ", refid='" + refid + '\'' +
+                '}';
     }
 }
