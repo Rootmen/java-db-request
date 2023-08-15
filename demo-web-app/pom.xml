@@ -9,21 +9,16 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>demo-web-app</artifactId>
+
+    <packaging>war</packaging>
+
     <dependencies>
         <dependency>
             <groupId>ru.iedt.database.request</groupId>
-            <artifactId>servelt</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.iedt.database.request</groupId>
-            <artifactId>xml-parser</artifactId>
+            <artifactId>distribute</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <version>1.0-SNAPSHOT</version>
-    <artifactId>distribute</artifactId>
-
 
 </project>

@@ -5,25 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.iedt.database.request</groupId>
-        <artifactId>java-db-request</artifactId>
+        <artifactId>modules</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>servelt</artifactId>
+
     <dependencies>
         <dependency>
-            <groupId>ru.iedt.database.request</groupId>
-            <artifactId>servelt</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ru.iedt.database.request</groupId>
-            <artifactId>xml-parser</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
         </dependency>
     </dependencies>
-
-    <version>1.0-SNAPSHOT</version>
-    <artifactId>distribute</artifactId>
-
 
 </project>

@@ -12,8 +12,7 @@
     <modules>
         <module>modules</module>
         <module>tests</module>
-        <module>build</module>
-        <module>build</module>
+        <module>modules/servelt</module>
     </modules>
 
     <artifactId>source</artifactId>

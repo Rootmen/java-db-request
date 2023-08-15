@@ -12,6 +12,7 @@
         <module>source</module>
         <module>distribute</module>
         <module>lib</module>
+        <module>demo-web-app</module>
     </modules>
 
     <properties>
