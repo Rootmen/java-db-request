@@ -1,9 +1,10 @@
-package ru.iedt.database.request.websoket;
+package ru.iedt.database.request.database.webosket;
+
+import ru.iedt.database.request.database.store.QueryStoreList;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint(value = "/chat/{app_id}/{secret}/{session_id}")
 public class WebSocketServerBase {
+    static {
+        QueryStoreList.getStoresArray();
+    }
     private final Map<String, List<Session>> sessionsList = new ConcurrentHashMap<>();
 
     @OnOpen
@@ -21,12 +25,13 @@ public class WebSocketServerBase {
                        @PathParam("session_id") String sessionId) {
         System.out.println("Open Connection ...");
         sessionsList.computeIfAbsent(appId, key -> new ArrayList<>()).add(session);
-        session.getAsyncRemote().sendText("ASDASDASSD");
     }
 
     @OnClose
     public void onClose(Session session,
+                        CloseReason reason,
                         @PathParam("app_id") String appId) {
+        System.out.println("Closing a WebSocket due to "+reason.getReasonPhrase());
         final List<Session> sessions = this.sessionsList.get(appId);
         final Iterator<Session> sessionIterator = sessions.iterator();
         while (sessionIterator.hasNext()) {

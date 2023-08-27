@@ -52,6 +52,13 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <!-- Зависимости для рефлексии -->
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.10.2</version>
+            </dependency>
+
             <!-- Зависимости для тестирования -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>

@@ -6,23 +6,28 @@
     <parent>
         <groupId>ru.iedt.database.request</groupId>
         <artifactId>java-db-request</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${revision}-${changelist}</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>ru.iedt.database.request</groupId>
             <artifactId>servelt</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${revision}-${changelist}</version>
         </dependency>
         <dependency>
             <groupId>ru.iedt.database.request</groupId>
             <artifactId>xml-parser</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${revision}-${changelist}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.iedt.database.request</groupId>
+            <artifactId>database-controller</artifactId>
+            <version>${revision}-${changelist}</version>
         </dependency>
     </dependencies>
 
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}-${changelist}</version>
     <artifactId>distribute</artifactId>
 
 

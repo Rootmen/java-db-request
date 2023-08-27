@@ -6,7 +6,7 @@
     <parent>
         <groupId>ru.iedt.database.request</groupId>
         <artifactId>java-db-request</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${revision}-${changelist}</version>
     </parent>
 
     <artifactId>demo-web-app</artifactId>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>ru.iedt.database.request</groupId>
             <artifactId>distribute</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${revision}-${changelist}</version>
         </dependency>
     </dependencies>
 
