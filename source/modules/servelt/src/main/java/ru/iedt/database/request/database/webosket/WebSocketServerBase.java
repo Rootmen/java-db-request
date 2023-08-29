@@ -13,9 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint(value = "/chat/{app_id}/{secret}/{session_id}")
 public class WebSocketServerBase {
-    static {
-        QueryStoreList.getStoresArray();
-    }
     private final Map<String, List<Session>> sessionsList = new ConcurrentHashMap<>();
 
     @OnOpen

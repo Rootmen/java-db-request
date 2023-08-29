@@ -1,9 +1,9 @@
 package ru.iedt.database.request.database.controller.binder;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import jdk.nashorn.internal.ir.ObjectNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ru.iedt.database.request.database.controller.parameter.Parameter;
-import ru.iedt.database.request.database.controller.query.ConnectionsManager;
+import ru.iedt.database.request.database.controller.query.connections.ConnectionsManager;
 
 import java.io.PrintWriter;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package ru.iedt.database.request.database.controller.query;
+package ru.iedt.database.request.database.controller.query.connections;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

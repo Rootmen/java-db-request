@@ -8,12 +8,12 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 
-/* ВАЖНО пакет должен быть в package ru. */
+/* ВАЖНО пакет должен быть в package ru.* */
 @DefinitionStore
-public class StoreEim extends QueryStoreDefinition {
+public class StoreDefinitionEim extends QueryStoreDefinition {
     @Override
     public URI getStorePath() throws URISyntaxException {
-        return Objects.requireNonNull(StoreEim.class.getResource("/EIM")).toURI();
+        return Objects.requireNonNull(StoreDefinitionEim.class.getResource("/EIM")).toURI();
     }
 
     @Override
