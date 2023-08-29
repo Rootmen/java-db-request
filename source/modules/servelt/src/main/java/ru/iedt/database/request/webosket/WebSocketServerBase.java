@@ -1,4 +1,4 @@
-package ru.iedt.database.request.database.webosket;
+package ru.iedt.database.request.webosket;
 
 import ru.iedt.database.request.database.store.QueryStoreList;
 

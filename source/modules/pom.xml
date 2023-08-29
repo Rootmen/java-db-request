@@ -14,6 +14,7 @@
         <module>servelt</module>
         <module>xml-parser</module>
         <module>database-controller</module>
+        <module>exeptions</module>
     </modules>
     <version>${revision}-${changelist}</version>
     <artifactId>modules</artifactId>

@@ -8,6 +8,7 @@ abstract public class ExecutionInterface<T, F, D> {
 
     abstract public static class ExecutionInterfaceReturn<T, F, D> {
         abstract public void addResult(T result);
+
         abstract public D getResult();
 
         abstract public boolean isNeedSaveResult();

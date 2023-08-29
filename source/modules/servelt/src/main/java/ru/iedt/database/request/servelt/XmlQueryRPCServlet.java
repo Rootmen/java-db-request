@@ -1,4 +1,4 @@
-package ru.iedt.database.request.database.servelt;
+package ru.iedt.database.request.servelt;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 
-@WebServlet(value = "/api/v1/jax-rpc", loadOnStartup = 1)
-public class RPC extends HttpServlet {
-    static Logger LOGGER = LoggerFactory.getLogger(RPC.class);
+public class XmlQueryRPCServlet extends HttpServlet {
+    static Logger LOGGER = LoggerFactory.getLogger(XmlQueryRPCServlet.class);
     QueryExecutorService executorService = new QueryExecutorService();
 
     @Override
