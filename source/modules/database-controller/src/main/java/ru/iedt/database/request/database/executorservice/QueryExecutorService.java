@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class QueryExecutorService {
-    ArrayList<QueryStoreList.QueryStoreMetadata> f = QueryStoreList.getStoresArray();
+    // ArrayList<QueryStoreList.QueryStoreMetadata> f = QueryStoreList.getStoresArray();
     static ExecutorService service;
 
     static {
@@ -24,17 +24,17 @@ public class QueryExecutorService {
             countThreadPool = 25;
         }
         service = Executors.newFixedThreadPool(countThreadPool);
-        System.out.println("Количество потоков для обработок запросов : " + countThreadPool);
+        System.out.println("Количество потоков для обработок запросов: " + countThreadPool);
     }
 
     static HashMap<String, HashMap<String, QuerySet>> queryStores;
 
-
-
-    public void reloadStore() {
-        ArrayList<QueryStoreList.QueryStoreMetadata> queryStoresArray = QueryStoreList.getStoresArray();
+    public void updateStore() {
+        ArrayList<QueryStoreList.QueryStoreMetadata> queryStoresArray = QueryStoreList.getStoresMetadata();
         queryStores = new HashMap<>();
-
+        for (QueryStoreList.QueryStoreMetadata metadata : queryStoresArray) {
+            String storeName = metadata.getStoreName();
+        }
 
     }
 

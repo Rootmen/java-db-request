@@ -19,7 +19,8 @@ public class QueryStoreList {
             try {
                 QueryStoreDefinition queryStoreDefinition = (QueryStoreDefinition) clazz.getDeclaredConstructor().newInstance();
                 queryStores.add(new QueryStoreMetadata(queryStoreDefinition.getStorePath(), queryStoreDefinition.getStoreName()));
-            } catch (InstantiationException | IllegalAccessException | URISyntaxException | InvocationTargetException | NoSuchMethodException e) {
+            } catch (InstantiationException | IllegalAccessException | URISyntaxException | InvocationTargetException |
+                     NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -31,6 +32,7 @@ public class QueryStoreList {
         String storeName;
         HashMap<String, ConnectionsManager> connections = new HashMap<>();
         HashMap<String, QuerySet> querySet = new HashMap<>();
+
         public QueryStore(URI storePatch, String storeName) {
             this.storeName = storeName;
 
@@ -38,7 +40,7 @@ public class QueryStoreList {
         }
 
 
-        private static ParserXMLErrors checkDirectory(String directory) {
+/*        private static ParserXMLErrors checkDirectory(String directory) {
             //Проверка того что директория существует
             if (Files.notExists(Paths.get(directory)) || !Files.isDirectory(Paths.get(directory))) {
                 return new ExceptionNoDirectory(directory);
@@ -58,6 +60,7 @@ public class QueryStoreList {
             }
             return null;
         }
+    }*/
     }
 
     /**
@@ -86,6 +89,14 @@ public class QueryStoreList {
                     "storePatch=" + storePatch +
                     ", storeName='" + storeName + '\'' +
                     '}';
+        }
+
+        public URI getStorePatch() {
+            return storePatch;
+        }
+
+        public String getStoreName() {
+            return storeName;
         }
     }
 }

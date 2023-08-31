@@ -13,7 +13,6 @@ public class ConnectionsManager {
     String username;
     String password;
     String connectionClass;
-    //private HikariDataSource dataSource;
     private DataSource dataSource;
 
     public ConnectionsManager(String url, String username, String password, String connectionClass) {
@@ -21,14 +20,6 @@ public class ConnectionsManager {
         this.username = username;
         this.password = password;
         this.connectionClass = connectionClass;
-        /*HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(url);
-        config.setUsername(username);
-        config.setPassword(password);
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        dataSource = new HikariDataSource(config);*/
     }
 
     public ConnectionsManager(String jndi, String username, String password) throws NamingException {
@@ -53,11 +44,10 @@ public class ConnectionsManager {
         }
         if (this.dataSource == null) {
             return DriverManager.getConnection(this.url, this.username, this.password);
-        } else {
-            if (this.username != null && this.password != null) {
-                return this.dataSource.getConnection(this.username, this.password);
-            }
-            return this.dataSource.getConnection();
         }
+        if (this.username != null && this.password != null) {
+            return this.dataSource.getConnection(this.username, this.password);
+        }
+        return this.dataSource.getConnection();
     }
 }
