@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class StaxStreamParser {
 
 
-    public Definition parseDefinitions(URI file) throws Exception {
+    public static Definition parseDefinitions(URI file) throws Exception {
         //TODO действия при ошибки парсера
         if (file == null) throw new RuntimeException();
         Path paths = Paths.get(file);

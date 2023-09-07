@@ -55,6 +55,6 @@ public class XmlQueryRPCServlet extends HttpServlet {
     @Override
     public void destroy() {
         super.destroy();
-        executorService.shutdown();
+        QueryExecutorService.shutdown();
     }
 }
