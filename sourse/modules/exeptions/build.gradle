@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group = 'ru.iedt.database.request'
-version = '1.0-SNAPSHOT'
+group "${applicationGroup}"
+version "${applicationVersion}"
 
 repositories {
     mavenCentral()
@@ -16,4 +16,9 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_20
+    targetCompatibility = JavaVersion.VERSION_20
 }

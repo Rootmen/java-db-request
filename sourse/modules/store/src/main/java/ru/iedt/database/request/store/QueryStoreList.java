@@ -1,29 +1,36 @@
 package ru.iedt.database.request.store;
 
 import org.reflections.Reflections;
-/*import ru.iedt.database.request.database.controller.query.connections.ConnectionsManager;
-import ru.iedt.database.request.structures.nodes.database.QuerySet;*/
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class QueryStoreList {
-    static public ArrayList<QueryStoreMetadata> getStoresMetadata() {
+
+    /**
+     * Метод для получения метаданных из классов, отмеченных аннотацией @DefinitionStore.
+     * <p>
+     * Этот метод использует рефлексию для поиска классов и создания их экземпляров, отмеченных аннотацией @DefinitionStore,
+     * для извлечения и хранения метаданных.
+     *
+     * @return Список QueryStoreDefinition, содержащий метаданные классов, отмеченных аннотацией @DefinitionStore.
+     * @throws RuntimeException В случае возникновения ошибок при создании экземпляров классов с метаданными.
+     */
+    static public ArrayList<QueryStoreDefinition> getStoresMetadata() {
+        // Инициализация рефлексии и списка для хранения классов и метаданных
         Reflections reflections = new Reflections("ru");
-        ArrayList<Class<?>> classes = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
-        ArrayList<QueryStoreMetadata> queryStores = new ArrayList<>();
-        for (Class<?> clazz : classes) {
+        ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
+        ArrayList<QueryStoreDefinition> queryStores = new ArrayList<>();
+
+        // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
+        for (Class<?> classElement : classArrayList) {
             try {
-                QueryStoreDefinition queryStoreDefinition = (QueryStoreDefinition) clazz.getDeclaredConstructor().newInstance();
-                queryStores.add(new QueryStoreMetadata(queryStoreDefinition.getStorePath(), queryStoreDefinition.getStoreName()));
-            } catch (InstantiationException | IllegalAccessException | URISyntaxException | InvocationTargetException |
-                     NoSuchMethodException e) {
+                queryStores.add((QueryStoreDefinition) classElement.getDeclaredConstructor().newInstance());
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
+        // Возвращение списка с метаданными классов5
         return queryStores;
     }
 
