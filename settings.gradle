@@ -9,4 +9,12 @@ pluginManagement {
     }
 }
 rootProject.name = 'java-db-request'
+//модуль поиска definition в коде
+include ':sourse:modules:store'
+include ':sourse:modules:database-controller'
+//модуль со всеми исключениями в модуле
+include ':sourse:exeptions'
+include ':sourse:modules:xml-parser'
+include 'sourse:modules:exeptions'
+findProject(':sourse:modules:exeptions')?.name = 'exeptions'
 
