@@ -34,6 +34,10 @@ public class QueryStoreList {
         return queryStores;
     }
 
+    public static void main(String[] args) {
+        ArrayList<QueryStoreDefinition> queryStoreDefinitions = getStoresMetadata();
+        System.out.println(queryStoreDefinitions);
+    }
 
   /*  static public class QueryStore {
         String storeName;

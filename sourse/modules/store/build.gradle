@@ -13,10 +13,6 @@ dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-arc'
 
-
-    implementation 'io.smallrye:jandex'
-
-
     implementation 'org.reflections:reflections:0.10.2'
 
 
@@ -34,8 +30,8 @@ tasks.configureEach { task ->
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_20
-    targetCompatibility = JavaVersion.VERSION_20
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 test {
