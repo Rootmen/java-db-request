@@ -1,9 +1,6 @@
 package ru.iedt.database.request.parser;
 
-import ru.iedt.database.request.structures.nodes.database.Connection;
-import ru.iedt.database.request.structures.nodes.database.Query;
-import ru.iedt.database.request.structures.nodes.database.QuerySet;
-import ru.iedt.database.request.structures.nodes.database.SQL;
+import ru.iedt.database.request.structures.nodes.database.*;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -11,22 +8,25 @@ import javax.xml.stream.XMLStreamReader;
 
 public class StaxStreamParserElement {
 
-    public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
-        QuerySet querySet = new QuerySet();
+   /* public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
+        QuerySet querySet = new QuerySet(reader.getAttributeValue(null, "REFID"));
         while (reader.hasNext()) {
             int parserCode = reader.next();
-            if (parserCode == XMLStreamConstants.START_ELEMENT && "CONNECTION".equals(reader.getLocalName())) {
+            if (!(parserCode == XMLStreamConstants.START_ELEMENT || parserCode == XMLStreamConstants.END_ELEMENT))
+                continue;
+            String localName = reader.getLocalName().toUpperCase();
+            if (parserCode == XMLStreamConstants.START_ELEMENT && "connection".equals(localName)) {
                 Connection connection = StaxStreamParserElement.parseConnectionNode(reader);
                 querySet.setConnection(connection);
-            } else if (parserCode == XMLStreamConstants.START_ELEMENT && "QUERY".equals(reader.getLocalName())) {
+            } else if (parserCode == XMLStreamConstants.START_ELEMENT && "query".equals(localName)) {
                 Query query = StaxStreamParserElement.parseQueryNode(reader);
                 querySet.addQueries(query);
-            } else if (parserCode == XMLStreamConstants.END_ELEMENT && "QuerySet".equals(reader.getLocalName())) {
-                break;   
+            } else if (parserCode == XMLStreamConstants.END_ELEMENT && "queryset".equals(localName)) {
+                break;
             }
         }
         return querySet;
-    }
+    }*/
 
 
     public static Connection parseConnectionNode(XMLStreamReader reader) throws XMLStreamException {

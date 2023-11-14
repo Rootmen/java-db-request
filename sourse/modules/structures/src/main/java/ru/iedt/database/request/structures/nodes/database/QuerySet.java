@@ -3,34 +3,33 @@ package ru.iedt.database.request.structures.nodes.database;
 import ru.iedt.database.request.structures.base.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class QuerySet extends Node {
+public class QuerySet {
 
     ArrayList<Query> queries;
-    Connection connection;
-    public QuerySet() {
-        super("QuerySet");
-        this.queries = new ArrayList<>();
-    }
+    HashMap<String,Connection> connections;
 
-    public QuerySet(ArrayList<Query> queries) {
-        super("QuerySet");
-        this.queries = queries;
+    String refid;
+    public QuerySet(String refid) {
+        this.queries = new ArrayList<>();
+        this.refid = refid;
     }
 
     public void addQueries(Query query) {
         queries.add(query);
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setConnections(HashMap<String,Connection> connection) {
+        this.connections = connection;
+    }
+
+    public String getRefid() {
+        return refid;
     }
 
     @Override
     public String toString() {
-        return "QuerySet {" +
-                "\n\tqueries=" + queries +
-                ",\n\tconnection=" + connection +
-                "\n}";
+        return String.format("QuerySet { queries='%s', connection='%s' }",queries, connections) ;
     }
 }

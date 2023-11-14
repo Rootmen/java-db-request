@@ -9,6 +9,14 @@ public class Connection {
         this.name = name;
     }
 
+    public String getRef() {
+        return ref;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return String.format("Connection{ refid='%s', name='%s' }", this.ref, this.name);

@@ -1,24 +1,52 @@
 package ru.iedt.database.request.structures.nodes.database;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 public class Definition {
-    ArrayList<SQL> sqlArrayList = new ArrayList<>();
-    ArrayList<QuerySet> querySetArrayList = new ArrayList<>();
 
-    public void setQuerySetArrayList(ArrayList<QuerySet> querySetArrayList) {
-        this.querySetArrayList = querySetArrayList;
+    private HashMap<String, Template> template = new HashMap<>();
+    private HashMap<String, QuerySet> querySet = new HashMap<>();
+
+    public void setQuerySetArrayList(HashMap<String, QuerySet> querySetMap) {
+        this.querySet = querySetMap;
     }
 
-    public void setSqlArrayList(ArrayList<SQL> sqlArrayList) {
-        this.sqlArrayList = sqlArrayList;
+    public void setSqlArrayList(HashMap<String, Template> templateMap) {
+        this.template = templateMap;
     }
 
     @Override
     public String toString() {
-        return "Definition {" +
-                "\nSQL=" + sqlArrayList +
-                ",\nQuerySet=" + querySetArrayList +
-                '}';
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            mapper.getSerializerProvider().setNullKeySerializer(new KeySerializer());
+            Object jsonObject = mapper.readValue(
+                    String.format("{ \"template\": %s,  \"querySet\": %s}",
+                                    mapper.writeValueAsString(template),
+                                    mapper.writeValueAsString(querySet))
+                            .replace("\\n", "")
+                            .replaceAll("\\s+", " "),
+                    Object.class);
+            return mapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(jsonObject);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    static class KeySerializer extends JsonSerializer<Object> {
+        @Override
+        public void serialize(Object nullKey, JsonGenerator jsonGenerator, SerializerProvider unused)
+                throws IOException, JsonProcessingException {
+            jsonGenerator.writeFieldName("");
+        }
+    }
+
 }

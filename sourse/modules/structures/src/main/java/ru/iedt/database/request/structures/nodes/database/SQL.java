@@ -6,6 +6,7 @@ public class SQL {
     private String refId;
 
     public void setRefId(String refId) {
+        if (refId != null) refId = refId.trim();
         this.refId = refId;
     }
 
@@ -13,11 +14,16 @@ public class SQL {
         this.value = new StringBuilder(value.trim());
     }
 
+    public StringBuilder getValue() {
+        return value;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
     @Override
     public String toString() {
-        return "SQL{" +
-                "value='" + value + "'"+
-                ", refid='" + refId + '\'' +
-                '}';
+        return String.format("SQL{ refid='%s', value='%s' }", value.toString().replaceAll("\\s+", " ").replaceAll("\\n", " "), refId);
     }
 }
