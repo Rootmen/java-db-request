@@ -1,6 +1,13 @@
+buildscript {
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-lint-plugin:18.0.3'
+    }
+}
+
 plugins {
     id 'java'
     id 'io.quarkus'
+    id 'nebula.lint' version "18.0.3"
 }
 
 quarkusDev.enabled = false
@@ -21,4 +28,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+allprojects {
+    apply plugin :"nebula.lint"
+    gradleLint {
+        rules = ['all-dependency'] // we'll add rules here
+    }
 }

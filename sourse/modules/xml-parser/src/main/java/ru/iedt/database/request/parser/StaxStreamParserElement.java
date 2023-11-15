@@ -1,11 +1,5 @@
 package ru.iedt.database.request.parser;
 
-import ru.iedt.database.request.structures.nodes.database.*;
-
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 public class StaxStreamParserElement {
 
    /* public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
@@ -29,7 +23,7 @@ public class StaxStreamParserElement {
     }*/
 
 
-    public static Connection parseConnectionNode(XMLStreamReader reader) throws XMLStreamException {
+/*    public static Connection parseConnectionNode(XMLStreamReader reader) throws XMLStreamException {
         Connection connection = new Connection(reader.getAttributeValue(null, "REFID"), reader.getAttributeValue(null, "name"));
         while (reader.hasNext()) {
             int parserCode = reader.next();
@@ -38,9 +32,9 @@ public class StaxStreamParserElement {
             }
         }
         return connection;
-    }
+    }*/
 
-    public static Query parseQueryNode(XMLStreamReader reader) throws XMLStreamException {
+   /* public static Query parseQueryNode(XMLStreamReader reader) throws XMLStreamException {
         Query query = new Query();
         while (reader.hasNext()) {
             int parserCode = reader.next();
@@ -52,9 +46,9 @@ public class StaxStreamParserElement {
             }
         }
         return query;
-    }
+    }*/
 
-    public static SQL parseSqlNode(XMLStreamReader reader) throws XMLStreamException {
+  /*  public static SQL parseSqlNode(XMLStreamReader reader) throws XMLStreamException {
         SQL sql = new SQL();
         sql.setRefId(reader.getAttributeValue(null, "REFID"));
         sql.setValue(reader.getElementText());
@@ -65,5 +59,5 @@ public class StaxStreamParserElement {
             }
         }
         return sql;
-    }
+    }*/
 }

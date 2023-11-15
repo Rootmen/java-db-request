@@ -1,7 +1,8 @@
 package ru.iedt.database.request.parser.elements.v3;
 
 import ru.iedt.database.request.parser.StaxStreamProcessor;
-import ru.iedt.database.request.structures.nodes.database.Definition;
+import ru.iedt.database.request.parser.elements.v3.parser.ParserEngineDefinition;
+import ru.iedt.database.request.structures.nodes.v3.Definition;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -12,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static ru.iedt.database.request.parser.elements.v3.parser.ParserEngineDefinition.parseDefinitionNode;
 
 public class ParserEngine {
 
@@ -26,7 +26,7 @@ public class ParserEngine {
 
         try (StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(paths))) {
             XMLStreamReader reader = processor.getReader();
-            return parseDefinitionNode(reader);
+            return ParserEngineDefinition.parseDefinitionNode(reader);
         } catch (XMLStreamException | IOException e) {
             throw new RuntimeException(e);
         }

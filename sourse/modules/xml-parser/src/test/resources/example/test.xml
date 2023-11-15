@@ -6,46 +6,46 @@
             FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
             ]]>
         </Template>
+        <Template ID="MAIN_TABLE_2">
+            <![CDATA[
+            FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA_2 AS VARIANT
+            ]]>
+        </Template>
+        <Template ID="MAIN_TABLE_5">
+            <![CDATA[
+            FROM DNEIM.INFRASTRUCTURAL_5VARIANT_DATA_2 AS VARIANT
+            ]]>
+        </Template>
     </Templates>
     <QuerySet ID="GET_TEST">
-        <Connections>
-            <Connection refid="PG_CONNECT" name="main" default="true"/>
-            <Connection refid="PG_CONNECT" name="second"/>
-        </Connections>
-        <Queries>
-            <Query>
-                <Parameters>
-                    <Parameter name="VAR_ID" type="bigint"/>
-                    <Parameter name="ST1" type="int" default="0"/>
-                    <Parameter name="ST2" type="int" default="0"/>
-                    <Parameter name="YEARS" type="int_array">
-                        <When value="[0]">
-                            <![CDATA[
-                            (SELECT ARRAY_AGG(CALCULATION_YEARS)
-                             FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
-                             WHERE VARIANT.VAR_ID = $VAR_ID$)
-                            ]]>
-                        </When>
-                        <Otherwise><![CDATA[0]]></Otherwise>
-                    </Parameter>
-                </Parameters>
-                <SQL connection="second" wrapperClass="com.rootmen.Database.DatabaseQuery.WrapperPassport">
+        <Parameters>
+            <Parameter name="VAR_ID" type="bigint"/>
+            <Parameter name="ST1" type="int" default="0"/>
+            <Parameter name="ST2" type="int" default="0"/>
+            <Parameter name="YEARS" type="int_array">
+                <When value="[0]">
                     <![CDATA[
+                    (SELECT ARRAY_AGG(CALCULATION_YEARS)
+                    FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
+                    WHERE VARIANT.VAR_ID = $VAR_ID$)
+                    ]]>
+                </When>
+                <Otherwise><![CDATA[0]]></Otherwise>
+            </Parameter>
+        </Parameters>
+        <Query>
+            <SQL name="main" wrapper_class="json">
+                <![CDATA[
                     SELECT 1 AS RESULT,
                            $ST1$ AS RESULT_ST1,
                            $ST2$ AS RESULT_ST2,
                            $VAR_ID$ AS RESULT_VAR_ID,
                            $YEARS$ AS RESULT_YEARS
-                    ]]>
-                </SQL>
-            </Query>
-        </Queries>
+                ]]>
+            </SQL>
+        </Query>
     </QuerySet>
-    <QuerySet ID="GET_TEST_REFS">
-        <Connections>
-            <Connection refid="PG_CONNECT" name="main" default="true"/>
-            <Connection refid="PG_CONNECT" name="second"/>
-        </Connections>
+   <!-- <QuerySet ID="GET_TEST_REFS">
         <Queries>
             <Query>
                 <Parameters>
@@ -63,7 +63,7 @@
                         <Otherwise><![CDATA[0]]></Otherwise>
                     </Parameter>
                 </Parameters>
-                <SQL connection="second" wrapperClass="com.rootmen.Database.DatabaseQuery.WrapperPassport">
+                <SQL>
                     <![CDATA[
                     SELECT *
                     $REF_SQL=MAIN_TABLE$
@@ -71,5 +71,5 @@
                 </SQL>
             </Query>
         </Queries>
-    </QuerySet>
+    </QuerySet>-->
 </Definition>

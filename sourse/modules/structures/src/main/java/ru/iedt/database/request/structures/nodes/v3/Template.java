@@ -1,4 +1,4 @@
-package ru.iedt.database.request.structures.nodes.database;
+package ru.iedt.database.request.structures.nodes.v3;
 
 public class Template {
     private StringBuilder value;
@@ -28,6 +28,8 @@ public class Template {
 
     @Override
     public String toString() {
-        return String.format("SQL{ refid='%s', value='%s' }", value.toString().replaceAll("\\s+", " ").replaceAll("\\n", " "), id);
+        return String.format("\"%s\":\"%s\"", this.getId(), this.getValue().toString().trim());
     }
+
+
 }

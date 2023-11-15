@@ -2,9 +2,9 @@ package ru.iedt.database.request.parser.elements.v3.parser;
 
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
-import ru.iedt.database.request.structures.nodes.database.Definition;
-import ru.iedt.database.request.structures.nodes.database.QuerySet;
-import ru.iedt.database.request.structures.nodes.database.Template;
+import ru.iedt.database.request.structures.nodes.v3.Definition;
+import ru.iedt.database.request.structures.nodes.v3.QuerySet;
+import ru.iedt.database.request.structures.nodes.v3.Template;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
