@@ -2,7 +2,7 @@ package ru.iedt.database.request.parser;
 
 public class StaxStreamParserElement {
 
-   /* public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
+    /* public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
         QuerySet querySet = new QuerySet(reader.getAttributeValue(null, "REFID"));
         while (reader.hasNext()) {
             int parserCode = reader.next();
@@ -22,8 +22,7 @@ public class StaxStreamParserElement {
         return querySet;
     }*/
 
-
-/*    public static Connection parseConnectionNode(XMLStreamReader reader) throws XMLStreamException {
+    /*    public static Connection parseConnectionNode(XMLStreamReader reader) throws XMLStreamException {
         Connection connection = new Connection(reader.getAttributeValue(null, "REFID"), reader.getAttributeValue(null, "name"));
         while (reader.hasNext()) {
             int parserCode = reader.next();
@@ -34,7 +33,7 @@ public class StaxStreamParserElement {
         return connection;
     }*/
 
-   /* public static Query parseQueryNode(XMLStreamReader reader) throws XMLStreamException {
+    /* public static Query parseQueryNode(XMLStreamReader reader) throws XMLStreamException {
         Query query = new Query();
         while (reader.hasNext()) {
             int parserCode = reader.next();
@@ -48,7 +47,7 @@ public class StaxStreamParserElement {
         return query;
     }*/
 
-  /*  public static SQL parseSqlNode(XMLStreamReader reader) throws XMLStreamException {
+    /*  public static SQL parseSqlNode(XMLStreamReader reader) throws XMLStreamException {
         SQL sql = new SQL();
         sql.setRefId(reader.getAttributeValue(null, "REFID"));
         sql.setValue(reader.getElementText());

@@ -1,15 +1,14 @@
 package ru.iedt.database.request.parser.elements.v3.parser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import ru.iedt.database.request.parser.elements.v3.Attributes;
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.structures.nodes.v3.Parameter;
-
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ParserEngineParameters {
 
@@ -57,7 +56,8 @@ public class ParserEngineParameters {
                     throw new RuntimeException(String.format("When значения дублируются с value='%s'", whenValue));
                 }
                 whenMap.put(whenValue, value);
-            } if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.OTHERWISE.equals(localName)) {
+            }
+            if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.OTHERWISE.equals(localName)) {
                 String whenValue = "default";
                 String value = reader.getElementText().trim();
                 if (whenMap.containsKey(whenValue)) {

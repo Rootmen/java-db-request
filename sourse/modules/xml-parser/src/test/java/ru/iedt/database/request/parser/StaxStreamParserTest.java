@@ -1,12 +1,9 @@
 package ru.iedt.database.request.parser;
 
 import io.quarkus.test.junit.QuarkusTest;
+import java.net.URL;
 import org.junit.jupiter.api.Test;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
-
-import java.net.URL;
-
-
 
 @QuarkusTest
 public class StaxStreamParserTest {

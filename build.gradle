@@ -1,13 +1,10 @@
 buildscript {
-    dependencies {
-        classpath 'com.netflix.nebula:gradle-lint-plugin:18.0.3'
-    }
 }
 
 plugins {
-    id 'java'
-    id 'io.quarkus'
-    id 'nebula.lint' version "18.0.3"
+	id 'java'
+	id 'io.quarkus'
+	id "com.diffplug.spotless" version "6.22.0"
 }
 
 quarkusDev.enabled = false
@@ -17,22 +14,34 @@ group "${applicationGroup}"
 version "${applicationVersion}"
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+	mavenCentral()
+	mavenLocal()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation platform('org.junit:junit-bom:5.9.1')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
-allprojects {
-    apply plugin :"nebula.lint"
-    gradleLint {
-        rules = ['all-dependency'] // we'll add rules here
-    }
+spotless {
+	ratchetFrom 'origin/main'
+
+	format 'misc', {
+		// define the files to apply `misc` to
+		target '*.gradle', '*.md', '.gitignore'
+
+		// define the steps to apply to those files
+		trimTrailingWhitespace()
+		indentWithTabs() // or spaces. Takes an integer argument if you don't like 4
+		endWithNewline()
+	}
+	java {
+		target "**/*.java"
+		palantirJavaFormat()
+		//prettier(['prettier': '3.0.3', 'prettier-plugin-java': '2.3.0']).config(['parser': 'java', 'tabWidth': 4, 'plugins': ['prettier-plugin-java']])
+	}
 }

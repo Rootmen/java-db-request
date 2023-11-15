@@ -1,9 +1,8 @@
 package ru.iedt.database.request.store;
 
-import org.reflections.Reflections;
-
 import java.net.URI;
 import java.util.ArrayList;
+import org.reflections.Reflections;
 
 public class QueryStoreList {
 
@@ -16,7 +15,7 @@ public class QueryStoreList {
      * @return Список QueryStoreDefinition, содержащий метаданные классов, отмеченных аннотацией @DefinitionStore.
      * @throws RuntimeException В случае возникновения ошибок при создании экземпляров классов с метаданными.
      */
-    static public ArrayList<QueryStoreDefinition> getStoresMetadata() {
+    public static ArrayList<QueryStoreDefinition> getStoresMetadata() {
         // Инициализация рефлексии и списка для хранения классов и метаданных
         Reflections reflections = new Reflections("ru");
         ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
@@ -25,7 +24,8 @@ public class QueryStoreList {
         // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
         for (Class<?> classElement : classArrayList) {
             try {
-                queryStores.add((QueryStoreDefinition) classElement.getDeclaredConstructor().newInstance());
+                queryStores.add((QueryStoreDefinition)
+                        classElement.getDeclaredConstructor().newInstance());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -39,19 +39,20 @@ public class QueryStoreList {
         System.out.println(queryStoreDefinitions);
     }
 
-  /*  static public class QueryStore {
-        String storeName;
-        HashMap<String, ConnectionsManager> connections = new HashMap<>();
-        HashMap<String, QuerySet> querySet = new HashMap<>();
+    /*  static public class QueryStore {
+            String storeName;
+            HashMap<String, ConnectionsManager> connections = new HashMap<>();
+            HashMap<String, QuerySet> querySet = new HashMap<>();
 
-        public QueryStore(URI storePatch, String storeName) {
-            this.storeName = storeName;
-
-
-        }
+            public QueryStore(URI storePatch, String storeName) {
+                this.storeName = storeName;
 
 
-*//*        private static ParserXMLErrors checkDirectory(String directory) {
+            }
+
+
+    */
+    /*        private static ParserXMLErrors checkDirectory(String directory) {
             //Проверка того что директория существует
             if (Files.notExists(Paths.get(directory)) || !Files.isDirectory(Paths.get(directory))) {
                 return new ExceptionNoDirectory(directory);
@@ -71,14 +72,15 @@ public class QueryStoreList {
             }
             return null;
         }
-    }*//*
+    }*/
+    /*
     }*/
 
     /**
      * Вложенный статический класс QueryStore представляет собой структуру,
      * которая хранит информацию о хранилище запросов.
      */
-    static public class QueryStoreMetadata {
+    public static class QueryStoreMetadata {
         /**
          * Путь к хранилищу запросов.
          */
@@ -96,10 +98,7 @@ public class QueryStoreList {
 
         @Override
         public String toString() {
-            return "QueryStore{" +
-                    "storePatch=" + storePatch +
-                    ", storeName='" + storeName + '\'' +
-                    '}';
+            return "QueryStore{" + "storePatch=" + storePatch + ", storeName='" + storeName + '\'' + '}';
         }
 
         public URI getStorePatch() {

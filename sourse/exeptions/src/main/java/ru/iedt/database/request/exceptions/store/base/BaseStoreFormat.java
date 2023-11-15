@@ -1,6 +1,5 @@
 package ru.iedt.database.request.exceptions.store.base;
 
-
 import ru.iedt.database.request.exceptions.BaseExceptions;
 
 public class BaseStoreFormat extends BaseExceptions {

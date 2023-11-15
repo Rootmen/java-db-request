@@ -1,12 +1,12 @@
 package ru.iedt.database.request.parser;
 
+import java.io.InputStream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.util.StreamReaderDelegate;
-import java.io.InputStream;
 
 public class StaxStreamProcessor implements AutoCloseable {
     private static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
@@ -50,7 +50,6 @@ public class StaxStreamProcessor implements AutoCloseable {
             return super.getAttributeNamespace(index).toLowerCase();
         }
 
-
         @Override
         public String getLocalName() {
             return super.getLocalName().toLowerCase();
@@ -58,7 +57,8 @@ public class StaxStreamProcessor implements AutoCloseable {
 
         @Override
         public String getAttributeValue(String namespaceURI, String localName) {
-            if (this.reader.getEventType() == XMLEvent.START_ELEMENT || this.reader.getEventType() == XMLEvent.ATTRIBUTE) {
+            if (this.reader.getEventType() == XMLEvent.START_ELEMENT
+                    || this.reader.getEventType() == XMLEvent.ATTRIBUTE) {
                 int attributesCount = this.reader.getAttributeCount();
                 for (int g = 0; g < attributesCount; g++) {
                     QName qName = this.reader.getAttributeName(g);
@@ -67,7 +67,8 @@ public class StaxStreamProcessor implements AutoCloseable {
                             return this.reader.getAttributeValue(g);
                         }
                     } else {
-                        if (qName.getLocalPart().toLowerCase().equals(localName) && qName.getNamespaceURI().toLowerCase().equals(namespaceURI)) {
+                        if (qName.getLocalPart().toLowerCase().equals(localName)
+                                && qName.getNamespaceURI().toLowerCase().equals(namespaceURI)) {
                             return this.reader.getAttributeValue(g);
                         }
                     }
@@ -75,10 +76,9 @@ public class StaxStreamProcessor implements AutoCloseable {
 
                 return null;
             } else {
-                throw new IllegalStateException("Current state is not among the states XMLEvent.START_ELEMENT and XMLEvent.ATTRIBUTE valid for getAttributeValue()");
+                throw new IllegalStateException(
+                        "Current state is not among the states XMLEvent.START_ELEMENT and XMLEvent.ATTRIBUTE valid for getAttributeValue()");
             }
-
         }
-
     }
 }

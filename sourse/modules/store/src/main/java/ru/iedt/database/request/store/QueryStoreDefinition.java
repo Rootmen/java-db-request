@@ -1,7 +1,6 @@
 package ru.iedt.database.request.store;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -19,7 +18,7 @@ public abstract class QueryStoreDefinition {
      * @return URI пути к хранилищу запросов.
      * @throws URISyntaxException если произошла ошибка в URI.
      */
-    abstract public URI getStorePath() throws URISyntaxException;
+    public abstract URI getStorePath() throws URISyntaxException;
 
     /**
      * Абстрактный метод, который должен быть реализован в подклассах,
@@ -27,7 +26,7 @@ public abstract class QueryStoreDefinition {
      *
      * @return Имя хранилища запросов.
      */
-    abstract public String getStoreName();
+    public abstract String getStoreName();
 
     /**
      * Переопределенный метод `toString`, возвращающий строковое представление объекта `QueryStoreDefinition`.
@@ -38,7 +37,8 @@ public abstract class QueryStoreDefinition {
     @Override
     public String toString() {
         try {
-            return String.format("QueryStore{ storePatch='%s', storeName='%s' }", this.getStorePath(), this.getStoreName());
+            return String.format(
+                    "QueryStore{ storePatch='%s', storeName='%s' }", this.getStorePath(), this.getStoreName());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

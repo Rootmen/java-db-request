@@ -2,8 +2,7 @@ package ru.iedt.database.request.parser;
 
 public class StaxStreamParser {
 
-
-   /* public static Definition parseDefinitions(URI file) throws Exception {
+    /* public static Definition parseDefinitions(URI file) throws Exception {
         //TODO действия при ошибки парсера
         if (file == null) throw new RuntimeException();
         Path paths = Paths.get(file);

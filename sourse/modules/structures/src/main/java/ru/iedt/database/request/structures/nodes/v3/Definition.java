@@ -1,7 +1,6 @@
 package ru.iedt.database.request.structures.nodes.v3;
 
 import com.fasterxml.jackson.databind.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -44,23 +43,19 @@ public class Definition {
             querySetString.append(" ]");
 
             Object jsonObject = mapper.readValue(
-                    String.format("{ \"template\": %s,  \"querySet\": %s}",
-                                    templateString,
-                                    querySetString)
+                    String.format("{ \"template\": %s,  \"querySet\": %s}", templateString, querySetString)
                             .replace("\\n", "")
                             .replaceAll("\\s+", " "),
                     Object.class);
 
-            return mapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(jsonObject);
-           /* return  String.format("{ \"template\": %s,  \"querySet\": %s}",
-                            templateString,
-                            querySetString)
-                    .replace("\\n", "")
-                    .replaceAll("\\s+", " ");*/
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+            /* return  String.format("{ \"template\": %s,  \"querySet\": %s}",
+                    templateString,
+                    querySetString)
+            .replace("\\n", "")
+            .replaceAll("\\s+", " ");*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 }

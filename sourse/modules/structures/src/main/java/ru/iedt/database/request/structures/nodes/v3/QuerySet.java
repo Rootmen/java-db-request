@@ -2,7 +2,6 @@ package ru.iedt.database.request.structures.nodes.v3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import java.util.ArrayList;
 
 public class QuerySet {

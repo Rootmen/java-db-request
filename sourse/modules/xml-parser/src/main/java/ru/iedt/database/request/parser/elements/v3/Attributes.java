@@ -34,5 +34,4 @@ public interface Attributes {
     public interface When {
         public static final String VALUE = "value";
     }
-
 }

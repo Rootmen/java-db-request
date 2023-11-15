@@ -1,17 +1,15 @@
 package ru.iedt.database.request.parser.elements.v3.parser;
 
+import java.util.ArrayList;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import ru.iedt.database.request.parser.elements.v3.Attributes;
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.structures.nodes.v3.Parameter;
 import ru.iedt.database.request.structures.nodes.v3.Queries;
 import ru.iedt.database.request.structures.nodes.v3.QuerySet;
-
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.util.ArrayList;
-
 
 public class ParserEngineQuerySet {
 
@@ -22,7 +20,6 @@ public class ParserEngineQuerySet {
      * @return Объект QuerySet, содержащий извлеченные соединения и запросы.
      * @throws XMLStreamException в случае ошибок разбора XML.
      */
-
     public static QuerySet parseQuerySetNode(XMLStreamReader reader) throws XMLStreamException {
         QuerySet querySet = new QuerySet(reader.getAttributeValue(null, Attributes.QuerySet.ID));
 

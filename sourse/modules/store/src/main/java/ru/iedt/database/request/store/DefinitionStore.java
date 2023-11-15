@@ -1,7 +1,6 @@
 package ru.iedt.database.request.store;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-
 import java.lang.annotation.*;
 
 /**
@@ -12,6 +11,5 @@ import java.lang.annotation.*;
  */
 @RegisterForReflection
 @Target(ElementType.TYPE)
-@Retention(value= RetentionPolicy.RUNTIME)
-public @interface DefinitionStore {
-}
+@Retention(value = RetentionPolicy.RUNTIME)
+public @interface DefinitionStore {}

@@ -1,12 +1,12 @@
 pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        mavenLocal()
-    }
-    plugins {
-        id "${quarkusPluginId}" version "${quarkusPluginVersion}"
-    }
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+		mavenLocal()
+	}
+	plugins {
+		id "${quarkusPluginId}" version "${quarkusPluginVersion}"
+	}
 }
 rootProject.name = 'java-db-request'
 //модуль поиска definition в коде
@@ -16,4 +16,3 @@ include ':sourse:modules:database-controller'
 include ':sourse:exeptions'
 include ':sourse:modules:xml-parser'
 include ':sourse:modules:structures'
-

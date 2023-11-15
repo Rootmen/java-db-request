@@ -11,5 +11,4 @@ public interface Nodes {
     public static final String PARAMETER = "parameter";
     public static final String WHEN = "when";
     public static final String OTHERWISE = "otherwise";
-
 }
