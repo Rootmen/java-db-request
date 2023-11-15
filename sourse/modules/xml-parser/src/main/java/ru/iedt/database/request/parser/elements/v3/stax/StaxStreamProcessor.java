@@ -1,4 +1,4 @@
-package ru.iedt.database.request.parser;
+package ru.iedt.database.request.parser.elements.v3.stax;
 
 import java.io.InputStream;
 import javax.xml.namespace.QName;

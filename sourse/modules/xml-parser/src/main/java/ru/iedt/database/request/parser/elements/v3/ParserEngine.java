@@ -8,8 +8,8 @@ import java.nio.file.Paths;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import ru.iedt.database.request.parser.StaxStreamProcessor;
-import ru.iedt.database.request.parser.elements.v3.parser.ParserEngineDefinition;
+import ru.iedt.database.request.parser.elements.v3.stax.StaxStreamProcessor;
+import ru.iedt.database.request.parser.elements.v3.engine.ParserEngineDefinition;
 import ru.iedt.database.request.structures.nodes.v3.Definition;
 
 public class ParserEngine {
