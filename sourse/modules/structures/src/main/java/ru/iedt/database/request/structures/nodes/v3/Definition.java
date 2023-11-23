@@ -1,19 +1,20 @@
 package ru.iedt.database.request.structures.nodes.v3;
 
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Definition {
 
-    private HashMap<String, Template> template = new HashMap<>();
-    private HashMap<String, QuerySet> querySet = new HashMap<>();
+    private Map<String, ? extends Template> template = new HashMap<>();
+    private Map<String, ? extends QuerySet> querySet = new HashMap<>();
 
-    public void setQuerySetArrayList(HashMap<String, QuerySet> querySetMap) {
+    public final void setQuerySetArrayList(Map<String, ? extends QuerySet> querySetMap) {
         this.querySet = querySetMap;
     }
 
-    public void setSqlArrayList(HashMap<String, Template> templateMap) {
+    public void setSqlArrayList(Map<String, ? extends Template> templateMap) {
         this.template = templateMap;
     }
 
@@ -49,11 +50,6 @@ public class Definition {
                     Object.class);
 
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-            /* return  String.format("{ \"template\": %s,  \"querySet\": %s}",
-                    templateString,
-                    querySetString)
-            .replace("\\n", "")
-            .replaceAll("\\s+", " ");*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

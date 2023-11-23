@@ -21,10 +21,11 @@ public class ParserEngineDefinition {
             String localName = reader.getLocalName();
             if (Nodes.QUERY_SET.equals(localName)) {
                 QuerySet querySet = ParserEngineQuerySet.parseQuerySetNode(reader);
-                if (querySetMap.containsKey(querySet.getRefid()))
-                    throw new RuntimeException(
-                            String.format("QuerySet refid '%s' в хранилище дублируется", querySet.getRefid()));
-                querySetMap.put(querySet.getRefid(), querySet);
+                String refid = querySet.getRefid();
+                if (querySetMap.containsKey(refid)) {
+                    throw new RuntimeException(String.format("QuerySet refid '%s' в хранилище дублируется", refid));
+                }
+                querySetMap.put(refid, querySet);
             } else if (Nodes.TEMPLATES.equals(localName)) {
                 HashMap<String, Template> templates = ParserEngineTemplate.parseTemplatesNode(reader);
                 definition.setSqlArrayList(templates);
