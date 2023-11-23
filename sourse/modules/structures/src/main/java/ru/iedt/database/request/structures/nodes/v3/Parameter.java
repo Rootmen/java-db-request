@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.HashMap;
 
 public class Parameter {
-    String defaultValue;
-    String parameterName;
-    String parameterType;
+    private final String defaultValue;
+    private final String parameterName;
+    private final String parameterType;
 
     HashMap<String, String> whenMap = new HashMap<>();
 
@@ -29,7 +29,7 @@ public class Parameter {
             ObjectMapper mapper = new ObjectMapper();
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             return String.format(
-                    " { \"parameterName\":\"%s\", \"parameterType\":\"%s\", \"defaultValue\":\"%s\", \"whenMap\":%s }",
+                    "{ \"parameterName\":\"%s\", \"parameterType\":\"%s\", \"defaultValue\":\"%s\", \"whenMap\":%s }",
                     parameterName,
                     parameterType,
                     defaultValue,
