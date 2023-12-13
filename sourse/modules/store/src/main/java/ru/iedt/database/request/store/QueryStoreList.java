@@ -84,12 +84,12 @@ public class QueryStoreList {
         /**
          * Путь к хранилищу запросов.
          */
-        URI storePatch;
+        private final URI storePatch;
 
         /**
          * Имя хранилища запросов.
          */
-        String storeName;
+        private  final String storeName;
 
         public QueryStoreMetadata(URI storePatch, String storeName) {
             this.storeName = storeName;

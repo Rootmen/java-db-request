@@ -1,6 +1,7 @@
 package ru.iedt.database.request.parser.elements.v3.engine;
 
 import java.util.HashMap;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import ru.iedt.database.request.parser.elements.v3.Attributes;
@@ -25,11 +26,10 @@ public class ParserEngineTemplate {
 
         while (reader.hasNext()) {
             int readCode = reader.next();
-            if (ParserEngine.isElement(readCode)) continue;
-            String elementName = reader.getLocalName();
-            if (Nodes.TEMPLATE.equals(elementName)) {
+            String elementName = ParserEngine.getElementName(reader, readCode);
+            if (Nodes.TEMPLATE.equals(elementName) && readCode == XMLStreamConstants.START_ELEMENT) {
                 processTemplate(reader, templateMap);
-            } else if (Nodes.TEMPLATES.equals(elementName)) {
+            } else if (Nodes.TEMPLATES.equals(elementName) && readCode == XMLStreamConstants.END_ELEMENT) {
                 break;
             }
         }

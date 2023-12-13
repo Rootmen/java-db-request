@@ -28,7 +28,6 @@ public class Template {
 
     @Override
     public String toString() {
-        return String.format(
-                "\"%s\":\"%s\"", this.getId(), this.getValue().toString().trim());
+        return String.format("[id=%s, value=%s]", this.getId(), this.getValue().toString().trim());
     }
 }

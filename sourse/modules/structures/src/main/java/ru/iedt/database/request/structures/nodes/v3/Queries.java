@@ -9,8 +9,13 @@ public class Queries {
         this.sql.add(sql);
     }
 
+    public ArrayList<SQL> getSql() {
+        return sql;
+    }
+
     @Override
     public String toString() {
-        return String.format("{ \"sql\":%s }", sql);
+
+        return String.format("[sql=%s]", sql);
     }
 }

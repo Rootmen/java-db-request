@@ -18,24 +18,30 @@ public class Parameter {
         this.parameterType = parameterType;
     }
 
-    public Parameter setWhenMap(HashMap<String, String> whenMap) {
+    public void setWhenMap(HashMap<String, String> whenMap) {
         this.whenMap = whenMap;
-        return this;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public String getParameterName() {
+        return parameterName;
+    }
+
+    public String getParameterType() {
+        return parameterType;
+    }
+
+    public HashMap<String, String> getWhenMap() {
+        return whenMap;
     }
 
     @Override
     public String toString() {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            return String.format(
-                    "{ \"parameterName\":\"%s\", \"parameterType\":\"%s\", \"defaultValue\":\"%s\", \"whenMap\":%s }",
-                    parameterName,
-                    parameterType,
-                    defaultValue,
-                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(whenMap));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return String.format(
+                "[parameterName=%s, parameterType=%s, defaultValue=%s, whenMap=%s]",
+                parameterName, parameterType, defaultValue, whenMap);
     }
 }

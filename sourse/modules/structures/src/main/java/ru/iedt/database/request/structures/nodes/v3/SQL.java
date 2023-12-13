@@ -27,7 +27,7 @@ public class SQL {
     @Override
     public String toString() {
         return String.format(
-                "{ \"name\":\"%s\", \"wrapper\":\"%s\", \"value\":\"%s\" }",
+                "[name=%s, wrapper=%s, value=%s]",
                 name, wrapper, value.toString().replaceAll("\\s+", " ").replaceAll("\\n", " "));
     }
 }

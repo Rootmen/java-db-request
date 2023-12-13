@@ -33,4 +33,11 @@ public class ParserEngine {
     public static boolean isElement(int parseCode) {
         return !(XMLStreamConstants.START_ELEMENT == parseCode || XMLStreamConstants.END_ELEMENT == parseCode);
     }
+
+    public static String getElementName(XMLStreamReader reader, int parseCode) {
+        if (!(XMLStreamConstants.START_ELEMENT == parseCode || XMLStreamConstants.END_ELEMENT == parseCode)) {
+            return null;
+        }
+        return reader.getLocalName();
+    }
 }

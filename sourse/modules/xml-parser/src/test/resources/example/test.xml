@@ -45,31 +45,29 @@
             </SQL>
         </Query>
     </QuerySet>
-   <!-- <QuerySet ID="GET_TEST_REFS">
-        <Queries>
-            <Query>
-                <Parameters>
-                    <Parameter name="VAR_ID" type="bigint"/>
-                    <Parameter name="ST1" type="int" default="0"/>
-                    <Parameter name="ST2" type="int" default="0"/>
-                    <Parameter name="YEARS" type="int_array">
-                        <When value="[0]">
-                            <![CDATA[
+    <QuerySet ID="GET_TEST_REFS">
+        <Parameters>
+            <Parameter name="VAR_ID" type="bigint"/>
+            <Parameter name="ST1" type="int" default="0"/>
+            <Parameter name="ST2" type="int" default="0"/>
+            <Parameter name="YEARS" type="int_array">
+                <When value="[0]">
+                    <![CDATA[
                             (SELECT ARRAY_AGG(CALCULATION_YEARS)
                              FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
                              WHERE VARIANT.VAR_ID = $VAR_ID$)
                             ]]>
-                        </When>
-                        <Otherwise><![CDATA[0]]></Otherwise>
-                    </Parameter>
-                </Parameters>
-                <SQL>
-                    <![CDATA[
+                </When>
+                <Otherwise><![CDATA[0]]></Otherwise>
+            </Parameter>
+        </Parameters>
+        <Query>
+            <SQL>
+                <![CDATA[
                     SELECT *
                     $REF_SQL=MAIN_TABLE$
                     ]]>
-                </SQL>
-            </Query>
-        </Queries>
-    </QuerySet>-->
+            </SQL>
+        </Query>
+    </QuerySet>
 </Definition>
