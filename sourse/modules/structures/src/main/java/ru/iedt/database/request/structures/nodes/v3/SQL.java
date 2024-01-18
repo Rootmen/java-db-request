@@ -2,9 +2,9 @@ package ru.iedt.database.request.structures.nodes.v3;
 
 public class SQL {
 
-    private final StringBuilder value;
-    private final String name;
-    private final String wrapper;
+    protected final StringBuilder value;
+    protected final String name;
+    protected final String wrapper;
 
     public SQL(StringBuilder value, String name, String wrapper) {
         this.value = value;

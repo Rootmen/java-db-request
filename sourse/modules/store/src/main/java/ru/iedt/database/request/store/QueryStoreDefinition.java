@@ -1,6 +1,7 @@
 package ru.iedt.database.request.store;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -37,8 +38,7 @@ public abstract class QueryStoreDefinition {
     @Override
     public String toString() {
         try {
-            return String.format(
-                    "QueryStore{ storePatch='%s', storeName='%s' }", this.getStorePath(), this.getStoreName());
+            return String.format("QueryStore{ storePatch='%s', storeName='%s' }", this.getStorePath(), this.getStoreName());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

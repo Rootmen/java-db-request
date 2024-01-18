@@ -3,11 +3,7 @@ package ru.iedt.database.request.structures.nodes.v3;
 import java.util.ArrayList;
 
 public class Queries {
-    ArrayList<SQL> sql = new ArrayList<>();
-
-    public void addSql(SQL sql) {
-        this.sql.add(sql);
-    }
+    protected final ArrayList<SQL> sql = new ArrayList<>();
 
     public ArrayList<SQL> getSql() {
         return sql;
@@ -15,7 +11,6 @@ public class Queries {
 
     @Override
     public String toString() {
-
         return String.format("[sql=%s]", sql);
     }
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Definition parser="v3">
+    <QuerySet ID="TEST_SELECT">
+        <Parameters>
+            <Parameter name="ID1" type="int"/>
+            <Parameter name="ID2" type="int" default="0"/>
+            <Parameter name="ID3" type="int" default="0"/>
+            <Parameter name="ID4" type="int_array">
+                <When value="[0]">
+                    <![CDATA[
+                    ARRAY[-1]
+                    ]]>
+                </When>
+                <Otherwise>$ID4$</Otherwise>
+            </Parameter>
+        </Parameters>
+        <Query>
+            <SQL name="main" wrapper_class="json">
+                <![CDATA[
+                    SELECT 1 AS RESULT,
+                           $ID1$ AS ID1,
+                           $ID2$ AS ID2,
+                           $ID3$ AS ID3,
+                           $ID4$ AS ID4
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
+</Definition>

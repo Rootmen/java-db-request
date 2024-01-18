@@ -1,37 +1,31 @@
 package ru.iedt.database.request.structures.nodes.v3;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class QuerySet {
 
-    ArrayList<Queries> queries;
+    protected final List<Queries> queries = new ArrayList<>();
 
-    ArrayList<Parameter> parameters = new ArrayList<>();
+    protected final Map<String, Parameter> parameters = new HashMap<>();
 
-    String refid;
+    protected final String refid;
 
     public QuerySet(String refid) {
-        this.queries = new ArrayList<>();
         this.refid = refid;
-    }
-
-    public void addQueries(Queries query) {
-        queries.add(query);
-    }
-
-    public void setParameters(ArrayList<Parameter> parameters) {
-        this.parameters = parameters;
     }
 
     public String getRefid() {
         return refid;
     }
 
-    public ArrayList<Queries> getQueries() {
+    public List<Queries> getQueries() {
         return queries;
     }
 
-    public ArrayList<Parameter> getParameters() {
+    public Map<String, Parameter> getParameters() {
         return parameters;
     }
 

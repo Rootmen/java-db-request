@@ -30,7 +30,7 @@ public class QueryStoreList {
                 throw new RuntimeException(e);
             }
         }
-        // Возвращение списка с метаданными классов5
+        // Возвращение списка с метаданными классов
         return queryStores;
     }
 

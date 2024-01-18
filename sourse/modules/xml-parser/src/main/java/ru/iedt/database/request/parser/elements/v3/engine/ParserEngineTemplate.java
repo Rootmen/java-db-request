@@ -1,13 +1,16 @@
 package ru.iedt.database.request.parser.elements.v3.engine;
 
-import java.util.HashMap;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import ru.iedt.database.request.parser.elements.v3.Attributes;
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
+import ru.iedt.database.request.structures.nodes.v3.edit.TemplateClass;
+import ru.iedt.database.request.structures.nodes.v3.edit.TemplateEditable;
 import ru.iedt.database.request.structures.nodes.v3.Template;
+
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.util.HashMap;
 
 /**
  * Класс, выполняющий разбор XML для извлечения информации о шаблонах.
@@ -47,7 +50,7 @@ public class ParserEngineTemplate {
             throws XMLStreamException {
         String id = reader.getAttributeValue(null, Attributes.Template.ID);
         String value = reader.getElementText();
-        Template template = new Template(new StringBuilder(value), id);
+        TemplateClass template = new TemplateClass(new StringBuilder(value), id);
 
         if (templateMap.containsKey(template.getId())) {
             throw new RuntimeException(String.format("Шаблон с ID '%s' уже существует в хранилище", template.getId()));

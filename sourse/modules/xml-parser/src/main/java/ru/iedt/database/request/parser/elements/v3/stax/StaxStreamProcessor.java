@@ -57,8 +57,9 @@ public class StaxStreamProcessor implements AutoCloseable {
 
         @Override
         public String getAttributeValue(String namespaceURI, String localName) {
-            if (this.reader.getEventType() == XMLEvent.START_ELEMENT
-                    || this.reader.getEventType() == XMLEvent.ATTRIBUTE) {
+            int code = this.reader.getEventType();
+            boolean isHasAttribute = code == XMLEvent.START_ELEMENT || code == XMLEvent.ATTRIBUTE;
+            if (isHasAttribute) {
                 int attributesCount = this.reader.getAttributeCount();
                 for (int g = 0; g < attributesCount; g++) {
                     QName qName = this.reader.getAttributeName(g);
@@ -73,12 +74,11 @@ public class StaxStreamProcessor implements AutoCloseable {
                         }
                     }
                 }
-
-                return null;
             } else {
                 throw new IllegalStateException(
                         "Current state is not among the states XMLEvent.START_ELEMENT and XMLEvent.ATTRIBUTE valid for getAttributeValue()");
             }
+            return null;
         }
     }
 }
