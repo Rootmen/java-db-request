@@ -1,10 +1,12 @@
-package ru.iedt.database.request.structures.nodes.v3;
+package ru.iedt.database.request.structures.nodes.v3.node;
 
-public class SQL {
+import ru.iedt.database.request.structures.nodes.v3.Elements;
 
-    protected final StringBuilder value;
-    protected final String name;
-    protected final String wrapper;
+public class SQL implements Elements.SQL {
+
+    private final StringBuilder value;
+    private final String name;
+    private final String wrapper;
 
     public SQL(StringBuilder value, String name, String wrapper) {
         this.value = value;

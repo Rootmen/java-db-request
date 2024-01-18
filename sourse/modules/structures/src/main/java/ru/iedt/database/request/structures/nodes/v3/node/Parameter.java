@@ -1,8 +1,11 @@
-package ru.iedt.database.request.structures.nodes.v3;
+package ru.iedt.database.request.structures.nodes.v3.node;
+
+import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 import java.util.HashMap;
 
-public class Parameter {
+public class Parameter implements Elements.Parameter {
+
     protected final String defaultValue;
     protected final String parameterName;
     protected final String parameterType;
@@ -13,6 +16,14 @@ public class Parameter {
         this.parameterName = parameterName;
         this.parameterType = parameterType;
     }
+
+    public void setWhenMap(HashMap<String, String> whenMap) {
+        this.whenMap.clear();
+        this.whenMap.putAll(whenMap);
+    }
+
+
+
 
     public String getDefaultValue() {
         return defaultValue;

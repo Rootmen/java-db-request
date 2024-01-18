@@ -10,9 +10,7 @@ import ru.iedt.database.request.controller.parameter.ParameterInput;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
 import ru.iedt.database.request.store.QueryStoreList;
-import ru.iedt.database.request.structures.nodes.v3.Definition;
-import ru.iedt.database.request.structures.nodes.v3.Parameter;
-import ru.iedt.database.request.structures.nodes.v3.QuerySet;
+import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,11 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Singleton
 public class DatabaseController {
-    private final Map<String, Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
+    private final Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
 
     DatabaseController() {
         ArrayList<QueryStoreDefinition> queryStoreDefinitionArrayList = QueryStoreList.getStoresMetadata();
@@ -38,7 +37,7 @@ public class DatabaseController {
                     throw new RuntimeException(String.format(
                             "Nor found file %s",
                             queryStoreDefinition.getStorePath().getPath()));
-                Definition definition = ParserEngine.parsingXml(file);
+                Elements.Definition definition = ParserEngine.parsingXml(file);
                 QUERY_STORE_DEFINITION_MAP.put(storeName, definition);
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
@@ -48,10 +47,11 @@ public class DatabaseController {
 
     public Uni<HashMap<String, Uni<RowSet<Row>>>> runningQuerySet(
             String storeName, String queryName, HashMap<String, ParameterInput> parameterInputs, PgPool client) {
-        Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
+        Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
         if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
-        QuerySet querySet = definition.getQuerySet().get(queryName);
-        Map<String, Parameter> parameters = querySet.getParameters();
+        Elements.QuerySet querySet = definition.getQuerySet().get(queryName);
+        Map<String, Elements.Parameter> parameters = querySet.getParameters();
+        List<Elements.Queries> queries = querySet.getQueries();
         return client.withTransaction(conn -> {
             HashMap<String, Uni<RowSet<Row>>> result = new HashMap<>();
             Uni<RowSet<Row>> insertOne = conn.preparedQuery("INSERT INTO fruits (name) VALUES ($1) RETURNING id")
@@ -64,7 +64,7 @@ public class DatabaseController {
         });
     }
 
-    public Map<String, Definition> getDefinitions() {
+    public Map<String, Elements.Definition> getDefinitions() {
         return QUERY_STORE_DEFINITION_MAP;
     }
 }

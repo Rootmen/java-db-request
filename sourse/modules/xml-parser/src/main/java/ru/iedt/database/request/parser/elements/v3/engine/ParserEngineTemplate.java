@@ -3,9 +3,8 @@ package ru.iedt.database.request.parser.elements.v3.engine;
 import ru.iedt.database.request.parser.elements.v3.Attributes;
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
-import ru.iedt.database.request.structures.nodes.v3.edit.TemplateClass;
-import ru.iedt.database.request.structures.nodes.v3.edit.TemplateEditable;
-import ru.iedt.database.request.structures.nodes.v3.Template;
+import ru.iedt.database.request.structures.nodes.v3.Elements;
+import ru.iedt.database.request.structures.nodes.v3.node.Template;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -24,8 +23,8 @@ public class ParserEngineTemplate {
      * @return HashMap, содержащий извлеченные шаблоны.
      * @throws XMLStreamException в случае ошибок разбора XML.
      */
-    public static HashMap<String, Template> parseTemplatesNode(XMLStreamReader reader) throws XMLStreamException {
-        HashMap<String, Template> templateMap = new HashMap<>();
+    public static HashMap<String, Elements.Template> parseTemplatesNode(XMLStreamReader reader) throws XMLStreamException {
+        HashMap<String, Elements.Template> templateMap = new HashMap<>();
 
         while (reader.hasNext()) {
             int readCode = reader.next();
@@ -46,11 +45,11 @@ public class ParserEngineTemplate {
      * @param templateMap Карта для хранения извлеченных шаблонов.
      * @throws XMLStreamException в случае ошибок разбора XML.
      */
-    private static void processTemplate(XMLStreamReader reader, HashMap<String, Template> templateMap)
+    private static void processTemplate(XMLStreamReader reader, HashMap<String, Elements.Template> templateMap)
             throws XMLStreamException {
         String id = reader.getAttributeValue(null, Attributes.Template.ID);
         String value = reader.getElementText();
-        TemplateClass template = new TemplateClass(new StringBuilder(value), id);
+        Elements.Template template = new Template(new StringBuilder(value), id);
 
         if (templateMap.containsKey(template.getId())) {
             throw new RuntimeException(String.format("Шаблон с ID '%s' уже существует в хранилище", template.getId()));

@@ -1,14 +1,14 @@
-package ru.iedt.database.request.structures.nodes.v3.edit;
+package ru.iedt.database.request.structures.nodes.v3.node;
 
 
-import ru.iedt.database.request.structures.nodes.v3.Template;
+import ru.iedt.database.request.structures.nodes.v3.Elements;
 
-public class TemplateClass implements Template {
+public class Template implements Elements.Template {
 
     private StringBuilder value;
     private String id;
 
-    public TemplateClass(StringBuilder value, String id) {
+    public Template(StringBuilder value, String id) {
         this.value = value;
         this.id = id;
     }
