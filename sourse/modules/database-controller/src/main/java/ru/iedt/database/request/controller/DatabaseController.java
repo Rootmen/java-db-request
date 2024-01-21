@@ -1,6 +1,8 @@
 package ru.iedt.database.request.controller;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.vertx.mutiny.pgclient.PgPool;
 import io.vertx.mutiny.sqlclient.PreparedQuery;
 import io.vertx.mutiny.sqlclient.Row;
@@ -11,10 +13,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import jakarta.ws.rs.core.Response;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
@@ -48,18 +49,18 @@ public class DatabaseController {
         }
     }
 
-    public List<Uni<Map<String, Uni<RowSet<Row>>>>> runningQuerySet(
+    public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
             String storeName, String queryName, HashMap<String, ParameterInput> parameterInputs, PgPool client) {
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
         if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
         Elements.QuerySet querySet = definition.getQuerySet().get(queryName);
         Map<String, Elements.Parameter<?>> parameters = createParameters(parameterInputs, querySet.getParameters());
         List<Elements.Queries> queries = querySet.getQueries();
-        List<Uni<Map<String, Uni<RowSet<Row>>>>> result = new ArrayList<>();
+        List<Uni<Map<String, RowSet<Row>>>> unis = new ArrayList<>();
         for (Elements.Queries query : queries) {
-            result.add(runQueries(query, parameters, client));
+            unis.add(runQueries(query, parameters, client));
         }
-        return result;
+        return Uni.join().all(unis).andCollectFailures();
     }
 
     private Map<String, Elements.Parameter<?>> createParameters(
@@ -73,7 +74,7 @@ public class DatabaseController {
         return parameterMap;
     }
 
-    private Uni<Map<String, Uni<RowSet<Row>>>> runQueries(
+    private Uni<Map<String, RowSet<Row>>> runQueries(
             Elements.Queries queries, Map<String, Elements.Parameter<?>> parameters, PgPool client) {
         List<Elements.SQL> sqlList = queries.getSql();
         List<SQL.InsertData> insertDataArray = new ArrayList<>();
@@ -81,7 +82,8 @@ public class DatabaseController {
             insertDataArray.add(SQL.getInsertData(sql, parameters));
         }
         return client.withTransaction(connection -> {
-            Map<String, Uni<RowSet<Row>>> unis = new HashMap<>();
+            List<Uni<RowSet<Row>>> unis = new ArrayList<>();
+            List<String> unisKey = new ArrayList<>();
             for (SQL.InsertData insertData : insertDataArray) {
                 Tuple tuple = Tuple.tuple();
                 for (String token : insertData.getParametersTokens()) {
@@ -90,9 +92,16 @@ public class DatabaseController {
                 }
                 PreparedQuery<RowSet<Row>> preparedQuery = connection.preparedQuery(insertData.getSql());
                 Uni<RowSet<Row>> query = preparedQuery.execute(tuple);
-                unis.put(insertData.getName(), query);
+                unisKey.add(insertData.getName());
+                unis.add(query);
             }
-            return Uni.createFrom().item(unis);
+            return Uni.combine().all().unis(unis).with(responses -> {
+                Map<String, RowSet<Row>> map = new LinkedHashMap<>();
+                for (int g = 0; g < responses.size(); g++) {
+                    map.put(unisKey.get(g), (RowSet<Row>) responses.get(g));
+                }
+                return map;
+            });
         });
     }
 }

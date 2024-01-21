@@ -1,18 +1,27 @@
 package ru.iedt.database.request.controller;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.inject.Inject;
 import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
+import ru.iedt.database.request.controller.users.UsersModel;
+import ru.iedt.database.request.controller.users.dto.UserAccount;
 
 @QuarkusTest
 public class DatabaseControllerTest {
 
+
     @Inject
-    DatabaseController databaseController;
+    UsersModel usersModel;
 
     @Inject
     PgPool client;
@@ -21,31 +30,26 @@ public class DatabaseControllerTest {
     public void testDatabaseController() throws Exception {
         client.query("DROP TABLE IF EXISTS fruits")
                 .execute()
-                .flatMap(r -> client.query("CREATE TABLE fruits (id SERIAL PRIMARY KEY, name TEXT NOT NULL)")
+                .flatMap(r -> client.query("CREATE SCHEMA IF NOT EXISTS dnauthorization;")
                         .execute())
-                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')")
+                .flatMap(r -> client.query(
+                                "CREATE TABLE IF NOT EXISTS dnauthorization.users_account\n" + "                (\n"
+                                        + "                        account_id                      uuid PRIMARY KEY default gen_random_uuid(),\n"
+                                        + "                account_name                    text                                       NOT NULL UNIQUE,\n"
+                                        + "        account_mail                    text                                       NOT NULL UNIQUE,\n"
+                                        + "                account_password_verifier       text                                       NOT NULL,\n"
+                                        + "                account_salt                    text                                       NOT NULL,\n"
+                                        + "                account_last_password_update    timestamp        DEFAULT CURRENT_TIMESTAMP NOT NULL,\n"
+                                        + "                account_password_reset_interval integer          DEFAULT 90                NOT NULL\n"
+                                        + ");")
                         .execute())
-                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')")
+                .flatMap(r -> client.query("Insert Into dnauthorization.users_account(account_name ,account_mail,account_password_verifier,account_salt) values ('test', 'test', 'test','test') ;")
                         .execute())
                 .await()
                 .indefinitely();
-        HashMap<String, ParameterInput> inputArrayList = new HashMap<>();
-        inputArrayList.put("ID4", new ParameterInput("ID4", "-121313"));
-        inputArrayList.put("ID3", new ParameterInput("ID3", "1"));
-        inputArrayList.put("ID2", new ParameterInput("ID2", "2"));
-        inputArrayList.put("ID1", new ParameterInput("ID1", "-3"));
-        inputArrayList.put("ID5", new ParameterInput("ID5", "0"));
-        JsonObject jsonObject = databaseController
-                .runningQuerySet("demo", "TEST_SELECT", inputArrayList, this.client)
-                .get(0)
-                .await()
-                .indefinitely()
-                .get("main")
-                .await()
-                .indefinitely()
-                .iterator()
-                .next()
-                .toJson();
-        System.out.println(jsonObject);
+
+        System.out.println(usersModel.getAllUserAccount(client).toUni().await().indefinitely());
+
+
     }
 }
