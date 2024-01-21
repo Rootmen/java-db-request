@@ -1,14 +1,13 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type;
 
-import io.vertx.mutiny.sqlclient.Tuple;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
+import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
 
+import io.vertx.mutiny.sqlclient.Tuple;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-
-import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
 
 public class ParameterArrayBigInteger extends ParameterArray<ArrayList<BigInteger>> {
     public ParameterArrayBigInteger(ArrayList<BigInteger> defaultValue, String parameterName) {

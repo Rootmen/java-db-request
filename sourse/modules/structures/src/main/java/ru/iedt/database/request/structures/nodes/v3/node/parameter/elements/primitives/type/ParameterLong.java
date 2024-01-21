@@ -1,10 +1,9 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type;
 
 import io.vertx.mutiny.sqlclient.Tuple;
+import java.math.BigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
-
-import java.math.BigInteger;
 
 public class ParameterLong extends ParameterObjects<Long> {
     public ParameterLong(String defaultValue, String parameterName) {
@@ -26,6 +25,7 @@ public class ParameterLong extends ParameterObjects<Long> {
     }
 
     static Long parseString(String integer) throws RuntimeException {
+        if (integer == null) return null;
         try {
             return new BigInteger(integer).longValue();
         } catch (Exception e) {

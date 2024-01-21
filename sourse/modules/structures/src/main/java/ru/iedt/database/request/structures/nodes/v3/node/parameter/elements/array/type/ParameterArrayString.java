@@ -1,13 +1,11 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type;
 
+import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
+
 import io.vertx.mutiny.sqlclient.Tuple;
+import java.util.ArrayList;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-
-import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
 
 public class ParameterArrayString extends ParameterArray<ArrayList<String>> {
     public ParameterArrayString(ArrayList<String> defaultValue, String parameterName) {

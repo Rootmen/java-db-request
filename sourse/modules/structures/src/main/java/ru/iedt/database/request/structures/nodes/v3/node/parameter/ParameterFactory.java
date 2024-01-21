@@ -1,15 +1,14 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayString;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type.*;
-
-import java.util.ArrayList;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
 
 public class ParameterFactory {
 
@@ -54,9 +53,11 @@ public class ParameterFactory {
                 }
             }
             return arrayString;
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        } catch (NoSuchMethodException
+                | InvocationTargetException
+                | InstantiationException
+                | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

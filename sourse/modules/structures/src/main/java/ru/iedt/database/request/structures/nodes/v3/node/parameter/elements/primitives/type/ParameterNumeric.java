@@ -1,10 +1,9 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type;
 
 import io.vertx.mutiny.sqlclient.Tuple;
+import java.math.BigDecimal;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
-
-import java.math.BigDecimal;
 
 public class ParameterNumeric extends ParameterObjects<BigDecimal> {
     public ParameterNumeric(String defaultValue, String parameterName) {
@@ -26,6 +25,7 @@ public class ParameterNumeric extends ParameterObjects<BigDecimal> {
     }
 
     static BigDecimal parseString(String value) throws RuntimeException {
+        if (value == null) return null;
         try {
             return new BigDecimal(value);
         } catch (Exception e) {

@@ -1,12 +1,10 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type;
 
 import io.vertx.mutiny.sqlclient.Tuple;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class ParameterLocalDate extends ParameterObjects<LocalDate> {
 
@@ -17,7 +15,6 @@ public class ParameterLocalDate extends ParameterObjects<LocalDate> {
     public ParameterLocalDate(LocalDate defaultValue, String parameterName) {
         super(defaultValue, parameterName, ParameterTypes.DATE);
     }
-
 
     @Override
     public void setValue(String value) {
@@ -30,6 +27,7 @@ public class ParameterLocalDate extends ParameterObjects<LocalDate> {
     }
 
     static LocalDate parseString(String value) throws RuntimeException {
+        if (value == null) return null;
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             return LocalDate.parse(value, formatter);

@@ -1,13 +1,10 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type;
 
 import io.vertx.mutiny.sqlclient.Tuple;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
 
 public class ParameterBigInteger extends ParameterObjects<BigInteger> {
 
@@ -25,6 +22,7 @@ public class ParameterBigInteger extends ParameterObjects<BigInteger> {
     }
 
     static BigInteger parseString(String integer) throws RuntimeException {
+        if (integer == null) return null;
         try {
             return new BigInteger(integer);
         } catch (Exception e) {
