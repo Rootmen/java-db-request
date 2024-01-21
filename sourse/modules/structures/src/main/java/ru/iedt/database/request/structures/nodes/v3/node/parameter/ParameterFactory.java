@@ -20,13 +20,13 @@ public class ParameterFactory {
                 return new ParameterInteger(value, name);
             case "int_array":
             case "integer_array":
-                return new ParameterArrayInteger(generateArray(value, 0), name);
+                return new ParameterArrayInteger(generateArray(value, Integer.class), name);
             case "bigint_array":
             case "biginteger_array":
-                return new ParameterArrayBigInteger(generateArray(value, new BigInteger("0")), name);
+                return new ParameterArrayBigInteger(generateArray(value, BigInteger.class), name);
             case "str_array":
             case "string_array":
-                return new ParameterArrayString(generateArray(value, ""), name);
+                return new ParameterArrayString(generateArray(value, String.class), name);
             case "bigint":
             case "biginteger":
                 return new ParameterBigInteger(value, name);
@@ -43,11 +43,11 @@ public class ParameterFactory {
         throw new RuntimeException("Type " + type + "is not allowed");
     }
 
-    public static <T> ArrayList<T> generateArray(String array, T type) throws RuntimeException {
+    public static <T> ArrayList<T> generateArray(String array, Class<T> type) throws RuntimeException {
         try {
             ArrayList<T> arrayString = new ArrayList<>();
-            if (array != null && !array.equals("")) {
-                Constructor<T> constr = (Constructor<T>) type.getClass().getConstructor(String.class);
+            if (array != null && !array.isEmpty()) {
+                Constructor<T> constr = type.getConstructor(String.class);
                 String[] values = array.split(",");
                 for (String value : values) {
                     arrayString.add(constr.newInstance(value));

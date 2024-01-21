@@ -97,7 +97,4 @@ public class DatabaseController {
         });
     }
 
-    public Map<String, Elements.Definition> getDefinitions() {
-        return QUERY_STORE_DEFINITION_MAP;
-    }
 }

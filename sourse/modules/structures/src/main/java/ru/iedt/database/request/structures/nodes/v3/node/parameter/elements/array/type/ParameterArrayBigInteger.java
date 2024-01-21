@@ -17,7 +17,7 @@ public class ParameterArrayBigInteger extends ParameterArray<ArrayList<BigIntege
 
     @Override
     public void setValue(String value) {
-        this.currentValue = generateArray(value, new BigInteger("0"));
+        this.currentValue = generateArray(value, BigInteger.class);
     }
 
     @Override

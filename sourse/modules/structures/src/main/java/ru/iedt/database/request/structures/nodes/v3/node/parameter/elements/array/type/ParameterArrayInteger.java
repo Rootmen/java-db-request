@@ -4,8 +4,6 @@ import io.vertx.mutiny.sqlclient.Tuple;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.generateArray;
@@ -17,7 +15,7 @@ public class ParameterArrayInteger extends ParameterArray<ArrayList<Integer>> {
 
     @Override
     public void setValue(String value) {
-        this.currentValue = generateArray(value, 0);
+        this.currentValue = generateArray(value, Integer.class);
     }
 
     @Override

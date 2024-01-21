@@ -16,7 +16,7 @@ public class ParameterArrayString extends ParameterArray<ArrayList<String>> {
 
     @Override
     public void setValue(String value) {
-        this.currentValue = generateArray(value, "");
+        this.currentValue = generateArray(value, String.class);
     }
 
     @Override
