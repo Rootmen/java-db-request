@@ -19,7 +19,6 @@ dependencies {
 	//--------------------quarkus----------------------------------------------------------------------------
 	implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
 	implementation 'io.quarkus:quarkus-arc'
-	implementation project(':sourse:modules:database-controller')
 	//-------------------------------------------------------------------------------------------------------
 	testImplementation 'io.quarkus:quarkus-junit5'
 	testImplementation 'io.quarkus:quarkus-junit5-component'
