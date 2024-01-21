@@ -1,0 +1,8 @@
+
+
+SELECT 1 AS RESULT,
+        ? AS ID1,
+        ? AS ID2,
+        ? AS ID3,
+        ? AS ID4
+
