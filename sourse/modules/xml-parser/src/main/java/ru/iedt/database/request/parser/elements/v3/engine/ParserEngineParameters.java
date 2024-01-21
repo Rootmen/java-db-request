@@ -4,7 +4,8 @@ import ru.iedt.database.request.parser.elements.v3.Attributes;
 import ru.iedt.database.request.parser.elements.v3.Nodes;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
-import ru.iedt.database.request.structures.nodes.v3.node.Parameter;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -14,19 +15,17 @@ import java.util.Map;
 
 public class ParserEngineParameters {
 
-    public static Map<String, Elements.Parameter> parseParametersNode(XMLStreamReader reader) throws XMLStreamException {
-        Map<String,  Elements.Parameter> parameters = new HashMap<>();
+    public static Map<String, Elements.Parameter<?>> parseParametersNode(XMLStreamReader reader)
+            throws XMLStreamException {
+        Map<String, Elements.Parameter<?>> parameters = new HashMap<>();
         while (reader.hasNext()) {
             int parserCode = reader.next();
-
             if (ParserEngine.isElement(parserCode)) {
                 continue;
             }
-
             String localName = reader.getLocalName();
-
             if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.PARAMETER.equals(localName)) {
-                Parameter parameter = processParameter(reader);
+                Elements.Parameter<?> parameter = processParameter(reader);
                 parameters.put(parameter.getParameterName(), parameter);
             } else if (parserCode == XMLStreamConstants.END_ELEMENT && Nodes.PARAMETERS.equals(localName)) {
                 break;
@@ -35,22 +34,18 @@ public class ParserEngineParameters {
         return parameters;
     }
 
-    private static Parameter processParameter(XMLStreamReader reader) throws XMLStreamException {
+    private static Elements.Parameter<?> processParameter(XMLStreamReader reader) throws XMLStreamException {
         String parameterName = reader.getAttributeValue(null, Attributes.Parameter.NAME);
         String parameterType = reader.getAttributeValue(null, Attributes.Parameter.TYPE);
         String defaultValue = reader.getAttributeValue(null, Attributes.Parameter.DEFAULT);
-
-        Parameter parameter = new Parameter(defaultValue, parameterName, parameterType);
+        ParameterAbstract<?> parameterAbstract = (ParameterAbstract<?>) ParameterFactory.getParameter(parameterName, parameterType, defaultValue);
         HashMap<String, String> whenMap = new HashMap<>();
         while (reader.hasNext()) {
             int parserCode = reader.next();
-
             if (ParserEngine.isElement(parserCode)) {
                 continue;
             }
-
             String localName = reader.getLocalName();
-
             if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.WHEN.equals(localName)) {
                 String whenValue = reader.getAttributeValue(null, Attributes.When.VALUE);
                 String value = reader.getElementText().trim();
@@ -70,7 +65,7 @@ public class ParserEngineParameters {
                 break;
             }
         }
-        parameter.setWhenMap(whenMap);
-        return parameter;
+        parameterAbstract.setWhenMap(whenMap);
+        return parameterAbstract;
     }
 }

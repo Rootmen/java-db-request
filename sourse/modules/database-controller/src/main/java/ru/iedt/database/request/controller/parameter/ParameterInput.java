@@ -1,11 +1,19 @@
 package ru.iedt.database.request.controller.parameter;
 
 public class ParameterInput {
-    public String value;
-    public String name;
+    private final String value;
+    private final String name;
 
     public ParameterInput(String name, String value) {
         this.value = value;
         this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getName() {
+        return name;
     }
 }

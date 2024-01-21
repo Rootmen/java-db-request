@@ -3,6 +3,7 @@ package ru.iedt.database.request.structures.nodes.v3.node;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Queries implements Elements.Queries {
 
@@ -12,8 +13,8 @@ public class Queries implements Elements.Queries {
         this.sql.add(sql);
     }
 
-    public ArrayList<Elements.SQL> getSql() {
-        return sql;
+    public List<Elements.SQL> getSql() {
+        return new ArrayList<>(sql);
     }
 
     @Override

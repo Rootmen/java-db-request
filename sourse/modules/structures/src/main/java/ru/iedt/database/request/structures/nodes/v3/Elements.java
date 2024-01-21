@@ -1,7 +1,7 @@
 package ru.iedt.database.request.structures.nodes.v3;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import io.vertx.mutiny.sqlclient.Tuple;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public interface Elements {
 
         List<Elements.Queries> getQueries();
 
-        Map<String, Elements.Parameter> getParameters();
+        Map<String, Elements.Parameter<?>> getParameters();
 
         @Override
         String toString();
@@ -46,22 +46,26 @@ public interface Elements {
         String toString();
     }
 
-    interface Parameter {
-        String getDefaultValue();
-
+    interface Parameter<T>  {
+        T getDefaultValue();
+        T getValue();
+        void setValue(T value);
+        void setValue(String value);
         String getParameterName();
 
         String getParameterType();
 
-        HashMap<String, String> getWhenMap();
+        Map<String, String> getWhenMap();
 
         @Override
         String toString();
+
+        void addToTuple(Tuple tuple);
     }
 
     interface Queries {
 
-        ArrayList<Elements.SQL> getSql();
+        List<Elements.SQL> getSql();
 
         @Override
         String toString();

@@ -1,24 +1,12 @@
 package ru.iedt.database.request.controller;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.quarkus.test.junit.QuarkusTest;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
+import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.pgclient.PgPool;
-import io.vertx.mutiny.sqlclient.Row;
-import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.iedt.database.request.controller.DatabaseController;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
-import ru.iedt.database.request.store.QueryStoreDefinition;
-import ru.iedt.database.request.store.QueryStoreList;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 @QuarkusTest
@@ -36,40 +24,28 @@ public class DatabaseControllerTest {
                 .execute()
                 .flatMap(r -> client.query("CREATE TABLE fruits (id SERIAL PRIMARY KEY, name TEXT NOT NULL)")
                         .execute())
-                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')").execute())
-                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')").execute())
+                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')")
+                        .execute())
+                .flatMap(r -> client.query("INSERT INTO fruits (name) VALUES ('тест')")
+                        .execute())
                 .await()
                 .indefinitely();
         HashMap<String, ParameterInput> inputArrayList = new HashMap<>();
-        HashMap<String, Uni<RowSet<Row>>> stringUniHashMap = databaseController
+        inputArrayList.put("ID4", new ParameterInput( "ID4","-121313"));
+        inputArrayList.put("ID3", new ParameterInput( "ID3","1"));
+        inputArrayList.put("ID2", new ParameterInput( "ID2","2"));
+        inputArrayList.put("ID1", new ParameterInput( "ID1","-3"));
+        JsonObject jsonObject = databaseController
                 .runningQuerySet("demo", "TEST_SELECT", inputArrayList, this.client)
+                .get(0)
                 .await()
-                .indefinitely();
-
-        stringUniHashMap
-                .get("1")
-                .onItem()
-                .transformToMulti(set -> Multi.createFrom().iterable(set))
-                .onItem()
-                .transform((Row row) -> {
-                    System.out.println(row.getInteger("id"));
-                    return row.getInteger("id");
-                })
-                .toUni()
+                .indefinitely()
+                .get("main")
                 .await()
-                .indefinitely();
-
-        stringUniHashMap
-                .get("2")
-                .onItem()
-                .transformToMulti(set -> Multi.createFrom().iterable(set))
-                .onItem()
-                .transform((Row row) -> {
-                    System.out.println(row.getInteger("id"));
-                    return row.getInteger("id");
-                })
-                .toUni()
-                .await()
-                .indefinitely();
+                .indefinitely()
+                .iterator()
+                .next()
+                .toJson();
+        System.out.println(jsonObject);
     }
 }

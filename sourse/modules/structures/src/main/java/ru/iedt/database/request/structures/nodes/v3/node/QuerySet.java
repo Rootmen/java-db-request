@@ -10,7 +10,7 @@ import java.util.Map;
 public class QuerySet implements Elements.QuerySet {
     protected final List<Elements.Queries> queries = new ArrayList<>();
 
-    protected final Map<String, Elements.Parameter> parameters = new HashMap<>();
+    protected final Map<String, Elements.Parameter<?>> parameters = new HashMap<>();
 
     protected final String refid;
 
@@ -22,7 +22,7 @@ public class QuerySet implements Elements.QuerySet {
         queries.add(query);
     }
 
-    public void setParameters(Map<String, Elements.Parameter> parameters) {
+    public void setParameters(Map<String, Elements.Parameter<?>> parameters) {
         this.parameters.clear();
         this.parameters.putAll(parameters);
     }
@@ -32,11 +32,11 @@ public class QuerySet implements Elements.QuerySet {
     }
 
     public List<Elements.Queries> getQueries() {
-        return queries;
+        return new ArrayList<>(queries);
     }
 
-    public Map<String, Elements.Parameter> getParameters() {
-        return parameters;
+    public Map<String, Elements.Parameter<?>> getParameters() {
+        return new HashMap<>(parameters);
     }
 
     @Override

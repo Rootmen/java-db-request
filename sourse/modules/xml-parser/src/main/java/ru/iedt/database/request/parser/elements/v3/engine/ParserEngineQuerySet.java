@@ -33,7 +33,7 @@ public class ParserEngineQuerySet {
             String localName = reader.getLocalName();
 
             if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.PARAMETERS.equals(localName)) {
-                Map<String, Elements.Parameter> parameters = ParserEngineParameters.parseParametersNode(reader);
+                Map<String, Elements.Parameter<?>> parameters = ParserEngineParameters.parseParametersNode(reader);
                 querySet.setParameters(parameters);
             } else if (parserCode == XMLStreamConstants.START_ELEMENT && Nodes.QUERY.equals(localName)) {
                 Elements.Queries query = ParserEngineQueries.parseQuerySetNode(reader);

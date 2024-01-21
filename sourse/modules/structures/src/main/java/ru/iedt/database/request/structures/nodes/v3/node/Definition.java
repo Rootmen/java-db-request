@@ -5,17 +5,17 @@ import ru.iedt.database.request.structures.nodes.v3.Elements;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Definition  implements Elements.Definition {
+public class Definition implements Elements.Definition {
 
     protected final Map<String, Elements.Template> template = new HashMap<>();
     protected final Map<String, Elements.QuerySet> querySet = new HashMap<>();
 
     public Map<String, Elements.Template> getTemplate() {
-        return template;
+        return new HashMap<>(template);
     }
 
     public Map<String, Elements.QuerySet> getQuerySet() {
-        return querySet;
+        return new HashMap<>(querySet);
     }
 
     public final void setQuerySetArrayList(Map<String, Elements.QuerySet> querySetMap) {
@@ -30,9 +30,6 @@ public class Definition  implements Elements.Definition {
 
     @Override
     public String toString() {
-        return  String.format("[template=%s, querySet=%s]", template, querySet);
+        return String.format("[template=%s, querySet=%s]", template, querySet);
     }
-
-
-
 }
