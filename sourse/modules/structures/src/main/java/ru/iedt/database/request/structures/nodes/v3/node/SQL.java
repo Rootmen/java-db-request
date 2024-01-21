@@ -1,12 +1,11 @@
 package ru.iedt.database.request.structures.nodes.v3.node;
 
-import ru.iedt.database.request.structures.nodes.v3.Elements;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 public class SQL implements Elements.SQL {
 
@@ -77,11 +76,12 @@ public class SQL implements Elements.SQL {
             Map<String, String> when = parameter.getWhenMap();
             if (when == null || when.isEmpty()) continue;
             String parameterName = parameter.getParameterName();
-            String regex = String.format("\\$%s\\$", parameterName.substring(1, parameterName.length() - 1));
-            if (when.get(parameter.getValue()) == null && when.get(null) != null) {
+            String regex = String.format("\\$%s\\$", parameterName);
+            String parameterValue = parameter.getValue().toString();
+            if (when.get(parameterValue) == null && when.get(null) != null) {
                 update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(null)));
-            } else if (when.get(parameter.getValue()) != null) {
-                update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(parameter.getValue())));
+            } else if (when.get(parameterValue) != null) {
+                update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(parameterValue)));
             }
         }
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(update);
@@ -95,7 +95,10 @@ public class SQL implements Elements.SQL {
             }
             parametersTokens.add(token);
             matcher.appendReplacement(out, "");
-            out.append("$").append(index).append("::").append(parameters.get(token).getParameterType());
+            out.append("$")
+                    .append(index)
+                    .append("::")
+                    .append(parameters.get(token).getParameterType());
             index++;
         }
         return new InsertData(matcher.appendTail(out).toString(), parametersTokens, sql.getName(), sql.getWrapper());

@@ -4,10 +4,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.pgclient.PgPool;
 import jakarta.inject.Inject;
+import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
-
-import java.util.HashMap;
 
 @QuarkusTest
 public class DatabaseControllerTest {
@@ -31,10 +30,11 @@ public class DatabaseControllerTest {
                 .await()
                 .indefinitely();
         HashMap<String, ParameterInput> inputArrayList = new HashMap<>();
-        inputArrayList.put("ID4", new ParameterInput( "ID4","-121313"));
-        inputArrayList.put("ID3", new ParameterInput( "ID3","1"));
-        inputArrayList.put("ID2", new ParameterInput( "ID2","2"));
-        inputArrayList.put("ID1", new ParameterInput( "ID1","-3"));
+        inputArrayList.put("ID4", new ParameterInput("ID4", "-121313"));
+        inputArrayList.put("ID3", new ParameterInput("ID3", "1"));
+        inputArrayList.put("ID2", new ParameterInput("ID2", "2"));
+        inputArrayList.put("ID1", new ParameterInput("ID1", "-3"));
+        inputArrayList.put("ID5", new ParameterInput("ID5", "0"));
         JsonObject jsonObject = databaseController
                 .runningQuerySet("demo", "TEST_SELECT", inputArrayList, this.client)
                 .get(0)

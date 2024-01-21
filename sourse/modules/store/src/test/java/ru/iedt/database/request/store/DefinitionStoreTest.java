@@ -1,14 +1,11 @@
 package ru.iedt.database.request.store;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.opentest4j.TestAbortedException;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Scanner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 public class DefinitionStoreTest {
