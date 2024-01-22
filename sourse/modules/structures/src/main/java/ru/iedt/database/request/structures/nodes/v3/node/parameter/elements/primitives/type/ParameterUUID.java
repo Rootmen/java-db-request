@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class ParameterUUID extends ParameterObjects<UUID> {
     public ParameterUUID(String defaultValue, String parameterName) {
-        super(parseString(defaultValue), parameterName, ParameterTypes.STRING);
+        super(parseString(defaultValue), parameterName, ParameterTypes.UUID);
     }
 
     @Override

@@ -11,6 +11,7 @@ public interface ParameterTypes {
     String DATE = "date";
     String TIMESTAMP  = "timestamp";
     String NUMERIC = "numeric";
+    String UUID = "uuid";
     String INTEGER_ARRAY = "int[]";
     String BIGINT_ARRAY = "bigint[]";
     String STRING_ARRAY = "string[]]";
