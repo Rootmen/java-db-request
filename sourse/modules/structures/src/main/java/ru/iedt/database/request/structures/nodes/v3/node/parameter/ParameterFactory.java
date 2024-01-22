@@ -38,6 +38,8 @@ public class ParameterFactory {
                 return new ParameterLocalDateTime(value, name);
             case "numeric":
                 return new ParameterNumeric(value, name);
+            case "uuid":
+                return new ParameterUUID(value, name);
         }
         throw new RuntimeException("Type " + type + "is not allowed");
     }
