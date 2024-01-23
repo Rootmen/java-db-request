@@ -79,7 +79,10 @@ public class SQL implements Elements.SQL {
             String regex = String.format("\\$%s\\$", parameterName);
             Object parameterValueRaw = parameter.getValue();
             String parameterValue = (parameterValueRaw == null) ? "null" : parameterValueRaw.toString();
-            update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(parameterValue)));
+            String replaceValue = when.get(parameterValue) == null ? when.get("default") : when.get(parameterValue);
+            if (replaceValue != null) {
+                update = update.replaceAll(regex, Matcher.quoteReplacement(replaceValue));
+            }
         }
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(update);
         List<String> parametersTokens = new ArrayList<>();

@@ -20,9 +20,8 @@ dependencies {
 	implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
 	implementation 'io.quarkus:quarkus-arc'
 	//-------------------------------------------------------------------------------------------------------
-	testImplementation 'io.quarkus:quarkus-junit5'
-	testImplementation 'io.quarkus:quarkus-junit5-component'
-	testImplementation 'io.rest-assured:rest-assured'
+	implementation project(path: ':sourse:modules:store')
+	implementation project(path: ':sourse:modules:database-controller')
 }
 
 test {
