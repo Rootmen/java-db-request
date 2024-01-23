@@ -7,7 +7,7 @@ public interface ParameterTypes {
     String BIGINT = "bigint";
     String INTEGER = "int";
     String LONG = "bigint";
-    String STRING = "string";
+    String STRING = "text";
     String DATE = "date";
     String TIMESTAMP  = "timestamp";
     String NUMERIC = "numeric";
