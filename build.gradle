@@ -2,8 +2,7 @@
 plugins {
 	id 'java'
 	id 'io.quarkus'
-	id "com.diffplug.spotless" version "6.22.0"
-	id 'maven-publish'
+	id "com.diffplug.spotless" version "6.23.3"
 }
 
 quarkusDev.enabled = false

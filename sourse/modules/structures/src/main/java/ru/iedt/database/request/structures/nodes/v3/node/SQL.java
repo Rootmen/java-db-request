@@ -77,12 +77,9 @@ public class SQL implements Elements.SQL {
             if (when == null || when.isEmpty()) continue;
             String parameterName = parameter.getParameterName();
             String regex = String.format("\\$%s\\$", parameterName);
-            String parameterValue = parameter.getValue().toString();
-            if (when.get(parameterValue) == null && when.get(null) != null) {
-                update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(null)));
-            } else if (when.get(parameterValue) != null) {
-                update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(parameterValue)));
-            }
+            Object parameterValueRaw = parameter.getValue();
+            String parameterValue = (parameterValueRaw == null) ? "null" : parameterValueRaw.toString();
+            update = update.replaceAll(regex, Matcher.quoteReplacement(when.get(parameterValue)));
         }
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(update);
         List<String> parametersTokens = new ArrayList<>();
