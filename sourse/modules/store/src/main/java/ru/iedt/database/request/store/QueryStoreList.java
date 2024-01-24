@@ -34,48 +34,6 @@ public class QueryStoreList {
         return queryStores;
     }
 
-    public static void main(String[] args) {
-        ArrayList<QueryStoreDefinition> queryStoreDefinitions = getStoresMetadata();
-        System.out.println(queryStoreDefinitions);
-    }
-
-    /*  static public class QueryStore {
-            String storeName;
-            HashMap<String, ConnectionsManager> connections = new HashMap<>();
-            HashMap<String, QuerySet> querySet = new HashMap<>();
-
-            public QueryStore(URI storePatch, String storeName) {
-                this.storeName = storeName;
-
-
-            }
-
-
-    */
-    /*        private static ParserXMLErrors checkDirectory(String directory) {
-            //Проверка того что директория существует
-            if (Files.notExists(Paths.get(directory)) || !Files.isDirectory(Paths.get(directory))) {
-                return new ExceptionNoDirectory(directory);
-            }
-            //Проверка наличия файла CONNECTIONS.xml
-            if (Files.notExists(Paths.get(directory + "/CONNECTIONS.xml"))) {
-                return new ExceptionNoConnectionConfig(directory);
-            }
-            //Проверка количества файлов
-            try (Stream<Path> files = Files.list(Paths.get(directory))) {
-                long count = files.count();
-                if (count < 1) {
-                    return new ExceptionNoFilesInDirectory(directory);
-                }
-            } catch (IOException ioException) {
-                return new ExceptionNoFilesInDirectory(directory, ioException);
-            }
-            return null;
-        }
-    }*/
-    /*
-    }*/
-
     /**
      * Вложенный статический класс QueryStore представляет собой структуру,
      * которая хранит информацию о хранилище запросов.

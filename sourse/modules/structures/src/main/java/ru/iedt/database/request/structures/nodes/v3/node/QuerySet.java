@@ -37,13 +37,14 @@ public class QuerySet implements Elements.QuerySet {
     }
 
     public Map<String, Elements.Parameter<?>> getParameters() {
-        return parameters.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> {
-                    Elements.Parameter<?> current = e.getValue();
-                    ParameterAbstract<?> parameterAbstract = (ParameterAbstract<?>) getParameter(current.getParameterName(), current.getParameterType(), (current.getValue() == null)? null: current.getValue().toString());
-                    parameterAbstract.setWhenMap(new HashMap<>(current.getWhenMap()));
-                    return  parameterAbstract;
-                }));
+        return parameters.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> {
+            Elements.Parameter<?> current = e.getValue();
+            Object value = (current.getValue() == null) ? null : current.getValue();
+            ParameterAbstract<?> parameterAbstract =
+                    (ParameterAbstract<?>) getParameter(current.getParameterName(), current.getParameterType(), value);
+            parameterAbstract.setWhenMap(new HashMap<>(current.getWhenMap()));
+            return parameterAbstract;
+        }));
     }
 
     @Override

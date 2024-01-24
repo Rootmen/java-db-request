@@ -44,7 +44,7 @@ public class DatabaseController {
     }
 
     public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
-            String storeName, String queryName, HashMap<String, ParameterInput> parameterInputs, PgPool client) {
+            String storeName, String queryName, Map<String, ParameterInput> parameterInputs, PgPool client) {
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
         if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
         Elements.QuerySet querySet = definition.getQuerySet().get(queryName);

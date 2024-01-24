@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import ru.iedt.database.request.controller.parameter.ParameterInput;
 
 @QuarkusTest
 public class DatabaseControllerTest {
@@ -28,9 +29,10 @@ public class DatabaseControllerTest {
                         .execute())
                 .await()
                 .indefinitely();
-
+        Map<String, ParameterInput> map = new HashMap<>();
+        map.put("ID2", new ParameterInput("ID2", "-10"));
         Uni<List<Map<String, RowSet<Row>>>> uni =
-                databaseController.runningQuerySet("demo", "TEST_SELECT", new HashMap<>(), client);
+                databaseController.runningQuerySet("demo", "TEST_SELECT", map, client);
         System.out.println(
                 uni.await().indefinitely().get(0).get("main").iterator().next().toJson());
     }
