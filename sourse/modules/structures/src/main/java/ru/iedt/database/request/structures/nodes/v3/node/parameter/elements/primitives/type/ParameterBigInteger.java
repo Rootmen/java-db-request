@@ -4,9 +4,9 @@ import io.vertx.mutiny.sqlclient.Tuple;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterBigInteger extends ParameterObjects<BigInteger> {
+public class ParameterBigInteger extends ParameterAbstract<BigInteger> {
 
     public ParameterBigInteger(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.BIGINT);

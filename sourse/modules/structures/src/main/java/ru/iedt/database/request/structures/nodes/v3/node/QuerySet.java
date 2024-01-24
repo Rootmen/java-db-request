@@ -1,11 +1,12 @@
 package ru.iedt.database.request.structures.nodes.v3.node;
 
 import ru.iedt.database.request.structures.nodes.v3.Elements;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterFactory.getParameter;
 
 public class QuerySet implements Elements.QuerySet {
     protected final List<Elements.Queries> queries = new ArrayList<>();
@@ -36,11 +37,21 @@ public class QuerySet implements Elements.QuerySet {
     }
 
     public Map<String, Elements.Parameter<?>> getParameters() {
-        return new HashMap<>(parameters);
+        return parameters.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> {
+                    Elements.Parameter<?> current = e.getValue();
+                    ParameterAbstract<?> parameterAbstract = (ParameterAbstract<?>) getParameter(current.getParameterName(), current.getParameterType(), (current.getValue() == null)? null: current.getValue().toString());
+                    parameterAbstract.setWhenMap(new HashMap<>(current.getWhenMap()));
+                    return  parameterAbstract;
+                }));
     }
 
     @Override
     public String toString() {
-        return String.format("[id=%s, parameters=%s, queries=%s]", this.refid, this.parameters, this.queries);
+        return new StringJoiner(", ", QuerySet.class.getSimpleName() + "[", "]")
+                .add("queries=" + queries)
+                .add("parameters=" + parameters)
+                .add("refid='" + refid + "'")
+                .toString();
     }
 }

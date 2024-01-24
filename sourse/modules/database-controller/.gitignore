@@ -37,3 +37,6 @@ nb-configuration.xml
 
 # Plugin directory
 /.quarkus/cli/plugins/
+src/test/java/ru/iedt/database/request/controller/users/*
+src/test/resources/query/*
+src/test/resources/init.sql

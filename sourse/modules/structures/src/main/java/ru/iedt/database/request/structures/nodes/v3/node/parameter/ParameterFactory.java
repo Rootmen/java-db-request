@@ -31,6 +31,7 @@ public class ParameterFactory {
                 return new ParameterBigInteger(value, name);
             case "long":
                 return new ParameterLong(value, name);
+            case "text":
             case "str":
             case "string":
                 return new ParameterString(value, name);
@@ -41,7 +42,7 @@ public class ParameterFactory {
             case "uuid":
                 return new ParameterUUID(value, name);
         }
-        throw new RuntimeException("Type " + type + "is not allowed");
+        throw new RuntimeException("Type " + type + " is not allowed");
     }
 
     public static <T> ArrayList<T> generateArray(String array, Class<T> type) throws RuntimeException {

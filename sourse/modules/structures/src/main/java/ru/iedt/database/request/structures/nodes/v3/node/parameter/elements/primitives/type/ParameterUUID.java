@@ -2,12 +2,12 @@ package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.pri
 
 import io.vertx.mutiny.sqlclient.Tuple;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public class ParameterUUID extends ParameterObjects<UUID> {
+public class ParameterUUID extends ParameterAbstract<UUID> {
     public ParameterUUID(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.UUID);
     }

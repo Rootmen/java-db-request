@@ -2,9 +2,9 @@ package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.pri
 
 import io.vertx.mutiny.sqlclient.Tuple;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterInteger extends ParameterObjects<Integer> {
+public class ParameterInteger extends ParameterAbstract<Integer> {
 
     public ParameterInteger(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.INTEGER);

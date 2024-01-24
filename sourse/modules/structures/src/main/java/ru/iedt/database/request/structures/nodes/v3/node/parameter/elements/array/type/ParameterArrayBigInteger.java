@@ -7,9 +7,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterArrayBigInteger extends ParameterArray<ArrayList<BigInteger>> {
+public class ParameterArrayBigInteger extends ParameterAbstract<ArrayList<BigInteger>> {
     public ParameterArrayBigInteger(ArrayList<BigInteger> defaultValue, String parameterName) {
         super(defaultValue, parameterName, ParameterTypes.BIGINT_ARRAY);
     }

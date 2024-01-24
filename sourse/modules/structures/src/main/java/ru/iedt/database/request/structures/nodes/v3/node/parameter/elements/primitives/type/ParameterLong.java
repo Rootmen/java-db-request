@@ -3,9 +3,9 @@ package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.pri
 import io.vertx.mutiny.sqlclient.Tuple;
 import java.math.BigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterLong extends ParameterObjects<Long> {
+public class ParameterLong extends ParameterAbstract<Long> {
     public ParameterLong(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.LONG);
     }

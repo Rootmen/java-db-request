@@ -4,9 +4,9 @@ import io.vertx.mutiny.sqlclient.Tuple;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterLocalDate extends ParameterObjects<LocalDate> {
+public class ParameterLocalDate extends ParameterAbstract<LocalDate> {
 
     public ParameterLocalDate(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.DATE);

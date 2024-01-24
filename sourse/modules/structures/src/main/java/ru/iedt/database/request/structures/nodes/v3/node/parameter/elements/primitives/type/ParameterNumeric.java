@@ -3,9 +3,9 @@ package ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.pri
 import io.vertx.mutiny.sqlclient.Tuple;
 import java.math.BigDecimal;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.ParameterObjects;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterNumeric extends ParameterObjects<BigDecimal> {
+public class ParameterNumeric extends ParameterAbstract<BigDecimal> {
     public ParameterNumeric(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.NUMERIC);
     }

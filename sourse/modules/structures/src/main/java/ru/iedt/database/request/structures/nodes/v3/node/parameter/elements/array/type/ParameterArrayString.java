@@ -5,9 +5,9 @@ import static ru.iedt.database.request.structures.nodes.v3.node.parameter.Parame
 import io.vertx.mutiny.sqlclient.Tuple;
 import java.util.ArrayList;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes;
-import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.ParameterArray;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
-public class ParameterArrayString extends ParameterArray<ArrayList<String>> {
+public class ParameterArrayString extends ParameterAbstract<ArrayList<String>> {
     public ParameterArrayString(ArrayList<String> defaultValue, String parameterName) {
         super(defaultValue, parameterName, ParameterTypes.STRING_ARRAY);
     }

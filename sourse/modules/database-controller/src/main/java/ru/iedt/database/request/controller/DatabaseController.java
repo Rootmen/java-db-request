@@ -2,10 +2,7 @@ package ru.iedt.database.request.controller;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.pgclient.PgPool;
-import io.vertx.mutiny.sqlclient.PreparedQuery;
-import io.vertx.mutiny.sqlclient.Row;
-import io.vertx.mutiny.sqlclient.RowSet;
-import io.vertx.mutiny.sqlclient.Tuple;
+import io.vertx.mutiny.sqlclient.*;
 import jakarta.inject.Singleton;
 import java.net.URI;
 import java.net.URISyntaxException;

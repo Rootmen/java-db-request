@@ -5,9 +5,11 @@ import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public abstract class ParameterAbstract<T> implements Elements.Parameter<T> {
 
+    protected T currentValue;
     protected final T defaultValue;
     protected final String parameterName;
     protected final String parameterType;
@@ -39,20 +41,27 @@ public abstract class ParameterAbstract<T> implements Elements.Parameter<T> {
     public Map<String, String> getWhenMap() {
         return new HashMap<>(whenMap);
     }
-
     @Override
-    public String toString() {
-        return String.format(
-                "[parameterName=%s, parameterType=%s, defaultValue=%s, whenMap=%s]",
-                parameterName, parameterType, defaultValue, whenMap);
+    public T getValue() {
+        return (this.currentValue == null) ? this.defaultValue : this.currentValue;
     }
 
     @Override
-    public abstract T getValue();
-
-    @Override
-    public abstract void setValue(T value);
+    public void setValue(T value) {
+        this.currentValue = value;
+    };
 
     @Override
     public abstract void addToTuple(Tuple tuple);
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ParameterAbstract.class.getSimpleName() + "[", "]")
+                .add("currentValue=" + currentValue)
+                .add("defaultValue=" + defaultValue)
+                .add("parameterName='" + parameterName + "'")
+                .add("parameterType='" + parameterType + "'")
+                .add("whenMap=" + whenMap)
+                .toString();
+    }
 }
