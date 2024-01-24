@@ -18,6 +18,7 @@ import ru.iedt.database.request.store.QueryStoreDefinition;
 import ru.iedt.database.request.store.QueryStoreList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.SQL;
+import ru.iedt.database.request.structures.nodes.v3.node.Template;
 
 @Singleton
 public class DatabaseController {
@@ -51,10 +52,11 @@ public class DatabaseController {
         if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
         Elements.QuerySet querySet = definition.getQuerySet().get(queryName);
         Map<String, Elements.Parameter<?>> parameters = createParameters(parameterInputs, querySet.getParameters());
+        Map<String, Elements.Template> template = definition.getTemplate();
         List<Elements.Queries> queries = querySet.getQueries();
         List<Uni<Map<String, RowSet<Row>>>> unis = new ArrayList<>();
         for (Elements.Queries query : queries) {
-            unis.add(runQueries(query, parameters, client));
+            unis.add(runQueries(query, parameters, template, client));
         }
         return Uni.join().all(unis).andCollectFailures();
     }
@@ -71,11 +73,11 @@ public class DatabaseController {
     }
 
     private Uni<Map<String, RowSet<Row>>> runQueries(
-            Elements.Queries queries, Map<String, Elements.Parameter<?>> parameters, PgPool client) {
+            Elements.Queries queries, Map<String, Elements.Parameter<?>> parameters, Map<String, Elements.Template> template, PgPool client) {
         List<Elements.SQL> sqlList = queries.getSql();
         List<SQL.InsertData> insertDataArray = new ArrayList<>();
         for (Elements.SQL sql : sqlList) {
-            insertDataArray.add(SQL.getInsertData(sql, parameters));
+            insertDataArray.add(SQL.getInsertData(sql, parameters, template));
         }
         return client.withTransaction(connection -> {
             List<Uni<RowSet<Row>>> unis = new ArrayList<>();

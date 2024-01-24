@@ -31,5 +31,7 @@ public class DatabaseControllerTest {
 
         Uni<List<Map<String, RowSet<Row>>>> uni =
                 databaseController.runningQuerySet("demo", "TEST_SELECT", new HashMap<>(), client);
+        System.out.println(
+                uni.await().indefinitely().get(0).get("main").iterator().next().toJson());
     }
 }

@@ -69,7 +69,7 @@ public class SQL implements Elements.SQL {
         }
     }
 
-    public static InsertData getInsertData(Elements.SQL sql, Map<String, Elements.Parameter<?>> parameters) {
+    public static InsertData getInsertData(Elements.SQL sql, Map<String, Elements.Parameter<?>> parameters, Map<String, Elements.Template> templates) {
         String update = sql.getValue().toString();
         // TODO более продуманная обработка
         for (Elements.Parameter<?> parameter : parameters.values()) {
@@ -83,6 +83,11 @@ public class SQL implements Elements.SQL {
             if (replaceValue != null) {
                 update = update.replaceAll(regex, Matcher.quoteReplacement(replaceValue));
             }
+        }
+        for (Elements.Template template : templates.values()) {
+            String templateNAme = "REF_SQL=" + template.getId();
+            String regex = String.format("\\$%s\\$", templateNAme);
+            update = update.replaceAll(regex, Matcher.quoteReplacement(String.valueOf(template.getValue())));
         }
         Matcher matcher = Pattern.compile("\\$.*?\\$").matcher(update);
         List<String> parametersTokens = new ArrayList<>();
