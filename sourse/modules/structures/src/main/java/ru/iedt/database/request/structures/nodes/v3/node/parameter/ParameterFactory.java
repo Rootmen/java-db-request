@@ -81,8 +81,10 @@ public class ParameterFactory {
             case "str":
             case "string":
                 return new ParameterString(value, name);
-            case DATE:
+            case TIMESTAMP:
                 return new ParameterLocalDateTime(value, name);
+            case DATE:
+                return new ParameterLocalDate(value, name);
             case NUMERIC:
                 return new ParameterNumeric(value, name);
             case UUID:
