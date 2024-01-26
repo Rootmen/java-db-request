@@ -7,7 +7,7 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterType
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 public class ParameterLocalDate extends ParameterAbstract<LocalDate> {
-
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public ParameterLocalDate(String defaultValue, String parameterName) {
         super(parseString(defaultValue), parameterName, ParameterTypes.DATE);
     }
@@ -29,10 +29,13 @@ public class ParameterLocalDate extends ParameterAbstract<LocalDate> {
     static LocalDate parseString(String value) throws RuntimeException {
         if (value == null) return null;
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             return LocalDate.parse(value, formatter);
         } catch (Exception e) {
             throw new RuntimeException(value + " to e " + e);
         }
+    }
+
+    public static DateTimeFormatter getFormatter() {
+        return formatter;
     }
 }

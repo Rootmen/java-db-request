@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
@@ -42,8 +43,10 @@ public class ParameterFactory {
             case "str":
             case "string":
                 return new ParameterString((String) value, name);
-            case DATE:
+            case TIMESTAMP:
                 return new ParameterLocalDateTime((LocalDateTime) value, name);
+            case DATE:
+                return new ParameterLocalDate((LocalDate) value, name);
             case NUMERIC:
                 return new ParameterNumeric((BigDecimal) value, name);
             case UUID:

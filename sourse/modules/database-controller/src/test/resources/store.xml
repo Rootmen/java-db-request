@@ -26,6 +26,8 @@
                 </When>
                 <Otherwise>$ID5$</Otherwise>
             </Parameter>
+            <Parameter name="ID6" type="date"/>
+            <Parameter name="ID7" type="timestamp"/>
         </Parameters>
         <Query>
             <SQL name="main" wrapper_class="json">
@@ -35,7 +37,8 @@
                            $ID2$ AS ID2,
                            $ID3$ AS ID3,
                            $ID3$ AS ID4,
-                           $ID5$ AS ID5
+                           $ID5$ AS ID5,
+                           $ID7$ AS ID7,
                 ]]>
             </SQL>
         </Query>
