@@ -14,5 +14,5 @@ public interface ParameterTypes {
     String UUID = "uuid";
     String INTEGER_ARRAY = "int[]";
     String BIGINT_ARRAY = "bigint[]";
-    String STRING_ARRAY = "string[]]";
+    String STRING_ARRAY = "string[]";
 }
