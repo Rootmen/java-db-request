@@ -7,6 +7,9 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayInteger;
@@ -43,6 +46,10 @@ public class ParameterFactory {
             case "str":
             case "string":
                 return new ParameterString((String) value, name);
+            case JSON:
+                return new ParameterJson((JsonObject) value, name);
+            case JSON_ARRAY:
+                return new ParameterJsonArray((JsonArray) value, name);
             case TIMESTAMP:
                 return new ParameterLocalDateTime((LocalDateTime) value, name);
             case DATE:
@@ -89,6 +96,10 @@ public class ParameterFactory {
                 return new ParameterNumeric(value, name);
             case UUID:
                 return new ParameterUUID(value, name);
+            case JSON:
+                return new ParameterJson(value, name);
+            case JSON_ARRAY:
+                return new ParameterJsonArray(value, name);
         }
         throw new RuntimeException("Type " + type + " is not allowed");
     }

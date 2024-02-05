@@ -12,6 +12,8 @@ public interface ParameterTypes {
     String TIMESTAMP  = "timestamp";
     String NUMERIC = "numeric";
     String UUID = "uuid";
+    String JSON = "json";
+    String JSON_ARRAY = "json_array";
     String INTEGER_ARRAY = "int[]";
     String BIGINT_ARRAY = "bigint[]";
     String STRING_ARRAY = "string[]";
