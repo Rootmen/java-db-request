@@ -84,6 +84,8 @@ public class ParameterFactory {
             case "str_array":
             case "string_array":
                 return new ParameterArrayString(generateArray(value, String.class), name);
+            case BOOLEAN_ARRAY:
+                return new ParameterArrayBoolean(generateArray(value, Boolean.class), name);
             case BIGINT:
             case "biginteger":
                 return new ParameterBigInteger(value, name);
@@ -105,6 +107,8 @@ public class ParameterFactory {
                 return new ParameterJson(value, name);
             case JSON_ARRAY:
                 return new ParameterJsonArray(value, name);
+            case BOOLEAN:
+                return new ParameterBoolean(value, name);
         }
         throw new RuntimeException("Type " + type + " is not allowed");
     }
