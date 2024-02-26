@@ -7,11 +7,11 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.Para
 public class ParameterBoolean extends ParameterAbstract<Boolean> {
 
     public ParameterBoolean(String defaultValue, String parameterName) {
-        super(parseString(defaultValue), parameterName, ParameterTypes.BIGINT);
+        super(parseString(defaultValue), parameterName, ParameterTypes.BOOLEAN);
     }
 
     public ParameterBoolean(Boolean defaultValue, String parameterName) {
-        super(defaultValue, parameterName, ParameterTypes.BIGINT);
+        super(defaultValue, parameterName, ParameterTypes.BOOLEAN);
     }
 
     @Override
@@ -19,7 +19,7 @@ public class ParameterBoolean extends ParameterAbstract<Boolean> {
         this.currentValue = parseString(value);
     }
 
-    static boolean parseString(String input) throws RuntimeException {
+    static Boolean parseString(String input) throws RuntimeException {
         if (input == null) return false;
         try {
             return Boolean.parseBoolean(input);

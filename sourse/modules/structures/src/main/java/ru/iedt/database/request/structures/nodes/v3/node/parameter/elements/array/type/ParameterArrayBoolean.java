@@ -10,7 +10,7 @@ import static ru.iedt.database.request.structures.nodes.v3.node.parameter.Parame
 
 public class ParameterArrayBoolean extends ParameterAbstract<ArrayList<Boolean>> {
     public ParameterArrayBoolean(ArrayList<Boolean> defaultValue, String parameterName) {
-        super(defaultValue, parameterName, ParameterTypes.INTEGER_ARRAY);
+        super(defaultValue, parameterName, ParameterTypes.BOOLEAN_ARRAY);
     }
 
     @Override
