@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBigInteger;
+import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBoolean;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayString;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type.*;
@@ -37,6 +38,8 @@ public class ParameterFactory {
             case "str_array":
             case "string_array":
                 return new ParameterArrayString((ArrayList<String>) value, name);
+            case BOOLEAN_ARRAY:
+                return new ParameterArrayBoolean((ArrayList<Boolean>) value, name);
             case BIGINT:
             case "biginteger":
                 return new ParameterBigInteger((BigInteger) value, name);
@@ -58,6 +61,8 @@ public class ParameterFactory {
                 return new ParameterNumeric((BigDecimal) value, name);
             case UUID:
                 return new ParameterUUID((String) value, name);
+            case BOOLEAN:
+                return new ParameterBoolean((Boolean) value, name);
         }
         throw new RuntimeException("Type " + type + " is not allowed");
     }

@@ -9,6 +9,7 @@ public interface ParameterTypes {
     String LONG = "bigint";
     String STRING = "text";
     String DATE = "date";
+    String BOOLEAN = "boolean";
     String TIMESTAMP  = "timestamp";
     String NUMERIC = "numeric";
     String UUID = "uuid";
@@ -17,4 +18,5 @@ public interface ParameterTypes {
     String INTEGER_ARRAY = "int[]";
     String BIGINT_ARRAY = "bigint[]";
     String STRING_ARRAY = "string[]";
+    String BOOLEAN_ARRAY = "boolean[]";
 }
