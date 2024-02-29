@@ -4,46 +4,40 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 public class TaskDescription {
-    public UUID user;
+
+    public UUID user_id;
     public String socket;
     public String token;
-    public UUID app;
-    public UUID id;
+    public UUID app_id;
+    public UUID task_id;
     public String taskName;
     public String taskData;
 
-    public TaskDescription(
-            UUID user, String socket, String token, UUID app, UUID id, String taskName, String taskData) {
-        this.user = user;
+    public TaskDescription(UUID user_id, String socket, String token, UUID app_id, UUID task_id, String taskName, String taskData) {
+        this.user_id = user_id;
         this.socket = socket;
         this.token = token;
-        this.app = app;
-        this.id = id;
+        this.app_id = app_id;
+        this.task_id = task_id;
         this.taskName = taskName;
         this.taskData = taskData;
     }
 
     // TODO более сложная проверка
     public boolean isCorrect() {
-        return user != null
-                && socket != null
-                && token != null
-                && app != null
-                && id != null
-                && taskName != null
-                && taskData != null;
+        return user_id != null && socket != null && token != null && app_id != null && task_id != null && taskName != null && taskData != null;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", TaskDescription.class.getSimpleName() + "[", "]")
-                .add("user=" + user)
-                .add("socket='" + socket + "'")
-                .add("token='" + token + "'")
-                .add("app=" + app)
-                .add("id=" + id)
-                .add("taskName='" + taskName + "'")
-                .add("taskData='" + taskData + "'")
-                .toString();
+            .add("user_id=" + user_id)
+            .add("socket='" + socket + "'")
+            .add("token='" + token + "'")
+            .add("app_id=" + app_id)
+            .add("id=" + task_id)
+            .add("taskName='" + taskName + "'")
+            .add("taskData='" + taskData + "'")
+            .toString();
     }
 }
