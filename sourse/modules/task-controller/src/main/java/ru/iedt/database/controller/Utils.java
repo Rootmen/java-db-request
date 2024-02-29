@@ -62,4 +62,16 @@ public class Utils {
             .build();
         emitter.send(Message.of(json, Metadata.of(metadata)));
     }
+
+    public void addRabbitTaskWebsocket(Emitter<String> emitter, String user, String target, String taskName, String taskId, String json) {
+        OutgoingRabbitMQMetadata metadata = new OutgoingRabbitMQMetadata.Builder()
+            .withHeader(Attributes.Websocket.USER_ID, user)
+            .withHeader(Attributes.Websocket.TASK_NAME, taskName)
+            .withHeader(Attributes.Websocket.TASK_ID, taskId)
+            .withHeader(Attributes.Websocket.TARGET, target)
+            .withContentType("application/json")
+            .withTimestamp(ZonedDateTime.now())
+            .build();
+        emitter.send(Message.of(json, Metadata.of(metadata)));
+    }
 }
