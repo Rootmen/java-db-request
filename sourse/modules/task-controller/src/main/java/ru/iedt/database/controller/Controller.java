@@ -32,7 +32,6 @@ public class Controller {
                 if (m.isAnnotationPresent(Task.class)) {
                     Task task = m.getAnnotation(Task.class);
                     String name = task.value();
-                    if (name == null) name = task.name();
                     methods.put(name, m);
                     clazzs.put(name, object);
                 }
