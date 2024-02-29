@@ -3,13 +3,12 @@ package ru.iedt.database.controller;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Singleton;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
-import org.reflections.Reflections;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.reflections.Reflections;
 
 /**
  * Класс-контроллер для выполнения задач.
