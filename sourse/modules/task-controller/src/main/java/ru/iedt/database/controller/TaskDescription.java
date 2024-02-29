@@ -1,7 +1,5 @@
 package ru.iedt.database.controller;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.StringJoiner;
 import java.util.UUID;
 

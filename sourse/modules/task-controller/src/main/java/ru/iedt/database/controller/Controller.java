@@ -3,6 +3,7 @@ package ru.iedt.database.controller;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Singleton;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +49,7 @@ public class Controller {
      * @return Результат выполнения задачи в виде Uni<Void>.
      * @throws RuntimeException если задача не найдена или возникла ошибка при выполнении.
      */
-    public static Uni<Void> runTask(String taskName, TaskDescription task) {
+    public static Uni<Void> runTask(String taskName, TaskDescription task, Emitter<String> emitter) {
         try {
             Method method = methods.get(taskName);
             Object clazz = clazzs.get(taskName);
