@@ -49,7 +49,7 @@ public class Utils {
         );
     }
 
-    public void addRabbitTaskRest(Emitter<String> emitter, String user, String socket, String taskName, String token, String appId, String taskId, String json) {
+    public static void addRabbitTaskRest(Emitter<String> emitter, String user, String socket, String taskName, String token, String appId, String taskId, String json) {
         OutgoingRabbitMQMetadata metadata = new OutgoingRabbitMQMetadata.Builder()
             .withHeader(Attributes.Rest.USER_ID, user)
             .withHeader(Attributes.Rest.SOCKET, socket)
@@ -63,7 +63,7 @@ public class Utils {
         emitter.send(Message.of(json, Metadata.of(metadata)));
     }
 
-    public void addRabbitTaskWebsocket(Emitter<String> emitter, String user, String target, String taskName, String taskId, String json) {
+    public static void addRabbitTaskWebsocket(Emitter<String> emitter, String user, String target, String taskName, String taskId, String json) {
         OutgoingRabbitMQMetadata metadata = new OutgoingRabbitMQMetadata.Builder()
             .withHeader(Attributes.Websocket.USER_ID, user)
             .withHeader(Attributes.Websocket.TASK_NAME, taskName)
