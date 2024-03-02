@@ -42,7 +42,6 @@ public class Utils {
             UUID.fromString(mqMetadata.getHeader(Attributes.Rest.USER_ID, String.class).orElse("")),
             mqMetadata.getHeader(Attributes.Rest.SOCKET, String.class).orElse(null),
             mqMetadata.getHeader(Attributes.Rest.SECRET, String.class).orElse(null),
-            UUID.fromString(mqMetadata.getHeader(Attributes.Rest.APP_ID, String.class).orElse("")),
             UUID.fromString(mqMetadata.getHeader(Attributes.Rest.TASK_ID, String.class).orElse("")),
             mqMetadata.getHeader(Attributes.Rest.TASK_NAME, String.class).orElse(null),
             mapper.valueToTree(payload.getPayload()).toString()

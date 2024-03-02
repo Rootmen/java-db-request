@@ -13,11 +13,10 @@ public class TaskWebsocketDescription {
     public String task_name;
     public String task_data;
 
-    public TaskWebsocketDescription(UUID user_id, String socket, String token, UUID app_id, UUID task_id, String taskName, String taskData) {
+    public TaskWebsocketDescription(UUID user_id, String socket, String token, UUID task_id, String taskName, String task_data) {
         this.user_id = user_id;
         this.socket = socket;
         this.token = token;
-        this.app_id = app_id;
         this.task_id = task_id;
         this.task_name = taskName;
         this.task_data = task_data;
