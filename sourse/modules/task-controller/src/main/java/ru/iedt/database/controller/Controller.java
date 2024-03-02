@@ -47,6 +47,7 @@ public class Controller {
      * @return Результат выполнения задачи в виде Uni<Void>.
      * @throws RuntimeException если задача не найдена или возникла ошибка при выполнении.
      */
+    @SuppressWarnings("unchecked")
     public static Uni<Void> runTask(String taskName, TaskDescription task, Emitter<String> emitter) {
         try {
             Method method = methods.get(taskName);
