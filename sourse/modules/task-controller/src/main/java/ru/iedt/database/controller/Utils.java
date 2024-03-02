@@ -28,7 +28,7 @@ public class Utils {
             UUID.fromString(mqMetadata.getHeader(Attributes.Rest.APP_ID, String.class).orElse("")),
             UUID.fromString(mqMetadata.getHeader(Attributes.Rest.TASK_ID, String.class).orElse("")),
             mqMetadata.getHeader(Attributes.Rest.TASK_NAME, String.class).orElse(null),
-            payload.getPayload().toString()
+            mapper.valueToTree(payload.getPayload()).toString()
         );
     }
 
