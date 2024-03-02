@@ -10,17 +10,17 @@ public class TaskDescription {
     public String token;
     public UUID app_id;
     public UUID task_id;
-    public String taskName;
-    public String taskData;
+    public String task_name;
+    public String task_data;
 
-    public TaskDescription(UUID user_id, String socket, String token, UUID app_id, UUID task_id, String taskName, String taskData) {
+    public TaskDescription(UUID user_id, String socket, String token, UUID app_id, UUID task_id, String task_name, String task_data) {
         this.user_id = user_id;
         this.socket = socket;
         this.token = token;
         this.app_id = app_id;
         this.task_id = task_id;
-        this.taskName = taskName;
-        this.taskData = taskData;
+        this.task_name = task_name;
+        this.task_data = task_data;
     }
 
     // TODO более сложная проверка
@@ -36,8 +36,8 @@ public class TaskDescription {
             .add("token='" + token + "'")
             .add("app_id=" + app_id)
             .add("id=" + task_id)
-            .add("taskName='" + taskName + "'")
-            .add("taskData='" + taskData + "'")
+            .add("task_name='" + task_name + "'")
+            .add("task_data='" + task_data + "'")
             .toString();
     }
 }

@@ -36,8 +36,8 @@ public class TaskWebsocketDescription {
             .add("token='" + token + "'")
             .add("app_id=" + app_id)
             .add("id=" + task_id)
-            .add("taskName='" + taskName + "'")
-            .add("taskData='" + taskData + "'")
+            .add("task_name='" + task_name + "'")
+            .add("task_data='" + task_data + "'")
             .toString();
     }
 }
