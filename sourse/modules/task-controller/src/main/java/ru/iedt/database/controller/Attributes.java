@@ -11,6 +11,7 @@ public interface Attributes {
     }
 
     interface Websocket {
+        String SOCKET = "socket";
         String USER_ID = "user_id";
         String TARGET = "target";
         String TASK_ID = "task_id";

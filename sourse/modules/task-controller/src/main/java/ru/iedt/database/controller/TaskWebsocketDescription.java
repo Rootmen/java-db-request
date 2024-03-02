@@ -10,8 +10,8 @@ public class TaskWebsocketDescription {
     public String token;
     public UUID app_id;
     public UUID task_id;
-    public String taskName;
-    public String taskData;
+    public String task_name;
+    public String task_data;
 
     public TaskWebsocketDescription(UUID user_id, String socket, String token, UUID app_id, UUID task_id, String taskName, String taskData) {
         this.user_id = user_id;
@@ -19,13 +19,13 @@ public class TaskWebsocketDescription {
         this.token = token;
         this.app_id = app_id;
         this.task_id = task_id;
-        this.taskName = taskName;
-        this.taskData = taskData;
+        this.task_name = taskName;
+        this.task_data = task_data;
     }
 
     // TODO более сложная проверка
     public boolean isCorrect() {
-        return user_id != null && socket != null && token != null && app_id != null && task_id != null && taskName != null && taskData != null;
+        return user_id != null && socket != null && token != null && app_id != null && task_id != null && task_name != null && task_data != null;
     }
 
     @Override
