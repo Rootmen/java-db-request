@@ -51,7 +51,7 @@ public class Controller {
         try {
             Method method = methods.get(taskName);
             Object clazz = clazzs.get(taskName);
-            if (method == null || clazz == null) throw new RuntimeException("Задача "+ taskName + " не найдена");
+            if (method == null || clazz == null) throw new RuntimeException("Задача " + taskName + " не найдена");
             return (Uni<Void>) method.invoke(clazz, task, emitter);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
