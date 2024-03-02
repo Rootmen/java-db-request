@@ -25,7 +25,7 @@ public class TaskDescription {
 
     // TODO более сложная проверка
     public boolean isCorrect() {
-        return user_id != null && socket != null && token != null && app_id != null && task_id != null && taskName != null && taskData != null;
+        return user_id != null && socket != null && token != null && app_id != null && task_id != null && task_name != null && task_data != null;
     }
 
     @Override
