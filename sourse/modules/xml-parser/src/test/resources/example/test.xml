@@ -27,7 +27,7 @@
                     <![CDATA[
                     (SELECT ARRAY_AGG(CALCULATION_YEARS)
                     FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
-                    WHERE VARIANT.VAR_ID = $VAR_ID$)
+                    WHERE VARIANT.VAR_ID = ${VAR_ID})
                     ]]>
                 </When>
                 <Otherwise><![CDATA[0]]></Otherwise>
@@ -37,10 +37,10 @@
             <SQL name="main" wrapper_class="json">
                 <![CDATA[
                     SELECT 1 AS RESULT,
-                           $ST1$ AS RESULT_ST1,
-                           $ST2$ AS RESULT_ST2,
-                           $VAR_ID$ AS RESULT_VAR_ID,
-                           $YEARS$ AS RESULT_YEARS
+                           ${ST1} AS RESULT_ST1,
+                           ${ST2} AS RESULT_ST2,
+                           ${VAR_ID} AS RESULT_VAR_ID,
+                           ${YEARS} AS RESULT_YEARS
                 ]]>
             </SQL>
         </Query>
@@ -55,7 +55,7 @@
                     <![CDATA[
                             (SELECT ARRAY_AGG(CALCULATION_YEARS)
                              FROM DNEIM.INFRASTRUCTURAL_VARIANT_DATA AS VARIANT
-                             WHERE VARIANT.VAR_ID = $VAR_ID$)
+                             WHERE VARIANT.VAR_ID = ${VAR_ID})
                             ]]>
                 </When>
                 <Otherwise><![CDATA[0]]></Otherwise>
@@ -65,7 +65,7 @@
             <SQL>
                 <![CDATA[
                     SELECT *
-                    $REF_SQL=MAIN_TABLE$
+                    ${REF_SQL=MAIN_TABLE}
                     ]]>
             </SQL>
         </Query>
