@@ -39,11 +39,11 @@ public class Utils {
         }
         IncomingRabbitMQMetadata mqMetadata = metadata.get();
         return new TaskWebsocketDescription(
-            UUID.fromString(mqMetadata.getHeader(Attributes.Rest.USER_ID, String.class).orElse("")),
-            mqMetadata.getHeader(Attributes.Rest.SOCKET, String.class).orElse(null),
-            mqMetadata.getHeader(Attributes.Rest.SECRET, String.class).orElse(null),
-            UUID.fromString(mqMetadata.getHeader(Attributes.Rest.TASK_ID, String.class).orElse("")),
-            mqMetadata.getHeader(Attributes.Rest.TASK_NAME, String.class).orElse(null),
+            UUID.fromString(mqMetadata.getHeader(Attributes.Websocket.USER_ID, String.class).orElse("")),
+            mqMetadata.getHeader(Attributes.Websocket.SOCKET, String.class).orElse(null),
+            mqMetadata.getHeader(Attributes.Websocket.TARGET, String.class).orElse(null),
+            UUID.fromString(mqMetadata.getHeader(Attributes.Websocket.TASK_ID, String.class).orElse("")),
+            mqMetadata.getHeader(Attributes.Websocket.TASK_NAME, String.class).orElse(null),
             mapper.valueToTree(payload.getPayload()).toString()
         );
     }
