@@ -19,6 +19,7 @@ public class QueryStoreList {
         // Инициализация рефлексии и списка для хранения классов и метаданных
         Reflections reflections = new Reflections("ru");
         ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
+        System.out.printf("Найдено аннотаций: %-10s", classArrayList.size());
         ArrayList<QueryStoreDefinition> queryStores = new ArrayList<>();
 
         // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
