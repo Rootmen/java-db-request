@@ -94,7 +94,7 @@ public class SQL implements Elements.SQL {
         StringBuilder out = new StringBuilder();
         int index = 1;
         while (matcher.find()) {
-            String token = update.substring(matcher.start(), matcher.end()).substring(1);
+            String token = update.substring(matcher.start(), matcher.end()).substring(2);
             if (!token.isEmpty()) {
                 token = token.substring(0, token.length() - 1);
             }
