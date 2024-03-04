@@ -28,6 +28,13 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured'
 }
 
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 group "${applicationGroup}"
 version "${applicationVersion}"
 
