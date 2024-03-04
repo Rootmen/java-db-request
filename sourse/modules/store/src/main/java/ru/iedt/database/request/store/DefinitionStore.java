@@ -11,4 +11,5 @@ import java.lang.annotation.*;
  */
 @Target(ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
+@RegisterForReflection
 public @interface DefinitionStore {}

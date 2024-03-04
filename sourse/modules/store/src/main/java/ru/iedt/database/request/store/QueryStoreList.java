@@ -30,6 +30,8 @@ public class QueryStoreList {
                 throw new RuntimeException(e);
             }
         }
+        System.out.printf("Найдено хранилищ: %-10s", queryStores.size());
+        System.out.printf(queryStores.toString());
         // Возвращение списка с метаданными классов
         return queryStores;
     }
@@ -47,7 +49,7 @@ public class QueryStoreList {
         /**
          * Имя хранилища запросов.
          */
-        private  final String storeName;
+        private final String storeName;
 
         public QueryStoreMetadata(URI storePatch, String storeName) {
             this.storeName = storeName;
