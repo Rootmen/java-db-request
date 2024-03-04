@@ -9,7 +9,6 @@ import java.lang.annotation.*;
  * Классы, отмеченные этой аннотацией, могут быть использованы в рефлексивных операциях для получения информации
  * о хранилищах определений.
  */
-@RegisterForReflection
 @Target(ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface DefinitionStore {}
