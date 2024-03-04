@@ -76,7 +76,7 @@ public class SQL implements Elements.SQL {
             Map<String, String> when = parameter.getWhenMap();
             if (when == null || when.isEmpty()) continue;
             String parameterName = parameter.getParameterName();
-            String regex = String.format("\\${%s}", parameterName);
+            String regex = String.format("\\$\\{%s\\}", parameterName);
             Object parameterValueRaw = parameter.getValue();
             String parameterValue = (parameterValueRaw == null) ? "null" : parameterValueRaw.toString();
             String replaceValue = when.get(parameterValue) == null ? when.get("default") : when.get(parameterValue);
@@ -86,7 +86,7 @@ public class SQL implements Elements.SQL {
         }
         for (Elements.Template template : templates.values()) {
             String templateNAme = "REF_SQL=" + template.getId();
-            String regex = String.format("\\${%s}", templateNAme);
+            String regex = String.format("\\$\\{%s\\}", templateNAme);
             update = update.replaceAll(regex, Matcher.quoteReplacement(String.valueOf(template.getValue())));
         }
         Matcher matcher = Pattern.compile("\\$\\{([^{}]*)\\}").matcher(update);
