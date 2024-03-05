@@ -2,7 +2,13 @@ package ru.iedt.database.request.store;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Set;
+
 import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
+
+import static org.reflections.scanners.Scanners.SubTypes;
+import static org.reflections.scanners.Scanners.TypesAnnotated;
 
 public class QueryStoreList {
 
@@ -16,18 +22,9 @@ public class QueryStoreList {
      * @throws RuntimeException В случае возникновения ошибок при создании экземпляров классов с метаданными.
      */
     public static ArrayList<QueryStoreDefinition> getStoresMetadata() {
-        try {
-            Object clazz = Class.forName("ru.iedt.database.request.store.DefinitionStore");
-            System.out.println(clazz);
-            System.out.println(clazz.getClass().getPackageName());
-            clazz = Class.forName("ru.iedt.quarkus.system.director.secretary.db.ModelStore");
-            System.out.println(clazz);
-            System.out.println(clazz.getClass().getPackageName());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
         // Инициализация рефлексии и списка для хранения классов и метаданных
-        Reflections reflections = new Reflections("ru");
+        Reflections reflections = new Reflections(ClasspathHelper.forPackage("ru"));
+        Set<Class<?>> modules = reflections.get(TypesAnnotated.with(DefinitionStore.class).asClass());;
         ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
         System.out.printf("Найдено аннотаций: %-10s", classArrayList.size());
         ArrayList<QueryStoreDefinition> queryStores = new ArrayList<>();
