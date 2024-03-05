@@ -25,10 +25,11 @@ public class QueryStoreList {
         try {
             classArrayList =
             ClassPath
-                .from(ClassLoader.getSystemClassLoader())
+                .from(ClassLoader.getPlatformClassLoader())
                 .getAllClasses()
                 .stream()
                 .filter(clazz -> {
+                    System.out.println(clazz);
                     try {
                         if (clazz.load().getSuperclass() == null) return false;
                         return clazz.load().getSuperclass().getName().equals("ru.iedt.database.request.store.QueryStoreDefinition");
