@@ -22,10 +22,10 @@ import java.util.*;
 
 @Singleton
 public class DatabaseController {
-    private final Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
+    private final static Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
     private final static ArrayList<QueryStoreDefinition> INITIALIZERS  = QueryStoreList.getStoresMetadata();;
 
-    DatabaseController() {
+    static  {
         for (QueryStoreDefinition queryStoreDefinition : INITIALIZERS) {
             try {
                 String storeName = queryStoreDefinition.getStoreName();
