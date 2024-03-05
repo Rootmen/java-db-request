@@ -19,7 +19,6 @@ dependencies {
     implementation 'io.smallrye:jandex'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
 
-    implementation 'org.reflections:reflections:0.10.2'
     implementation project(path: ':sourse:modules:store')
     implementation project(path: ':sourse:modules:structures')
     implementation project(path: ':sourse:modules:xml-parser')

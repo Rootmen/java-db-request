@@ -1,14 +1,12 @@
 package ru.iedt.database.request.store;
 
+import com.google.common.reflect.ClassPath;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
-
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-
-import static org.reflections.scanners.Scanners.SubTypes;
-import static org.reflections.scanners.Scanners.TypesAnnotated;
+import java.util.stream.Collectors;
 
 public class QueryStoreList {
 
@@ -23,17 +21,34 @@ public class QueryStoreList {
      */
     public static ArrayList<QueryStoreDefinition> getStoresMetadata() {
         // Инициализация рефлексии и списка для хранения классов и метаданных
-        Reflections reflections = new Reflections(ClasspathHelper.forPackage("ru"));
-        Set<Class<?>> modules = reflections.get(TypesAnnotated.with(DefinitionStore.class).asClass());;
-        ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
+        Set<Class<?>> classArrayList = null;
+        try {
+            classArrayList =
+            ClassPath
+                .from(ClassLoader.getSystemClassLoader())
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> {
+                    try {
+                        if (clazz.load().getSuperclass() == null) return false;
+                        return clazz.load().getSuperclass().getName().equals("ru.iedt.database.request.store.QueryStoreDefinition");
+                    } catch (NoClassDefFoundError e) {
+                        return false;
+                    }
+                })
+                .map(ClassPath.ClassInfo::load)
+                .filter(load -> !Arrays.stream(load.getAnnotations()).filter(annotation -> annotation.toString().equals("@ru.iedt.database.request.store.DefinitionStore()")).collect((Collectors.toSet())).isEmpty())
+                .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         System.out.printf("Найдено аннотаций: %-10s", classArrayList.size());
         ArrayList<QueryStoreDefinition> queryStores = new ArrayList<>();
 
         // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
         for (Class<?> classElement : classArrayList) {
             try {
-                queryStores.add((QueryStoreDefinition)
-                        classElement.getDeclaredConstructor().newInstance());
+                queryStores.add((QueryStoreDefinition) Class.forName(classElement.getName()).getDeclaredConstructor().newInstance());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -49,6 +64,7 @@ public class QueryStoreList {
      * которая хранит информацию о хранилище запросов.
      */
     public static class QueryStoreMetadata {
+
         /**
          * Путь к хранилищу запросов.
          */
