@@ -1,12 +1,9 @@
 package ru.iedt.database.request.store;
 
-import com.google.common.reflect.ClassPath;
-import java.io.IOException;
+import org.reflections.Reflections;
+
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class QueryStoreList {
 
@@ -21,39 +18,22 @@ public class QueryStoreList {
      */
     public static ArrayList<QueryStoreDefinition> getStoresMetadata() {
         // Инициализация рефлексии и списка для хранения классов и метаданных
-        Set<Class<?>> classArrayList = null;
-        try {
-            classArrayList =
-            ClassPath
-                .from(ClassLoader.getSystemClassLoader())
-                .getAllClasses()
-                .stream()
-                .filter(clazz -> {
-                    System.out.println(clazz);
-                    try {
-                        if (clazz.load().getSuperclass() == null) return false;
-                        return clazz.load().getSuperclass().getName().equals("ru.iedt.database.request.store.QueryStoreDefinition");
-                    } catch (NoClassDefFoundError e) {
-                        return false;
-                    }
-                })
-                .map(ClassPath.ClassInfo::load)
-                .filter(load -> !Arrays.stream(load.getAnnotations()).filter(annotation -> annotation.toString().equals("@ru.iedt.database.request.store.DefinitionStore()")).collect((Collectors.toSet())).isEmpty())
-                .collect(Collectors.toSet());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Reflections reflections = new Reflections("ru");
+        ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
+
         System.out.printf("Найдено аннотаций: %-10s", classArrayList.size());
         ArrayList<QueryStoreDefinition> queryStores = new ArrayList<>();
 
         // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
         for (Class<?> classElement : classArrayList) {
             try {
-                queryStores.add((QueryStoreDefinition) Class.forName(classElement.getName()).getDeclaredConstructor().newInstance());
+                queryStores.add((QueryStoreDefinition)
+                        classElement.getDeclaredConstructor().newInstance());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
+        // Возвращение списка с метаданными классов
         System.out.printf("Найдено хранилищ: %-10s", queryStores.size());
         System.out.printf(queryStores.toString());
         // Возвращение списка с метаданными классов

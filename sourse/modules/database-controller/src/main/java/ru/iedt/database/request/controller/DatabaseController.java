@@ -26,10 +26,7 @@ public class DatabaseController {
     private final static ArrayList<QueryStoreDefinition> INITIALIZERS  = QueryStoreList.getStoresMetadata();;
 
     DatabaseController() {
-        ArrayList<QueryStoreDefinition> queryStoreDefinitionArrayList = QueryStoreList.getStoresMetadata();
-        System.out.println(queryStoreDefinitionArrayList);
-        System.out.println(INITIALIZERS);
-        for (QueryStoreDefinition queryStoreDefinition : queryStoreDefinitionArrayList) {
+        for (QueryStoreDefinition queryStoreDefinition : INITIALIZERS) {
             try {
                 String storeName = queryStoreDefinition.getStoreName();
                 if (QUERY_STORE_DEFINITION_MAP.containsKey(storeName)) {
