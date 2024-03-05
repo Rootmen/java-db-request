@@ -19,7 +19,7 @@ public abstract class QueryStoreDefinition {
      * @return URI пути к хранилищу запросов.
      * @throws URISyntaxException если произошла ошибка в URI.
      */
-    public abstract URI getStorePath() throws URISyntaxException;
+    public abstract String getResourcePatch();
 
     /**
      * Абстрактный метод, который должен быть реализован в подклассах,
@@ -35,12 +35,10 @@ public abstract class QueryStoreDefinition {
      * @return Строковое представление объекта, включая путь и имя хранилища запросов.
      * @throws RuntimeException если произошла ошибка при получении пути хранилища запросов.
      */
+    public abstract Class<?> getResourceClass();
+
     @Override
     public String toString() {
-        try {
-            return String.format("QueryStore{ storePatch='%s', storeName='%s' }", this.getStorePath(), this.getStoreName());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return String.format("QueryStore{ getResourcePatch='%s', storeName='%s', resourceClass='%s' }", this.getResourcePatch(), this.getStoreName(), this.getResourceClass());
     }
 }

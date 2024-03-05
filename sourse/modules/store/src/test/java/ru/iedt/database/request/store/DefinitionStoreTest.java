@@ -4,6 +4,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Objects;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +20,8 @@ public class DefinitionStoreTest {
         Assertions.assertEquals(queryStoreDefinitions.size(), 3, "Неправильно определено количество хранилищ");
         System.out.println("Проверка корректности работы поиска файла");
         for (QueryStoreDefinition qStoreDefinition : queryStoreDefinitions) {
-            String fileName = qStoreDefinition.getStorePath().getPath();
+            String fileName =
+                    Objects.requireNonNull(qStoreDefinition.getResourceClass().getResource(qStoreDefinition.getResourcePatch())).getPath();
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             String fileContent = reader.readLine();
             System.out.printf(

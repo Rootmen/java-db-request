@@ -8,6 +8,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,18 +16,17 @@ import java.nio.file.Paths;
 
 public class ParserEngine {
 
-    public static Elements.Definition parsingXml(URI file) {
+    public static Elements.Definition parsingXml(InputStream file) {
         if (file == null) throw new RuntimeException();
-        Path paths = Paths.get(file);
 
         // Валидация
         // Exception parserError = StaxStreamValidator.staxStreamValidateSchema(paths);
         // if (parserError != null) throw parserError;
 
-        try (StaxStreamProcessor processor = new StaxStreamProcessor(Files.newInputStream(paths))) {
+        try (StaxStreamProcessor processor = new StaxStreamProcessor(file)) {
             XMLStreamReader reader = processor.getReader();
             return ParserEngineDefinition.parseDefinitionNode(reader);
-        } catch (XMLStreamException | IOException e) {
+        } catch (XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }

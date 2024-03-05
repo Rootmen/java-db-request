@@ -11,14 +11,19 @@ import java.util.Objects;
 @RegisterForReflection
 @DefinitionStore
 public class Demo1QueryStoreDefinition extends QueryStoreDefinition {
+
     @Override
-    public URI getStorePath() throws URISyntaxException {
-        return Objects.requireNonNull(this.getClass().getResource("/store1.txt"))
-                .toURI();
+    public String getResourcePatch() {
+        return "/store1.txt";
     }
 
     @Override
     public String getStoreName() {
         return "store1";
+    }
+
+    @Override
+    public Class<?> getResourceClass() {
+        return this.getClass();
     }
 }

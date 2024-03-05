@@ -14,6 +14,7 @@ import ru.iedt.database.request.store.QueryStoreList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.SQL;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -22,27 +23,21 @@ import java.util.*;
 
 @Singleton
 public class DatabaseController {
-    private final static Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
-    private final static ArrayList<QueryStoreDefinition> INITIALIZERS  = QueryStoreList.getStoresMetadata();;
+    private static final Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
+    private static final ArrayList<QueryStoreDefinition> INITIALIZERS = QueryStoreList.getStoresMetadata();
+    ;
 
-    static  {
+    static {
         for (QueryStoreDefinition queryStoreDefinition : INITIALIZERS) {
-            try {
-                String storeName = queryStoreDefinition.getStoreName();
-                if (QUERY_STORE_DEFINITION_MAP.containsKey(storeName)) {
-                    throw new RuntimeException("Несколько хранилищ с одинаковым названием!");
-                }
-                URI file = queryStoreDefinition.getStorePath();
-                if (!Files.exists(Paths.get(file))) {
-                    throw new RuntimeException(String.format(
-                            "Nor found file %s",
-                            queryStoreDefinition.getStorePath().getPath()));
-                }
-                Elements.Definition definition = ParserEngine.parsingXml(file);
-                QUERY_STORE_DEFINITION_MAP.put(storeName, definition);
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
+            String storeName = queryStoreDefinition.getStoreName();
+            if (QUERY_STORE_DEFINITION_MAP.containsKey(storeName)) {
+                throw new RuntimeException("Несколько хранилищ с одинаковым названием!");
             }
+            InputStream file = queryStoreDefinition
+                    .getResourceClass()
+                    .getResourceAsStream(queryStoreDefinition.getResourcePatch());
+            Elements.Definition definition = ParserEngine.parsingXml(file);
+            QUERY_STORE_DEFINITION_MAP.put(storeName, definition);
         }
     }
 
@@ -73,7 +68,10 @@ public class DatabaseController {
     }
 
     private Uni<Map<String, RowSet<Row>>> runQueries(
-            Elements.Queries queries, Map<String, Elements.Parameter<?>> parameters, Map<String, Elements.Template> template, PgPool client) {
+            Elements.Queries queries,
+            Map<String, Elements.Parameter<?>> parameters,
+            Map<String, Elements.Template> template,
+            PgPool client) {
         List<Elements.SQL> sqlList = queries.getSql();
         List<SQL.InsertData> insertDataArray = new ArrayList<>();
         for (Elements.SQL sql : sqlList) {
