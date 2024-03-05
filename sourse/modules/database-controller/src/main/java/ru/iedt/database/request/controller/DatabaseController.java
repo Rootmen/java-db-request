@@ -24,9 +24,9 @@ import java.util.*;
 public class DatabaseController {
     private final Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
 
-    static final ArrayList<QueryStoreDefinition> INITIALIZERS = QueryStoreList.getStoresMetadata();
     DatabaseController() {
-        for (QueryStoreDefinition queryStoreDefinition : INITIALIZERS) {
+        ArrayList<QueryStoreDefinition> queryStoreDefinitionArrayList = QueryStoreList.getStoresMetadata();
+        for (QueryStoreDefinition queryStoreDefinition : queryStoreDefinitionArrayList) {
             try {
                 String storeName = queryStoreDefinition.getStoreName();
                 if (QUERY_STORE_DEFINITION_MAP.containsKey(storeName)) {
