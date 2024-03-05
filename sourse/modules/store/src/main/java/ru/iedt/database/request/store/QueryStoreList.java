@@ -16,6 +16,16 @@ public class QueryStoreList {
      * @throws RuntimeException В случае возникновения ошибок при создании экземпляров классов с метаданными.
      */
     public static ArrayList<QueryStoreDefinition> getStoresMetadata() {
+        try {
+            Object clazz = Class.forName("ru.iedt.database.request.store.DefinitionStore");
+            System.out.println(clazz);
+            System.out.println(clazz.getClass().getPackageName());
+            clazz = Class.forName("ru.iedt.database.request.store.DefinitionStore");
+            System.out.println(clazz);
+            System.out.println(clazz.getClass().getPackageName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         // Инициализация рефлексии и списка для хранения классов и метаданных
         Reflections reflections = new Reflections("ru");
         ArrayList<Class<?>> classArrayList = new ArrayList<>(reflections.getTypesAnnotatedWith(DefinitionStore.class));
