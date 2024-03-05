@@ -20,7 +20,7 @@ public class QueryStoreList {
             Object clazz = Class.forName("ru.iedt.database.request.store.DefinitionStore");
             System.out.println(clazz);
             System.out.println(clazz.getClass().getPackageName());
-            clazz = Class.forName("ru.iedt.database.request.store.DefinitionStore");
+            clazz = Class.forName("ru.iedt.quarkus.system.director.secretary.db.ModelStore");
             System.out.println(clazz);
             System.out.println(clazz.getClass().getPackageName());
         } catch (ClassNotFoundException e) {
