@@ -34,8 +34,8 @@ public class QueryStoreList {
             }
         }
         // Возвращение списка с метаданными классов
-        System.out.printf("Найдено хранилищ: %-10s", queryStores.size());
-        System.out.printf(queryStores.toString());
+        System.out.printf("Найдено хранилищ: %-10s\n", queryStores.size());
+        System.out.println(queryStores.toString());
         // Возвращение списка с метаданными классов
         return queryStores;
     }
