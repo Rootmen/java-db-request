@@ -25,7 +25,7 @@ public class QueryStoreList {
         try {
             classArrayList =
             ClassPath
-                .from(ClassLoader.getPlatformClassLoader())
+                .from(ClassLoader.getSystemClassLoader())
                 .getAllClasses()
                 .stream()
                 .filter(clazz -> {

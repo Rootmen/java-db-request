@@ -23,9 +23,12 @@ import java.util.*;
 @Singleton
 public class DatabaseController {
     private final Map<String, Elements.Definition> QUERY_STORE_DEFINITION_MAP = new HashMap<>();
+    private final ArrayList<QueryStoreDefinition> INITIALIZERS  = QueryStoreList.getStoresMetadata();;
 
     DatabaseController() {
         ArrayList<QueryStoreDefinition> queryStoreDefinitionArrayList = QueryStoreList.getStoresMetadata();
+        System.out.println(queryStoreDefinitionArrayList);
+        System.out.println(INITIALIZERS);
         for (QueryStoreDefinition queryStoreDefinition : queryStoreDefinitionArrayList) {
             try {
                 String storeName = queryStoreDefinition.getStoreName();
