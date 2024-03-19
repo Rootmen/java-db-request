@@ -2,6 +2,7 @@ package ru.iedt.database.request.structures.nodes.v3.node.parameter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -114,6 +115,10 @@ public class ParameterFactory {
     }
 
     public static <T> ArrayList<T> generateArray(String array, Class<T> type) throws RuntimeException {
+        if (type.equals(Integer.class)) {
+            return (ArrayList<T>) generateArrayInteger(array);
+        }
+        
         try {
             ArrayList<T> arrayString = new ArrayList<>();
             if (array != null && !array.isEmpty()) {
@@ -130,5 +135,16 @@ public class ParameterFactory {
                 | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ArrayList<Integer> generateArrayInteger(String array) throws RuntimeException {
+        ArrayList<Integer> arrayString = new ArrayList<>();
+        if (array != null && !array.isEmpty()) {
+            String[] values = array.split(",");
+            for (String value : values) {
+                arrayString.add(Integer.parseInt(value));
+            }
+        }
+        return arrayString;
     }
 }
