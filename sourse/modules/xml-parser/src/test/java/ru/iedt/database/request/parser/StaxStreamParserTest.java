@@ -13,7 +13,7 @@ public class StaxStreamParserTest {
     public void testParser() throws Exception {
         URL file = StaxStreamParserTest.class.getResource("/example/test.xml");
         if (file == null) throw new RuntimeException("Nor found file test.xml");
-        Elements.Definition definition = ParserEngine.parsingXml(file.toURI());
+        Elements.Definition definition = ParserEngine.parsingXml(file.openStream());
         System.out.println(definition);
         // Assertions.assertEquals(definition.toJson(), xmlFotmat,"Неправильно прочитано содержимое xml файла");
     }

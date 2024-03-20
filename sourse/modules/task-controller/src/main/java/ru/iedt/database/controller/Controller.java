@@ -7,8 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.reflections.Reflections;
+import ru.iedt.edoxchange.messaging.WebsocketMessage;
 
 /**
  * Класс-контроллер для выполнения задач.
@@ -48,12 +48,12 @@ public class Controller {
      * @throws RuntimeException если задача не найдена или возникла ошибка при выполнении.
      */
     @SuppressWarnings("unchecked")
-    public static Uni<Void> runTask(String taskName, TaskDescription task, Emitter<String> emitter) {
+    public static Uni<Void> runTask(String taskName, TaskDescription task, WebsocketMessage message) {
         try {
             Method method = methods.get(taskName);
             Object clazz = clazzs.get(taskName);
             if (method == null || clazz == null) throw new RuntimeException("Задача " + taskName + " не найдена");
-            return (Uni<Void>) method.invoke(clazz, task, emitter);
+            return (Uni<Void>) method.invoke(clazz, task, message);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
