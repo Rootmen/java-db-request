@@ -9,7 +9,7 @@ package WebsocketMessage;
 // The greeting service definition.
 service WebsocketMessage {
   // Sends a greeting
-  rpc Message (WebsocketReply) returns (WebsocketRequest) {}
+  rpc Message (WebsocketRequest) returns (WebsocketReply) {}
 }
 
 // The request message containing the user's name.
