@@ -1,24 +1,22 @@
 package ru.iedt.database.request.structures.nodes.v3.node.parameter;
 
+import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes.*;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBigInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayBoolean;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayInteger;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.array.type.ParameterArrayString;
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.primitives.type.*;
-
-import static ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterTypes.*;
 
 public class ParameterFactory {
 
@@ -117,8 +115,10 @@ public class ParameterFactory {
     public static <T> ArrayList<T> generateArray(String array, Class<T> type) throws RuntimeException {
         if (type.equals(Integer.class)) {
             return (ArrayList<T>) generateArrayInteger(array);
+        } else if (type.equals(BigInteger.class)) {
+            return (ArrayList<T>) generateArrayBigInteger(array);
         }
-        
+
         try {
             ArrayList<T> arrayString = new ArrayList<>();
             if (array != null && !array.isEmpty()) {
@@ -129,10 +129,7 @@ public class ParameterFactory {
                 }
             }
             return arrayString;
-        } catch (NoSuchMethodException
-                | InvocationTargetException
-                | InstantiationException
-                | IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -143,6 +140,17 @@ public class ParameterFactory {
             String[] values = array.split(",");
             for (String value : values) {
                 arrayString.add(Integer.parseInt(value));
+            }
+        }
+        return arrayString;
+    }
+
+    public static ArrayList<BigInteger> generateArrayBigInteger(String array) throws RuntimeException {
+        ArrayList<BigInteger> arrayString = new ArrayList<>();
+        if (array != null && !array.isEmpty()) {
+            String[] values = array.split(",");
+            for (String value : values) {
+                arrayString.add(new BigInteger(value));
             }
         }
         return arrayString;
