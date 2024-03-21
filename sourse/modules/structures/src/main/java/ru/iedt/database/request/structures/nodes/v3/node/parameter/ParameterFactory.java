@@ -20,6 +20,7 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.prim
 
 public class ParameterFactory {
 
+    @SuppressWarnings("unchecked")
     public static <T> Elements.Parameter<?> getParameter(String name, String type, T value) throws RuntimeException {
         switch (type.toLowerCase()) {
             case INTEGER:
@@ -112,6 +113,7 @@ public class ParameterFactory {
         throw new RuntimeException("Type " + type + " is not allowed");
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> ArrayList<T> generateArray(String array, Class<T> type) throws RuntimeException {
         if (type.equals(Integer.class)) {
             return (ArrayList<T>) generateArrayInteger(array);
@@ -139,7 +141,7 @@ public class ParameterFactory {
         if (array != null && !array.isEmpty()) {
             String[] values = array.split(",");
             for (String value : values) {
-                arrayString.add(Integer.parseInt(value));
+                arrayString.add(Integer.parseInt(value.trim()));
             }
         }
         return arrayString;
@@ -150,7 +152,7 @@ public class ParameterFactory {
         if (array != null && !array.isEmpty()) {
             String[] values = array.split(",");
             for (String value : values) {
-                arrayString.add(new BigInteger(value));
+                arrayString.add(new BigInteger(value.trim()));
             }
         }
         return arrayString;
