@@ -1,5 +1,6 @@
 package ru.iedt.database.controller;
 
+import io.quarkus.arc.Arc;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Singleton;
@@ -32,7 +33,7 @@ public class Controller {
         }
         System.out.print("Поиск методов:\n");
         for (Class<?> clazz : classes) {
-            Object object = CDI.current().select(clazz).get();
+            Object object = Arc.container().select(clazz).get();
             for (Method m : clazz.getDeclaredMethods()) {
                 if (m.isAnnotationPresent(Task.class)) {
                     Task task = m.getAnnotation(Task.class);
