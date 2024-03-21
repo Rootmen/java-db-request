@@ -58,6 +58,7 @@ public class DatabaseController {
         return parameterMap;
     }
 
+    @SuppressWarnings("unchecked")
     private Uni<Map<String, RowSet<Row>>> runQueries(Elements.Queries queries, Map<String, Elements.Parameter<?>> parameters, Map<String, Elements.Template> template, PgPool client, String storeName, String queryName) {
         List<Elements.SQL> sqlList = queries.getSql();
         List<SQL.InsertData> insertDataArray = new ArrayList<>();

@@ -1,9 +1,8 @@
 package ru.iedt.database.request.store;
 
-import org.reflections.Reflections;
-
 import java.net.URI;
 import java.util.ArrayList;
+import org.reflections.Reflections;
 
 public class QueryStoreList {
 
@@ -27,15 +26,16 @@ public class QueryStoreList {
         // Итерация по классам с аннотацией @DefinitionStore и создание их экземпляров в массив queryStores
         for (Class<?> classElement : classArrayList) {
             try {
-                queryStores.add((QueryStoreDefinition)
-                        classElement.getDeclaredConstructor().newInstance());
+                queryStores.add((QueryStoreDefinition) classElement.getDeclaredConstructor().newInstance());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
         // Возвращение списка с метаданными классов
         System.out.printf("Найдено хранилищ: %-10s\n", queryStores.size());
-        System.out.println(queryStores.toString());
+        for (QueryStoreDefinition queryStore : queryStores) {
+            System.out.println(queryStore);
+        }
         // Возвращение списка с метаданными классов
         return queryStores;
     }

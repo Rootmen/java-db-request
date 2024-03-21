@@ -26,12 +26,19 @@ public class Controller {
     static {
         Reflections reflections = new Reflections("ru");
         ArrayList<Class<?>> classes = new ArrayList<>(reflections.getTypesAnnotatedWith(Tasks.class));
+
+        System.out.printf("Найдено классов Tasks-runner: %-10s\n", classes.size());
+        for (Class<?> clazz : classes) {
+            System.out.println(clazz.getName());
+        }
+        System.out.print("Поиск методов:\n");
         for (Class<?> clazz : classes) {
             Object object = CDI.current().select(clazz).get();
             for (Method m : clazz.getDeclaredMethods()) {
                 if (m.isAnnotationPresent(Task.class)) {
                     Task task = m.getAnnotation(Task.class);
                     String name = task.value();
+                    System.out.printf("Задача: %-10s --- метод %-10s класс %-10s\n", name, m.getName(), object.getClass().getName());
                     methods.put(name, m);
                     clazzs.put(name, object);
                 }
