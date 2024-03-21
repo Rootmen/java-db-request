@@ -12,9 +12,8 @@ import ru.iedt.edoxchange.messaging.WebsocketMessage;
 
 /**
  * Класс-контроллер для выполнения задач.
- * Реализует паттерн Singleton.
  */
-@Singleton
+
 public class Controller {
 
     private static final HashMap<String, Method> methods = new HashMap<>();
