@@ -15,6 +15,7 @@ import ru.iedt.edoxchange.messaging.WebsocketMessage;
  * Класс-контроллер для выполнения задач.
  */
 
+@Singleton
 public class Controller {
 
     private static final HashMap<String, Method> methods = new HashMap<>();
@@ -55,7 +56,7 @@ public class Controller {
      * @throws RuntimeException если задача не найдена или возникла ошибка при выполнении.
      */
     @SuppressWarnings("unchecked")
-    public static Uni<Void> runTask(String taskName, TaskDescription task, WebsocketMessage message) {
+    public Uni<Void> runTask(String taskName, TaskDescription task, WebsocketMessage message) {
         try {
             Method method = methods.get(taskName);
             Object clazz = clazzs.get(taskName);
@@ -65,4 +66,5 @@ public class Controller {
             throw new RuntimeException(e);
         }
     }
+
 }
