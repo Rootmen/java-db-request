@@ -105,7 +105,7 @@ public class DatabaseController {
                                 return map;
                             })
                             .onItem()
-                            .transformToUni(stringRowSetMap -> transaction.commit().replaceWith(stringRowSetMap));
+                            .transformToUni(stringRowSetMap -> transaction.commit().onItem().transformToUni(unused -> connection.close()).replaceWith(stringRowSetMap));
                     })
             );
         /*    return client.withTransaction(connection -> {
