@@ -1,11 +1,9 @@
 package ru.iedt.database.request.controller;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.groups.UniJoin;
 import io.vertx.mutiny.pgclient.PgPool;
-import io.vertx.mutiny.sqlclient.PreparedQuery;
-import io.vertx.mutiny.sqlclient.Row;
-import io.vertx.mutiny.sqlclient.RowSet;
-import io.vertx.mutiny.sqlclient.Tuple;
+import io.vertx.mutiny.sqlclient.*;
 import jakarta.inject.Singleton;
 import java.io.InputStream;
 import java.util.*;
@@ -65,7 +63,52 @@ public class DatabaseController {
         for (Elements.SQL sql : sqlList) {
             insertDataArray.add(SQL.getInsertData(sql, parameters, template));
         }
-        return client.withTransaction(connection -> {
+        return client
+            .getConnection()
+            .onItem()
+            .transformToUni(connection ->
+                connection
+                    .begin()
+                    .onItem()
+                    .transformToUni(transaction -> {
+                        UniJoin.Builder<RowSet<Row>> builder = Uni.join().builder();
+                        List<String> unisKey = new ArrayList<>();
+                        for (SQL.InsertData insertData : insertDataArray) {
+                            Tuple tuple = Tuple.tuple();
+                            for (String token : insertData.getParametersTokens()) {
+                                Elements.Parameter<?> parameter = parameters.get(token);
+                                parameter.addToTuple(tuple);
+                            }
+                            PreparedQuery<RowSet<Row>> preparedQuery = connection.preparedQuery(insertData.getSql());
+                            builder.add(
+                                preparedQuery
+                                    .execute(tuple)
+                                    .onFailure()
+                                    .invoke(throwable -> {
+                                        System.err.println("Хранилище : " + storeName);
+                                        System.err.println("Запрос : " + queryName);
+                                        System.err.println("Текст запроса : " + insertData.getSql());
+                                        throwable.printStackTrace();
+                                    })
+                            );
+                            unisKey.add(insertData.getName());
+                        }
+                        return builder
+                            .joinAll()
+                            .andCollectFailures()
+                            .onItem()
+                            .transform(rowSets -> {
+                                Map<String, RowSet<Row>> map = new LinkedHashMap<>();
+                                for (int g = 0; g < rowSets.size(); g++) {
+                                    map.put(unisKey.get(g), rowSets.get(g));
+                                }
+                                return map;
+                            })
+                            .onItem()
+                            .transformToUni(stringRowSetMap -> transaction.commit().replaceWith(stringRowSetMap));
+                    })
+            );
+        /*    return client.withTransaction(connection -> {
             List<Uni<RowSet<Row>>> unis = new ArrayList<>();
             List<String> unisKey = new ArrayList<>();
             for (SQL.InsertData insertData : insertDataArray) {
@@ -99,5 +142,6 @@ public class DatabaseController {
                     return map;
                 });
         });
+  */
     }
 }
