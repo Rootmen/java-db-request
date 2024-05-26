@@ -2,14 +2,13 @@ package ru.iedt.database.controller;
 
 import io.quarkus.arc.Arc;
 import io.smallrye.mutiny.Uni;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.reflections.Reflections;
-import ru.iedt.edoxchange.messaging.WebsocketMessage;
+import ru.iedt.database.messaging.WebsocketMessage;
 
 /**
  * Класс-контроллер для выполнения задач.
@@ -66,5 +65,4 @@ public class Controller {
             throw new RuntimeException(e);
         }
     }
-
 }

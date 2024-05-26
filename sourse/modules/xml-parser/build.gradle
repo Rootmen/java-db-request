@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'io.quarkus'
     id 'org.kordamp.gradle.jandex' version '1.1.0'
+    id 'maven-publish'
 }
 
 repositories {
@@ -65,4 +66,31 @@ tasks.named('test') {
 
 tasks.named('quarkusDependenciesBuild') {
     dependsOn 'jandex'
+}
+
+
+publishing  {
+    repositories {
+        maven {
+            name = "myDomainRepository"
+            allowInsecureProtocol = true
+            url = "http://gitlabrunner.iedt.com.rzd:8080/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = "${applicationGroup}"
+            artifactId = project.name
+            version = "${applicationVersion}"
+            from components.java
+        }
+    }
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    suppressedValidationErrors.add('enforced-platform')
 }
