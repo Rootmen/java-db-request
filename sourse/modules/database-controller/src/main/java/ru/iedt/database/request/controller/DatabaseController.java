@@ -32,6 +32,7 @@ public class DatabaseController {
         }
     }
 
+    @Deprecated()
     public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(String storeName, String queryName, Map<String, ParameterInput> parameterInputs, PgPool client) {
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
         if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
@@ -108,40 +109,9 @@ public class DatabaseController {
                             .transformToUni(stringRowSetMap -> transaction.commit().onItem().transformToUni(unused -> connection.close()).replaceWith(stringRowSetMap));
                     })
             );
-        /*    return client.withTransaction(connection -> {
-            List<Uni<RowSet<Row>>> unis = new ArrayList<>();
-            List<String> unisKey = new ArrayList<>();
-            for (SQL.InsertData insertData : insertDataArray) {
-                Tuple tuple = Tuple.tuple();
-                for (String token : insertData.getParametersTokens()) {
-                    Elements.Parameter<?> parameter = parameters.get(token);
-                    parameter.addToTuple(tuple);
-                }
-                PreparedQuery<RowSet<Row>> preparedQuery = connection.preparedQuery(insertData.getSql());
-                Uni<RowSet<Row>> query = preparedQuery
-                    .execute(tuple)
-                    .onFailure()
-                    .invoke(throwable -> {
-                        System.err.println("Хранилище : " + storeName);
-                        System.err.println("Запрос : " + queryName);
-                        System.err.println("Текст запроса : " + insertData.getSql());
-                        throwable.printStackTrace();
-                    });
-                unisKey.add(insertData.getName());
-                unis.add(query);
-            }
-            return Uni
-                .combine()
-                .all()
-                .unis(unis)
-                .with(responses -> {
-                    Map<String, RowSet<Row>> map = new LinkedHashMap<>();
-                    for (int g = 0; g < responses.size(); g++) {
-                        map.put(unisKey.get(g), (RowSet<Row>) responses.get(g));
-                    }
-                    return map;
-                });
-        });
-  */
+    }
+
+    public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(String storeName, String queryName, ArrayList<ParameterInput> parameterInputs, HashMap<String, Class<?>> resultMapper, PgPool client) {
+        return null;
     }
 }

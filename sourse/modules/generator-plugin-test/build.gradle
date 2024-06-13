@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'ru.iedt.database.code.generator' version("${applicationVersion}")
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        allowInsecureProtocol = true
+        url "http://gitlabrunner.iedt.com.rzd:8080/releases"
+    }
+}
+
+dependencies {
+    implementation project(path: ':sourse:modules:database-controller')
+    implementation project(path: ':sourse:modules:xml-parser')
+    implementation project(path: ':sourse:modules:store')
+    implementation project(path: ':sourse:modules:structures')
+}
+
+group "${applicationGroup}"
+version "${applicationVersion}"
+
+tasks.configureEach { task ->
+    if (task.name == "quarkusDev") {
+        task.enabled = (target == project.name)
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+/*xmlGenerationConfig {
+    isEnabled = true
+}*/
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    suppressedValidationErrors.add('enforced-platform')
+}
+

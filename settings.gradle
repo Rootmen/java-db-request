@@ -3,6 +3,10 @@ pluginManagement {
 		mavenCentral()
 		gradlePluginPortal()
 		mavenLocal()
+		maven {
+			allowInsecureProtocol = true
+			url "http://gitlabrunner.iedt.com.rzd:8080/releases"
+		}
 	}
 	plugins {
 		id "${quarkusPluginId}" version "${quarkusPluginVersion}"
@@ -16,3 +20,5 @@ include ':sourse:exeptions'
 include ':sourse:modules:xml-parser'
 include ':sourse:modules:structures'
 include ':sourse:modules:task-controller'
+include ':sourse:modules:generator-plugin'
+include ':sourse:modules:generator-plugin-test'

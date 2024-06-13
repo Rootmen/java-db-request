@@ -1,0 +1,53 @@
+plugins {
+    id 'maven-publish'
+    id 'java-gradle-plugin'
+}
+
+
+group "${applicationGroup}"
+version "${applicationVersion}"
+
+tasks.configureEach { task ->
+    {
+        if (task.name == "quarkusDev") {
+            task.enabled = (target == project.name)
+        }
+    }
+}
+
+dependencies {
+    implementation project(path: ':sourse:modules:database-controller')
+    implementation project(path: ':sourse:modules:xml-parser')
+    implementation project(path: ':sourse:modules:store')
+    implementation project(path: ':sourse:modules:structures')
+}
+
+gradlePlugin {
+    plugins {
+        xmlGeneratorPlugin  {
+            id = 'ru.iedt.database.code.generator'
+            implementationClass = 'ru.iedt.database.code.generator.XmlGeneratorPlugin'
+        }
+    }
+}
+
+tasks.withType(Javadoc).all { enabled = false }
+
+publishing  {
+    repositories {
+        maven {
+            name = "myDomainRepository"
+            allowInsecureProtocol = true
+            url = "http://gitlabrunner.iedt.com.rzd:8080/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    suppressedValidationErrors.add('enforced-platform')
+}
+
