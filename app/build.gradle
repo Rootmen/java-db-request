@@ -1,0 +1,88 @@
+plugins {
+    id 'java'
+    id 'org.kordamp.gradle.jandex' version '1.1.0'
+}
+
+group = "${applicationGroup}"
+version = "${applicationVersion}"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':source:modules:store')
+    implementation project(':source:modules:structures')
+    implementation project(':source:modules:xml-parser')
+    implementation project(':source:modules:structures')
+    implementation project(':source:exceptions')
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    include('**/ru/iedt/database/**')
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() && it.directorySize() > 0 ? it : zipTree(it)
+        }
+    }
+    includeEmptyDirs = false
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('compileTestJava') {
+    dependsOn 'jandex'
+}
+
+tasks.named('test') {
+    dependsOn 'jandex'
+}
+
+publishing  {
+    repositories {
+        maven {
+            name = "myDomainRepository"
+            allowInsecureProtocol = true
+            url = "http://gitlabrunner.iedt.com.rzd:8080/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = "${applicationGroup}"
+            artifactId = project.name
+            version = "${applicationVersion}"
+            from components.java
+        }
+    }
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    suppressedValidationErrors.add('enforced-platform')
+}

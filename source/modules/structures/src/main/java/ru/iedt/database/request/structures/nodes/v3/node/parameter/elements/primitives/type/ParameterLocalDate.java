@@ -7,35 +7,36 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterType
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 public class ParameterLocalDate extends ParameterAbstract<LocalDate> {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public ParameterLocalDate(String defaultValue, String parameterName) {
-        super(parseString(defaultValue), parameterName, ParameterTypes.DATE);
-    }
+  private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public ParameterLocalDate(LocalDate defaultValue, String parameterName) {
-        super(defaultValue, parameterName, ParameterTypes.DATE);
-    }
+  public ParameterLocalDate(String defaultValue, String parameterName) {
+    super(parseString(defaultValue), parameterName, ParameterTypes.DATE);
+  }
 
-    @Override
-    public void setValue(String value) {
-        this.currentValue = parseString(value);
-    }
+  public ParameterLocalDate(LocalDate defaultValue, String parameterName) {
+    super(defaultValue, parameterName, ParameterTypes.DATE);
+  }
 
-    @Override
-    public void addToTuple(Tuple tuple) {
-        tuple.addLocalDate(this.getValue());
-    }
+  @Override
+  public void setValue(String value) {
+    this.currentValue = parseString(value);
+  }
 
-    static LocalDate parseString(String value) throws RuntimeException {
-        if (value == null) return null;
-        try {
-            return LocalDate.parse(value, formatter);
-        } catch (Exception e) {
-            throw new RuntimeException(value + " to e " + e);
-        }
-    }
+  @Override
+  public void addToTuple(Tuple tuple) {
+    tuple.addLocalDate(this.getValue());
+  }
 
-    public static DateTimeFormatter getFormatter() {
-        return formatter;
+  static LocalDate parseString(String value) throws RuntimeException {
+    if (value == null) return null;
+    try {
+      return LocalDate.parse(value, formatter);
+    } catch (Exception e) {
+      throw new RuntimeException(value + " to e " + e);
     }
+  }
+
+  public static DateTimeFormatter getFormatter() {
+    return formatter;
+  }
 }

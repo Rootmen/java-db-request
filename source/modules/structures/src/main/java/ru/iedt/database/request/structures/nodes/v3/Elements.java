@@ -1,73 +1,76 @@
 package ru.iedt.database.request.structures.nodes.v3;
 
 import io.vertx.mutiny.sqlclient.Tuple;
-
 import java.util.List;
 import java.util.Map;
 
 public interface Elements {
 
-    interface Definition {
-        Map<String, Elements.Template> getTemplate();
+  interface Definition {
+    Map<String, Elements.Template> getTemplate();
 
-        Map<String, Elements.QuerySet> getQuerySet();
+    Map<String, Elements.QuerySet> getQuerySet();
 
-        @Override
-        String toString();
-    }
+    @Override
+    String toString();
+  }
 
-    interface QuerySet {
-        String getRefid();
+  interface QuerySet {
+    String getRefid();
 
-        List<Elements.Queries> getQueries();
+    List<Elements.Queries> getQueries();
 
-        Map<String, Elements.Parameter<?>> getParameters();
+    Map<String, Elements.Parameter<?>> getParameters();
 
-        @Override
-        String toString();
-    }
+    @Override
+    String toString();
+  }
 
-    interface Template {
-        StringBuilder getValue();
+  interface Template {
+    StringBuilder getValue();
 
-        String getId();
+    String getId();
 
-        String toString();
-    }
+    String toString();
+  }
 
-    interface SQL {
-        StringBuilder getValue();
+  interface SQL {
+    StringBuilder getValue();
 
-        String getName();
+    String getName();
 
-        String getWrapper();
+    String getWrapper();
 
-        @Override
-        String toString();
-    }
+    @Override
+    String toString();
+  }
 
-    interface Parameter<T>  {
-        T getDefaultValue();
-        T getValue();
-        void setValue(T value);
-        void setValue(String value);
-        String getParameterName();
+  interface Parameter<T> {
+    T getDefaultValue();
 
-        String getParameterType();
+    T getValue();
 
-        Map<String, String> getWhenMap();
+    void setValue(T value);
 
-        @Override
-        String toString();
+    void setValue(String value);
 
-        void addToTuple(Tuple tuple);
-    }
+    String getParameterName();
 
-    interface Queries {
+    String getParameterType();
 
-        List<Elements.SQL> getSql();
+    Map<String, String> getWhenMap();
 
-        @Override
-        String toString();
-    }
+    @Override
+    String toString();
+
+    void addToTuple(Tuple tuple);
+  }
+
+  interface Queries {
+
+    List<Elements.SQL> getSql();
+
+    @Override
+    String toString();
+  }
 }

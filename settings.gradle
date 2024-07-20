@@ -10,9 +10,10 @@ pluginManagement {
 }
 rootProject.name = 'java-db-request'
 //модули
-include ':sourse:modules:store'
-include ':sourse:modules:database-controller'
-include ':sourse:exeptions'
-include ':sourse:modules:xml-parser'
-include ':sourse:modules:structures'
-include ':sourse:modules:task-controller'
+include ':source:modules:store'
+include ':source:modules:database-controller'
+include ':source:exceptions'
+include ':source:modules:xml-parser'
+include ':source:modules:structures'
+include ':source:modules:task-controller'
+include 'app'
