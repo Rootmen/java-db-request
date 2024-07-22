@@ -31,7 +31,7 @@ test {
 spotless {
 	groovyGradle {
 		target '*.gradle' // default target of groovyGradle
-		indentWithSpaces()
+		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
 		removeSemicolons()
@@ -40,13 +40,13 @@ spotless {
 
 	format 'misc', {
 		target '**/*.md', '**/.gitignore'
-		indentWithSpaces()
+		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
 	format 'xml', {
 		target 'src/**/*.xml'
-		indentWithSpaces()
+		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
@@ -59,7 +59,7 @@ spotless {
 		googleJavaFormat()
 		removeUnusedImports()
 		trimTrailingWhitespace()
-		indentWithSpaces()
+		indentWithTabs()
 		endWithNewline()
 	}
 }

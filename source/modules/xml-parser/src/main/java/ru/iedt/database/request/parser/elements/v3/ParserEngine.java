@@ -10,31 +10,31 @@ import ru.iedt.database.request.structures.nodes.v3.Elements;
 
 public class ParserEngine {
 
-  public static Elements.Definition parsingXml(InputStream file) {
-    if (file == null) throw new RuntimeException();
+public static Elements.Definition parsingXml(InputStream file) {
+	if (file == null) throw new RuntimeException();
 
-    // Валидация
-    // Exception parserError = StaxStreamValidator.staxStreamValidateSchema(paths);
-    // if (parserError != null) throw parserError;
+	// Валидация
+	// Exception parserError = StaxStreamValidator.staxStreamValidateSchema(paths);
+	// if (parserError != null) throw parserError;
 
-    try (StaxStreamProcessor processor = new StaxStreamProcessor(file)) {
-      XMLStreamReader reader = processor.getReader();
-      return ParserEngineDefinition.parseDefinitionNode(reader);
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
-  }
+	try (StaxStreamProcessor processor = new StaxStreamProcessor(file)) {
+	XMLStreamReader reader = processor.getReader();
+	return ParserEngineDefinition.parseDefinitionNode(reader);
+	} catch (XMLStreamException e) {
+	throw new RuntimeException(e);
+	}
+}
 
-  public static boolean isElement(int parseCode) {
-    return !(XMLStreamConstants.START_ELEMENT == parseCode
-        || XMLStreamConstants.END_ELEMENT == parseCode);
-  }
+public static boolean isElement(int parseCode) {
+	return !(XMLStreamConstants.START_ELEMENT == parseCode
+		|| XMLStreamConstants.END_ELEMENT == parseCode);
+}
 
-  public static String getElementName(XMLStreamReader reader, int parseCode) {
-    if (!(XMLStreamConstants.START_ELEMENT == parseCode
-        || XMLStreamConstants.END_ELEMENT == parseCode)) {
-      return null;
-    }
-    return reader.getLocalName();
-  }
+public static String getElementName(XMLStreamReader reader, int parseCode) {
+	if (!(XMLStreamConstants.START_ELEMENT == parseCode
+		|| XMLStreamConstants.END_ELEMENT == parseCode)) {
+	return null;
+	}
+	return reader.getLocalName();
+}
 }

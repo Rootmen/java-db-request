@@ -6,7 +6,7 @@ import io.vertx.mutiny.sqlclient.Row;
 @RegisterForReflection
 public class BaseEntity {
 
-  public static <T> T from(Row row, Class<T> clazz) {
-    return ReflectionUtil.from(row, clazz);
-  }
+public static <T> T from(Row row, Class<T> clazz) {
+	return ReflectionUtil.from(row, clazz);
+}
 }
