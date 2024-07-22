@@ -1,18 +1,20 @@
 package ru.iedt.database.request.controller;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.groups.UniJoin;
+import io.smallrye.mutiny.tuples.Tuple2;
 import io.vertx.mutiny.pgclient.PgPool;
 import io.vertx.mutiny.sqlclient.*;
 import jakarta.inject.Singleton;
 import java.io.InputStream;
 import java.util.*;
+import ru.iedt.database.request.controller.entity.BaseEntity;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
+import ru.iedt.database.request.controller.utils.DatabaseUtils;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
 import ru.iedt.database.request.store.QueryStoreList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
-import ru.iedt.database.request.structures.nodes.v3.node.SQL;
 
 @Singleton
 public class DatabaseController {
@@ -37,6 +39,7 @@ public class DatabaseController {
     }
   }
 
+  @Deprecated()
   public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
       String storeName,
       String queryName,
@@ -46,96 +49,121 @@ public class DatabaseController {
     if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
     Elements.QuerySet querySet = definition.getQuerySet().get(queryName);
     Map<String, Elements.Parameter<?>> parameters =
-        createParameters(parameterInputs, querySet.getParameters());
+        DatabaseUtils.createParametersInputs(parameterInputs, querySet.getParameters());
     Map<String, Elements.Template> template = definition.getTemplate();
     List<Elements.Queries> queries = querySet.getQueries();
     List<Uni<Map<String, RowSet<Row>>>> unis = new ArrayList<>();
     for (Elements.Queries query : queries) {
-      unis.add(runQueries(query, parameters, template, client, storeName, queryName));
+      unis.add(DatabaseUtils.runQueries(query, parameters, template, client, storeName, queryName));
     }
     return Uni.join().all(unis).andCollectFailures();
   }
 
-  private Map<String, Elements.Parameter<?>> createParameters(
-      Map<String, ParameterInput> parameterInputs,
-      Map<String, Elements.Parameter<?>> parameterMap) {
-    for (Map.Entry<String, Elements.Parameter<?>> entry : parameterMap.entrySet()) {
-      String key = entry.getKey();
-      Elements.Parameter<?> parameters = entry.getValue();
-      ParameterInput parameterInput = parameterInputs.get(key);
-      if (parameterInput != null) parameters.setValue(parameterInput.getValue());
+  public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
+      String storeName,
+      String queryName,
+      ArrayList<ParameterInput> parameterInputs,
+      PgPool client) {
+    Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
+    if (definition == null) throw new RuntimeException("Хранилище Definition не найдено");
+    Elements.QuerySet querySet = definition.getQuerySet().get(queryName);
+    Map<String, Elements.Parameter<?>> parameters =
+        DatabaseUtils.createParameters(parameterInputs, querySet.getParameters());
+    Map<String, Elements.Template> template = definition.getTemplate();
+    List<Elements.Queries> queries = querySet.getQueries();
+    List<Uni<Map<String, RowSet<Row>>>> unis = new ArrayList<>();
+    for (Elements.Queries query : queries) {
+      unis.add(DatabaseUtils.runQueries(query, parameters, template, client, storeName, queryName));
     }
-    return parameterMap;
+    return Uni.join().all(unis).andCollectFailures();
   }
 
-  @SuppressWarnings("unchecked")
-  private Uni<Map<String, RowSet<Row>>> runQueries(
-      Elements.Queries queries,
-      Map<String, Elements.Parameter<?>> parameters,
-      Map<String, Elements.Template> template,
-      PgPool client,
+  public Uni<RowSet<Row>> generateQuery(
       String storeName,
-      String queryName) {
-    List<Elements.SQL> sqlList = queries.getSql();
-    List<SQL.InsertData> insertDataArray = new ArrayList<>();
-    for (Elements.SQL sql : sqlList) {
-      insertDataArray.add(SQL.getInsertData(sql, parameters, template));
-    }
-    return client
-        .getConnection()
+      String queryName,
+      String sqlName,
+      Integer index,
+      ArrayList<ParameterInput> parameterInputs,
+      PgPool client) {
+    return this.runningQuerySet(storeName, queryName, parameterInputs, client)
         .onItem()
-        .transformToUni(
-            connection ->
-                connection
-                    .begin()
-                    .onItem()
-                    .transformToUni(
-                        transaction -> {
-                          UniJoin.Builder<RowSet<Row>> builder = Uni.join().builder();
-                          List<String> unisKey = new ArrayList<>();
-                          for (SQL.InsertData insertData : insertDataArray) {
-                            Tuple tuple = Tuple.tuple();
-                            for (String token : insertData.getParametersTokens()) {
-                              Elements.Parameter<?> parameter = parameters.get(token);
-                              parameter.addToTuple(tuple);
-                            }
-                            PreparedQuery<RowSet<Row>> preparedQuery =
-                                connection.preparedQuery(insertData.getSql());
-                            builder.add(
-                                preparedQuery
-                                    .execute(tuple)
-                                    .onFailure()
-                                    .invoke(
-                                        throwable -> {
-                                          System.err.println("Хранилище : " + storeName);
-                                          System.err.println("Запрос : " + queryName);
-                                          System.err.println("Параметры : " + parameters);
-                                          System.err.println(
-                                              "Текст запроса : " + insertData.getSql());
-                                          throwable.printStackTrace();
-                                        }));
-                            unisKey.add(insertData.getName());
-                          }
-                          return builder
-                              .joinAll()
-                              .andCollectFailures()
-                              .onItem()
-                              .transform(
-                                  rowSets -> {
-                                    Map<String, RowSet<Row>> map = new LinkedHashMap<>();
-                                    for (int g = 0; g < rowSets.size(); g++) {
-                                      map.put(unisKey.get(g), rowSets.get(g));
-                                    }
-                                    return map;
-                                  })
-                              .onItem()
-                              .transformToUni(
-                                  stringRowSetMap ->
-                                      transaction
-                                          .commit()
-                                          .onItem()
-                                          .transformToUni(unused -> connection.close())
-                                          .replaceWith(stringRowSetMap));
-                        }));
+        .transform(maps -> maps.get(index))
+        .onItem()
+        .transform(map -> map.get(sqlName));
+  }
+
+  public <T extends BaseEntity> Uni<T> runningQuerySetUni(
+      String storeName,
+      String queryName,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.runningQuerySetUni(
+        storeName, queryName, "main", 0, parameterInputs, tClass, client);
+  }
+
+  public <T extends BaseEntity> Uni<T> runningQuerySetUni(
+      String storeName,
+      String queryName,
+      String sqlName,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.runningQuerySetUni(
+        storeName, queryName, sqlName, 0, parameterInputs, tClass, client);
+  }
+
+  public <T extends BaseEntity> Uni<T> runningQuerySetUni(
+      String storeName,
+      String queryName,
+      String sqlName,
+      Integer index,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.generateQuery(storeName, queryName, sqlName, index, parameterInputs, client)
+        .onItem()
+        .transform(RowSet::iterator)
+        .onItem()
+        .transform(rowRowIterator -> rowRowIterator.hasNext() ? rowRowIterator.next() : null)
+        .onItem()
+        .transform(row -> T.from(row, tClass));
+  }
+
+  public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
+      String storeName,
+      String queryName,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.runningQuerySetMulti(
+        storeName, queryName, "main", 0, parameterInputs, tClass, client);
+  }
+
+  public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
+      String storeName,
+      String queryName,
+      String sqlName,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.runningQuerySetMulti(
+        storeName, queryName, sqlName, 0, parameterInputs, tClass, client);
+  }
+
+  public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
+      String storeName,
+      String queryName,
+      String sqlName,
+      Integer index,
+      ArrayList<ParameterInput> parameterInputs,
+      Class<T> tClass,
+      PgPool client) {
+    return this.generateQuery(storeName, queryName, sqlName, index, parameterInputs, client)
+        .onItem()
+        .transform(
+            rows ->
+                Tuple2.of(
+                    rows.size(), rows.toMulti().onItem().transform(row -> T.from(row, tClass))));
   }
 }

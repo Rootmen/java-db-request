@@ -1,7 +1,9 @@
 package ru.iedt.database.request.app.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 import ru.iedt.database.request.controller.entity.BaseEntity;
 import ru.iedt.database.request.controller.entity.annotation.CreateConstructor;
 import ru.iedt.database.request.controller.entity.annotation.CreateParameter;
@@ -26,7 +28,7 @@ public class TestClass extends BaseEntity {
       @CreateParameter(column_name = "param_5") Integer[] param_5,
       @CreateParameter(column_name = "param_5") Integer[] param_6,
       @CreateParameter(column_name = "param_5") ArrayList<Integer> param_7,
-      @CreateParameter(column_name = "param_5") ArrayList<Integer> param_8) {
+      @CreateParameter(column_name = "param_5") List<Integer> param_8) {
     this.param_1 = param_1;
     this.param_2 = param_2;
     this.param_3 = param_3;
@@ -39,16 +41,15 @@ public class TestClass extends BaseEntity {
 
   @Override
   public String toString() {
-    return "TestClass{"
-        + "param_1="
-        + param_1
-        + ", param_2="
-        + param_2
-        + ", param_3="
-        + param_3
-        + ", param_4='"
-        + param_4
-        + '\''
-        + '}';
+    return new StringJoiner(", ", TestClass.class.getSimpleName() + "[", "]")
+        .add("param_1=" + param_1)
+        .add("param_2=" + param_2)
+        .add("param_3=" + param_3)
+        .add("param_4='" + param_4 + "'")
+        .add("param_5=" + Arrays.toString(param_5))
+        .add("param_6=" + Arrays.toString(param_6))
+        .add("param_7=" + param_7)
+        .add("param_8=" + param_8)
+        .toString();
   }
 }
