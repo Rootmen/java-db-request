@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Definition parser="v3">
+    <QuerySet ID="GET_TEST">
+        <Query>
+            <SQL name="main">
+                <![CDATA[
+                    SELECT 1      AS param_1,
+                           1      AS param_2,
+                           1      AS param_3,
+                           'test' AS param_4,
+                           array[1,2,3] AS param_5,
+                           'test' AS param_6,
+                           'test' AS param_7,
+                           'test' AS param_8
+                    union all
+                    SELECT 1      AS param_1,
+                           1      AS param_2,
+                           1      AS param_3,
+                           'test' AS param_4,
+                           array[1,2,3] AS param_5,
+                           'test' AS param_6,
+                           'test' AS param_7,
+                           'test' AS param_8
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
+</Definition>

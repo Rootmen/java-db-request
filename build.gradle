@@ -1,6 +1,6 @@
-
 plugins {
 	id 'java'
+	id 'groovy'
 	id 'io.quarkus'
 	id "com.diffplug.spotless" version "6.23.3"
 	id 'maven-publish'
@@ -21,31 +21,45 @@ dependencies {
 	implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
 	implementation 'io.quarkus:quarkus-arc'
 	//-------------------------------------------------------------------------------------------------------
-	implementation project(path: ':sourse:modules:store')
-	implementation project(path: ':sourse:modules:database-controller')
+	implementation project(path: ':source:modules:store')
+	implementation project(path: ':source:modules:database-controller')
 }
 
 test {
 	useJUnitPlatform()
 }
-
-
 spotless {
-	ratchetFrom 'origin/main'
-	format 'misc', {
-		target '*.gradle', '*.md', '.gitignore'
+	groovyGradle {
+		target '*.gradle' // default target of groovyGradle
+		indentWithTabs()
 		trimTrailingWhitespace()
-		indentWithTabs() // or spaces. Takes an integer argument if you don't like 4
+		endWithNewline()
+		removeSemicolons()
+		greclipse()
+	}
+
+	format 'misc', {
+		target '**/*.md', '**/.gitignore'
+		indentWithTabs()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	format 'xml', {
+		target 'src/**/*.xml'
+		indentWithTabs()
+		trimTrailingWhitespace()
 		endWithNewline()
 	}
 	java {
 		target "**/*.java"
 		cleanthat()
+		importOrder('java|javax', 'com.acme', '', '\\#com.acme', '\\#')
 		toggleOffOn()
 		formatAnnotations()
+		googleJavaFormat()
 		removeUnusedImports()
 		trimTrailingWhitespace()
+		indentWithTabs()
 		endWithNewline()
-		prettier(['prettier': '3.0.3', 'prettier-plugin-java': '2.3.0']).config(['parser': 'java', 'tabWidth': 4, printWidth: 250, 'plugins': ['prettier-plugin-java']])
 	}
 }
