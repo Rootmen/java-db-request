@@ -8,22 +8,22 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterType
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 public class ParameterArrayInteger extends ParameterAbstract<ArrayList<Integer>> {
-  public ParameterArrayInteger(ArrayList<Integer> defaultValue, String parameterName) {
-    super(defaultValue, parameterName, ParameterTypes.INTEGER_ARRAY);
-  }
-
-  @Override
-  public void setValue(String value) {
-    this.currentValue = generateArray(value, Integer.class);
-  }
-
-  @Override
-  public void addToTuple(Tuple tuple) {
-    ArrayList<Integer> arrayList = this.getValue();
-    if (arrayList == null) {
-      tuple.addArrayOfInteger(null);
-      return;
+    public ParameterArrayInteger(ArrayList<Integer> defaultValue, String parameterName) {
+        super(defaultValue, parameterName, ParameterTypes.INTEGER_ARRAY);
     }
-    tuple.addArrayOfInteger(arrayList.toArray(Integer[]::new));
-  }
+
+    @Override
+    public void setValue(String value) {
+        this.currentValue = generateArray(value, Integer.class);
+    }
+
+    @Override
+    public void addToTuple(Tuple tuple) {
+        ArrayList<Integer> arrayList = this.getValue();
+        if (arrayList == null) {
+            tuple.addArrayOfInteger(null);
+            return;
+        }
+        tuple.addArrayOfInteger(arrayList.toArray(Integer[]::new));
+    }
 }

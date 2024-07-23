@@ -8,18 +8,18 @@ import ru.iedt.database.request.store.QueryStoreDefinition;
 @DefinitionStore
 public class Demo1QueryStoreDefinition extends QueryStoreDefinition {
 
-  @Override
-  public String getResourcePatch() {
-    return "/store1.txt";
-  }
+    @Override
+    public String getResourcePatch() {
+        return "/store1.txt";
+    }
 
-  @Override
-  public String getStoreName() {
-    return "store1";
-  }
+    @Override
+    public String getStoreName() {
+        return "store1";
+    }
 
-  @Override
-  public Class<?> getResourceClass() {
-    return this.getClass();
-  }
+    @Override
+    public Class<?> getResourceClass() {
+        return this.getClass();
+    }
 }

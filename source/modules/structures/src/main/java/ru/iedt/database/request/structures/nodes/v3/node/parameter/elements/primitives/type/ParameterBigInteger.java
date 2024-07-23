@@ -8,30 +8,30 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.Para
 
 public class ParameterBigInteger extends ParameterAbstract<BigInteger> {
 
-  public ParameterBigInteger(String defaultValue, String parameterName) {
-    super(parseString(defaultValue), parameterName, ParameterTypes.BIGINT);
-  }
-
-  public ParameterBigInteger(BigInteger defaultValue, String parameterName) {
-    super(defaultValue, parameterName, ParameterTypes.BIGINT);
-  }
-
-  @Override
-  public void setValue(String value) {
-    this.currentValue = parseString(value);
-  }
-
-  static BigInteger parseString(String integer) throws RuntimeException {
-    if (integer == null) return null;
-    try {
-      return new BigInteger(integer);
-    } catch (Exception e) {
-      throw new RuntimeException(integer + " to BigInteger ", e);
+    public ParameterBigInteger(String defaultValue, String parameterName) {
+        super(parseString(defaultValue), parameterName, ParameterTypes.BIGINT);
     }
-  }
 
-  @Override
-  public void addToTuple(Tuple tuple) {
-    tuple.addBigDecimal(new BigDecimal(this.getValue()));
-  }
+    public ParameterBigInteger(BigInteger defaultValue, String parameterName) {
+        super(defaultValue, parameterName, ParameterTypes.BIGINT);
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.currentValue = parseString(value);
+    }
+
+    static BigInteger parseString(String integer) throws RuntimeException {
+        if (integer == null) return null;
+        try {
+            return new BigInteger(integer);
+        } catch (Exception e) {
+            throw new RuntimeException(integer + " to BigInteger ", e);
+        }
+    }
+
+    @Override
+    public void addToTuple(Tuple tuple) {
+        tuple.addBigDecimal(new BigDecimal(this.getValue()));
+    }
 }

@@ -7,30 +7,30 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.Para
 
 public class ParameterJsonArray extends ParameterAbstract<JsonArray> {
 
-  public ParameterJsonArray(JsonArray defaultValue, String parameterName) {
-    super(defaultValue, parameterName, ParameterTypes.JSON);
-  }
-
-  public ParameterJsonArray(String defaultValue, String parameterName) {
-    super(parseString(defaultValue), parameterName, ParameterTypes.JSON);
-  }
-
-  @Override
-  public void setValue(String value) {
-    this.currentValue = parseString(value);
-  }
-
-  @Override
-  public void addToTuple(Tuple tuple) {
-    tuple.addJsonArray(this.getValue());
-  }
-
-  static JsonArray parseString(String value) throws RuntimeException {
-    if (value == null) return null;
-    try {
-      return new JsonArray(value);
-    } catch (Exception e) {
-      throw new RuntimeException(value + " to JsonObject " + e);
+    public ParameterJsonArray(JsonArray defaultValue, String parameterName) {
+        super(defaultValue, parameterName, ParameterTypes.JSON);
     }
-  }
+
+    public ParameterJsonArray(String defaultValue, String parameterName) {
+        super(parseString(defaultValue), parameterName, ParameterTypes.JSON);
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.currentValue = parseString(value);
+    }
+
+    @Override
+    public void addToTuple(Tuple tuple) {
+        tuple.addJsonArray(this.getValue());
+    }
+
+    static JsonArray parseString(String value) throws RuntimeException {
+        if (value == null) return null;
+        try {
+            return new JsonArray(value);
+        } catch (Exception e) {
+            throw new RuntimeException(value + " to JsonObject " + e);
+        }
+    }
 }
