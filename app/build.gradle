@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'io.quarkus'
     id 'org.kordamp.gradle.jandex' version '1.1.0'
+    id 'maven-publish'
 }
 
 group = "${applicationGroup}"
@@ -14,6 +15,7 @@ repositories {
 dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-jackson'
 
     implementation project(':source:modules:database-controller')
     implementation project(':source:modules:store')
@@ -91,6 +93,10 @@ tasks.named('compileTestJava') {
 }
 
 tasks.named('test') {
+    dependsOn 'jandex'
+}
+
+tasks.named('quarkusDependenciesBuild') {
     dependsOn 'jandex'
 }
 

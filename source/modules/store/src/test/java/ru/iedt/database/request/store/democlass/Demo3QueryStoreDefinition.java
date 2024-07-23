@@ -7,18 +7,18 @@ import ru.iedt.database.request.store.QueryStoreDefinition;
 @RegisterForReflection
 @DefinitionStore
 public class Demo3QueryStoreDefinition extends QueryStoreDefinition {
-@Override
-public String getResourcePatch() {
-	return "/store3.txt";
-}
+  @Override
+  public String getResourcePatch() {
+    return "/store3.txt";
+  }
 
-@Override
-public String getStoreName() {
-	return "store3";
-}
+  @Override
+  public String getStoreName() {
+    return "store3";
+  }
 
-@Override
-public Class<?> getResourceClass() {
-	return this.getClass();
-}
+  @Override
+  public Class<?> getResourceClass() {
+    return this.getClass();
+  }
 }

@@ -6,26 +6,26 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterType
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 public class ParameterUUID extends ParameterAbstract<UUID> {
-public ParameterUUID(String defaultValue, String parameterName) {
-	super(parseString(defaultValue), parameterName, ParameterTypes.UUID);
-}
+  public ParameterUUID(String defaultValue, String parameterName) {
+    super(parseString(defaultValue), parameterName, ParameterTypes.UUID);
+  }
 
-@Override
-public void setValue(String value) {
-	this.currentValue = UUID.fromString(value);
-}
+  @Override
+  public void setValue(String value) {
+    this.currentValue = UUID.fromString(value);
+  }
 
-@Override
-public void addToTuple(Tuple tuple) {
-	tuple.addUUID(this.getValue());
-}
+  @Override
+  public void addToTuple(Tuple tuple) {
+    tuple.addUUID(this.getValue());
+  }
 
-static UUID parseString(String value) throws RuntimeException {
-	if (value == null) return null;
-	try {
-	return UUID.fromString(value);
-	} catch (Exception e) {
-	throw new RuntimeException(value + " to UUID " + e);
-	}
-}
+  static UUID parseString(String value) throws RuntimeException {
+    if (value == null) return null;
+    try {
+      return UUID.fromString(value);
+    } catch (Exception e) {
+      throw new RuntimeException(value + " to UUID " + e);
+    }
+  }
 }

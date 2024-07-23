@@ -5,12 +5,12 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.ParameterType
 import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.ParameterAbstract;
 
 public class ParameterString extends ParameterAbstract<String> {
-public ParameterString(String defaultValue, String parameterName) {
-	super(defaultValue, parameterName, ParameterTypes.STRING);
-}
+  public ParameterString(String defaultValue, String parameterName) {
+    super(defaultValue, parameterName, ParameterTypes.STRING);
+  }
 
-@Override
-public void addToTuple(Tuple tuple) {
-	tuple.addString(this.getValue());
-}
+  @Override
+  public void addToTuple(Tuple tuple) {
+    tuple.addString(this.getValue());
+  }
 }

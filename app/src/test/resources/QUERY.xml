@@ -25,4 +25,27 @@
             </SQL>
         </Query>
     </QuerySet>
+    <QuerySet ID="GET_TEST_JSON">
+        <Query>
+            <SQL name="main">
+                <![CDATA[
+                    SELECT '{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }'::JSONB      AS param_1,
+                            '[{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            },
+                            {
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }]'::JSONB      AS param_2
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
 </Definition>

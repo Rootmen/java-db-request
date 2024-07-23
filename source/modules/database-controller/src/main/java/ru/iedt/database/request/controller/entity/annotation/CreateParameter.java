@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 @RegisterForReflection
 public @interface CreateParameter {
-String column_name();
+  String value();
 
-boolean is_json_mapping() default false;
+  boolean is_json_mapping() default false;
 }

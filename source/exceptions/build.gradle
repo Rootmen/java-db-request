@@ -23,3 +23,29 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
+
+publishing  {
+    repositories {
+        maven {
+            name = "myDomainRepository"
+            allowInsecureProtocol = true
+            url = "http://gitlabrunner.iedt.com.rzd:8080/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = "${applicationGroup}"
+            artifactId = project.name
+            version = "${applicationVersion}"
+            from components.java
+        }
+    }
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    suppressedValidationErrors.add('enforced-platform')
+}
