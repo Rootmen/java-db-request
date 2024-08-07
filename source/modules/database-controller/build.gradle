@@ -20,6 +20,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-reactive-pg-client'
     implementation 'io.smallrye:jandex'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     implementation project(path: ':source:modules:store')
     implementation project(path: ':source:modules:structures')

@@ -1,9 +1,13 @@
 package ru.iedt.database.request.controller.entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.vertx.mutiny.sqlclient.Row;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -101,17 +105,33 @@ public class ReflectionUtil {
 
     static ObjectMapper mapper = new ObjectMapper();
 
+    static {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.setVisibility(mapper.getSerializationConfig()
+                .getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+    }
+
     @SuppressWarnings("unchecked")
     static Object getDataFromJson(Row row, Class<?> clazz, String createParameter, Type typeGeneric) {
         try {
+            Object object = row.getJson(createParameter);
+            if (object == null) return null;
             if (clazz == ArrayList.class || clazz == LinkedList.class || clazz == List.class) {
                 Class<?> arrayClazz = (Class<?>) ((ParameterizedType) typeGeneric).getActualTypeArguments()[0];
                 JavaType type = mapper.getTypeFactory()
                         .constructCollectionType((Class<? extends Collection>) clazz, arrayClazz);
 
-                return mapper.readValue(row.getJson(createParameter).toString(), type);
+                return mapper.readValue(object.toString(), type);
             }
-            return mapper.readValue(row.getJson(createParameter).toString(), clazz);
+            return mapper.readValue(object.toString(), clazz);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
