@@ -10,6 +10,7 @@ pluginManagement {
 }
 rootProject.name = 'java-db-request'
 //модули
+include ':source:modules:message-format'
 include ':source:modules:store'
 include ':source:modules:database-controller'
 include ':source:exceptions'
