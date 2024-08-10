@@ -1,4 +1,4 @@
-package ru.iedt.database.controller;
+package ru.iedt.database.controller.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Task {
+public @interface TaskSynchronous {
     String value();
 }

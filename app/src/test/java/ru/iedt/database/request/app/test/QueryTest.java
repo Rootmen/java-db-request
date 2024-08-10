@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.iedt.database.request.controller.DatabaseController;
 
@@ -26,6 +27,7 @@ public class QueryTest {
     PgPool client;
 
     @Test
+    @BeforeAll
     public void testClassDefaultRunningQuerySet() {
         databaseController
                 .runningQuerySet(DEFINITION_NAME, "GET_TEST", new HashMap<>(), client)

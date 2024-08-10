@@ -1,20 +1,30 @@
 package ru.iedt.database.controller;
 
 import io.quarkus.arc.Arc;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.reflections.Reflections;
+import ru.iedt.database.controller.annotation.Task;
+import ru.iedt.database.controller.annotation.TaskSynchronous;
+import ru.iedt.database.controller.annotation.Tasks;
 import ru.iedt.database.messaging.WebsocketMessage;
 
-/** Класс-контроллер для выполнения задач. */
+/**
+ * Класс-контроллер для выполнения задач.
+ */
 @Singleton
 public class Controller {
 
-    private static final HashMap<String, Method> methods = new HashMap<>();
+    private static final HashMap<String, Method> methodsOld = new HashMap<>();
+    private static final HashMap<String, Method> methodsNew = new HashMap<>();
     private static final HashMap<String, Object> clazzs = new HashMap<>();
 
     /**
@@ -38,7 +48,16 @@ public class Controller {
                     System.out.printf(
                             "Задача: %-10s --- метод %-10s класс %-10s\n",
                             name, m.getName(), object.getClass().getName());
-                    methods.put(name, m);
+                    methodsOld.put(name, m);
+                    clazzs.put(name, object);
+                }
+                if (m.isAnnotationPresent(TaskSynchronous.class)) {
+                    TaskSynchronous task = m.getAnnotation(TaskSynchronous.class);
+                    String name = task.value();
+                    System.out.printf(
+                            "Задача: %-10s --- метод %-10s класс %-10s\n",
+                            name, m.getName(), object.getClass().getName());
+                    methodsNew.put(name, m);
                     clazzs.put(name, object);
                 }
             }
@@ -49,16 +68,52 @@ public class Controller {
      * Метод для выполнения задачи.
      *
      * @param taskName Название задачи.
-     * @param task Описание задачи.
+     * @param task     Описание задачи.
      * @return Результат выполнения задачи в виде Uni<Void>.
      * @throws RuntimeException если задача не найдена или возникла ошибка при выполнении.
      */
     @SuppressWarnings("unchecked")
-    public Uni<Void> runTask(String taskName, TaskDescription task, WebsocketMessage message) {
+    public Uni<ReturnTaskType<?>> runTaskSynchronous(String taskName, TaskDescription task, WebsocketMessage message) {
         try {
-            Method method = methods.get(taskName);
+            if (methodsOld.containsKey(taskName)) {
+                return this.runTaskOld(taskName, task, message)
+                        .onItem()
+                        .transform(
+                                unused -> new ReturnTaskType<>(Uni.createFrom().voidItem()));
+            }
+            Method method = methodsNew.get(taskName);
             Object clazz = clazzs.get(taskName);
             if (method == null || clazz == null) throw new RuntimeException("Задача " + taskName + " не найдена");
+            Class<?> arrayGeneric =
+                    (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+            if (arrayGeneric == Tuple2.class) {
+                return ((Uni<Tuple2<Integer, Multi<?>>>) method.invoke(clazz, task, message))
+                        .onItem()
+                        .transform(objects -> new ReturnTaskType<>(objects.getItem1(), objects.getItem2()));
+            } else if (arrayGeneric == ReturnTaskType.class) {
+                return Uni.createFrom()
+                        .item(Unchecked.supplier(
+                                () -> new ReturnTaskType<>((Uni<?>) method.invoke(clazz, task, message))));
+            }
+            throw new RuntimeException("Задача " + taskName + " не найдена");
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Deprecated(since = "Для совемстимости")
+    public Uni<Void> runTask(String taskName, TaskDescription task, WebsocketMessage message) {
+        return this.runTaskSynchronous(taskName, task, message)
+                .onItem()
+                .transformToUni(ReturnTaskType::getUni)
+                .replaceWithVoid();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Uni<Void> runTaskOld(String taskName, TaskDescription task, WebsocketMessage message) {
+        try {
+            Method method = methodsOld.get(taskName);
+            Object clazz = clazzs.get(taskName);
             return (Uni<Void>) method.invoke(clazz, task, message);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);

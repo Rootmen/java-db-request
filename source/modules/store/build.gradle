@@ -62,12 +62,13 @@ tasks.named('quarkusDependenciesBuild') {
 
 publishing {
     repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/rootmen/java-db-request")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+         maven {
+            name = "myDomainRepository"
+            allowInsecureProtocol = true
+            url = "http://gitlabrunner.iedt.com.rzd:8080/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
             }
         }
     }

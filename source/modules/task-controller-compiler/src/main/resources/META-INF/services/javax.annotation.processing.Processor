@@ -1,0 +1,2 @@
+ru.iedt.database.controller.annotation.TaskProcessor
+ru.iedt.database.controller.annotation.TaskSynchronousProcessor
