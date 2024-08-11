@@ -2,23 +2,18 @@ package ru.iedt.database.controller.annotation;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple2;
-import ru.iedt.database.controller.TaskDescription;
-import ru.iedt.database.messaging.WebsocketMessage;
-
+import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import ru.iedt.database.controller.TaskDescription;
+import ru.iedt.database.messaging.WebsocketMessage;
 
 @SupportedAnnotationTypes("ru.iedt.database.controller.annotation.Task")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -26,15 +21,23 @@ public class TaskProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         boolean isProcessFalse = false;
-        List<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Task.class).stream().toList();
+        List<? extends Element> elements =
+                roundEnv.getElementsAnnotatedWith(Task.class).stream().toList();
         if (elements.isEmpty()) return false;
         Elements elementUtils = processingEnv.getElementUtils();
         Types types = processingEnv.getTypeUtils();
-        TypeMirror taskDescriptionType = elementUtils.getTypeElement(TaskDescription.class.getCanonicalName()).asType();
-        TypeMirror websocketMessageType = elementUtils.getTypeElement(WebsocketMessage.class.getCanonicalName()).asType();
-        TypeMirror uniType = elementUtils.getTypeElement(Uni.class.getCanonicalName()).asType();
-        TypeMirror tupleType = elementUtils.getTypeElement(Tuple2.class.getCanonicalName()).asType();
-        TypeMirror voidType = elementUtils.getTypeElement(Void.class.getCanonicalName()).asType();
+        TypeMirror taskDescriptionType = elementUtils
+                .getTypeElement(TaskDescription.class.getCanonicalName())
+                .asType();
+        TypeMirror websocketMessageType = elementUtils
+                .getTypeElement(WebsocketMessage.class.getCanonicalName())
+                .asType();
+        TypeMirror uniType =
+                elementUtils.getTypeElement(Uni.class.getCanonicalName()).asType();
+        TypeMirror tupleType =
+                elementUtils.getTypeElement(Tuple2.class.getCanonicalName()).asType();
+        TypeMirror voidType =
+                elementUtils.getTypeElement(Void.class.getCanonicalName()).asType();
 
         for (Element element : elements) {
             if (element.getKind() == ElementKind.METHOD) {
@@ -45,19 +48,26 @@ public class TaskProcessor extends AbstractProcessor {
                     if (g == 0) {
                         if (!declaredType.equals(taskDescriptionType)) {
                             isProcessFalse = true;
-                            printError("Firsts argument in " + element.getSimpleName() + " is not TaskDescription", element);
+                            printError(
+                                    "Firsts argument in " + element.getSimpleName() + " is not TaskDescription",
+                                    element);
                         }
                     }
                     if (g == 1) {
                         if (!declaredType.equals(websocketMessageType)) {
                             isProcessFalse = true;
-                            printError("Second argument in " + element.getSimpleName() + " is not WebsocketMessage", element);
+                            printError(
+                                    "Second argument in " + element.getSimpleName() + " is not WebsocketMessage",
+                                    element);
                         }
                     }
                 }
                 if (parameters.size() != 2) {
                     isProcessFalse = true;
-                    printError("In " + element.getSimpleName() + " not a 2 parameter method need (TaskDescription task, WebsocketMessage websocketMessage)", element);
+                    printError(
+                            "In " + element.getSimpleName()
+                                    + " not a 2 parameter method need (TaskDescription task, WebsocketMessage websocketMessage)",
+                            element);
                 }
 
                 TypeMirror returnType = methodElement.getReturnType();
@@ -71,7 +81,8 @@ public class TaskProcessor extends AbstractProcessor {
                 List<? extends TypeMirror> genericReturnTypeArray = declaredReturnType.getTypeArguments();
                 if (genericReturnTypeArray.size() != 1) {
                     isProcessFalse = true;
-                    printError("generic return type in " + element.getSimpleName() + " is not single Uni<Void>", element);
+                    printError(
+                            "generic return type in " + element.getSimpleName() + " is not single Uni<Void>", element);
                     continue;
                 }
                 TypeMirror genericReturnType = genericReturnTypeArray.getFirst();
