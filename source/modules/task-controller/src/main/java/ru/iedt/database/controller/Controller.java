@@ -79,21 +79,24 @@ public class Controller {
                 return this.runTaskOld(taskName, task, message)
                         .onItem()
                         .transform(
-                                unused -> new ReturnTaskType<>(Uni.createFrom().voidItem()));
+                                unused -> new ReturnTaskType<>(Uni.createFrom().voidItem(), true));
             }
             Method method = methodsNew.get(taskName);
             Object clazz = clazzs.get(taskName);
             if (method == null || clazz == null) throw new RuntimeException("Задача " + taskName + " не найдена");
-            Class<?> arrayGeneric =
-                    (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+            Class<?> arrayGeneric = (Class<?>) ((ParameterizedType)
+                            (((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]))
+                    .getRawType();
+            ((ParameterizedType) (((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]))
+                    .getRawType();
             if (arrayGeneric == Tuple2.class) {
                 return ((Uni<Tuple2<Integer, Multi<?>>>) method.invoke(clazz, task, message))
                         .onItem()
-                        .transform(objects -> new ReturnTaskType<>(objects.getItem1(), objects.getItem2()));
+                        .transform(objects -> new ReturnTaskType<>(objects.getItem1(), objects.getItem2(), false));
             } else if (arrayGeneric == ReturnTaskType.class) {
                 return Uni.createFrom()
                         .item(Unchecked.supplier(
-                                () -> new ReturnTaskType<>((Uni<?>) method.invoke(clazz, task, message))));
+                                () -> new ReturnTaskType<>((Uni<?>) method.invoke(clazz, task, message), false)));
             }
             throw new RuntimeException("Задача " + taskName + " не найдена");
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -110,7 +113,7 @@ public class Controller {
     }
 
     @SuppressWarnings("unchecked")
-    public Uni<Void> runTaskOld(String taskName, TaskDescription task, WebsocketMessage message) {
+    private Uni<Void> runTaskOld(String taskName, TaskDescription task, WebsocketMessage message) {
         try {
             Method method = methodsOld.get(taskName);
             Object clazz = clazzs.get(taskName);

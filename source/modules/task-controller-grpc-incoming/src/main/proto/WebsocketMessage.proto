@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "ru.iedt.database.messaging";
+option java_outer_classname = "RequestIncomingProto";
+
+package RequestIncoming;
+
+// The greeting service definition.
+service RequestIncoming {
+  // Sends a greeting
+  rpc Message (Request) returns (stream RequestReply) {}
+}
+
+// The request message containing the user's name.
+message Request {
+  string user = 1;
+  string socket = 2;
+  string task_name = 3;
+  string token = 4;
+  string app_uuid = 5;
+  string task_uuid = 6;
+  string payload = 7;
+}
+
+// The response message containing the greetings
+message RequestReply {
+  string result = 1;
+}
