@@ -17,11 +17,11 @@ dependencies {
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-jackson'
 
-    compileOnly project(':source:modules:database-controller')
-    compileOnly project(':source:modules:store')
-    compileOnly project(':source:modules:structures')
-    compileOnly project(':source:modules:xml-parser')
-    compileOnly project(':source:exceptions')
+    implementation project(':source:modules:database-controller')
+    implementation project(':source:modules:store')
+    implementation project(':source:modules:structures')
+    implementation project(':source:modules:xml-parser')
+    implementation project(':source:exceptions')
 
 
     testImplementation 'io.quarkus:quarkus-reactive-pg-client'
