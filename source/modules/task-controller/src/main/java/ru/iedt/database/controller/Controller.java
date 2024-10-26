@@ -6,11 +6,14 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.inject.Singleton;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.reflections.Reflections;
 import ru.iedt.database.controller.annotation.Task;
 import ru.iedt.database.controller.annotation.TaskSynchronous;
@@ -84,21 +87,18 @@ public class Controller {
             Method method = methodsNew.get(taskName);
             Object clazz = clazzs.get(taskName);
             if (method == null || clazz == null) throw new RuntimeException("Задача " + taskName + " не найдена");
-            Class<?> arrayGeneric = (Class<?>) ((ParameterizedType)
-                            (((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]))
-                    .getRawType();
-            ((ParameterizedType) (((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]))
-                    .getRawType();
+            Type parameterizedType = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+            Class<?> arrayGeneric = (parameterizedType instanceof ParameterizedType) ? (Class<?>) ((ParameterizedType) parameterizedType).getRawType() : (Class<?>) parameterizedType;
             if (arrayGeneric == Tuple2.class) {
                 return ((Uni<Tuple2<Integer, Multi<?>>>) method.invoke(clazz, task, message))
                         .onItem()
                         .transform(objects -> new ReturnTaskType<>(objects.getItem1(), objects.getItem2(), false));
-            } else if (arrayGeneric == ReturnTaskType.class) {
+            } else {
                 return Uni.createFrom()
                         .item(Unchecked.supplier(
                                 () -> new ReturnTaskType<>((Uni<?>) method.invoke(clazz, task, message), false)));
             }
-            throw new RuntimeException("Задача " + taskName + " не найдена");
+            //throw new RuntimeException("Задача " + taskName + " не найдена");
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
