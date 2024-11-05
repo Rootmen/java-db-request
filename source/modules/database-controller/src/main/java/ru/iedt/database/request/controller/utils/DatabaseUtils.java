@@ -49,9 +49,42 @@ public class DatabaseUtils {
             String queryName) {
         List<Elements.SQL> sqlList = queries.getSql();
         List<SQL.InsertData> insertDataArray = new ArrayList<>();
-        for (Elements.SQL sql : sqlList) {
-            insertDataArray.add(SQL.getInsertData(sql, parameters, template));
+        sqlList.forEach(sql -> insertDataArray.add(SQL.getInsertData(sql, parameters, template)));
+        if (insertDataArray.size() == 1) {
+            return client.getConnection().flatMap(connection -> {
+                UniJoin.Builder<RowSet<Row>> builder = Uni.join().builder();
+                SQL.InsertData insertData = insertDataArray.getFirst();
+                List<String> unisKey = new ArrayList<>();
+                Tuple tuple = Tuple.tuple();
+                for (String token : insertData.getParametersTokens()) {
+                    Elements.Parameter<?> parameter = parameters.get(token);
+                    parameter.addToTuple(tuple);
+                }
+                PreparedQuery<RowSet<Row>> preparedQuery = connection.preparedQuery(insertData.getSql());
+                builder.add(preparedQuery.execute(tuple).onFailure().invoke(throwable -> {
+                    System.err.println("Хранилище : " + storeName);
+                    System.err.println("Запрос : " + queryName);
+                    System.err.println("Параметры : " + parameters);
+                    System.err.println("Текст запроса : " + insertData.getSql());
+                    throwable.printStackTrace();
+                }));
+                unisKey.add(insertData.getName());
+                return builder.joinAll()
+                        .andCollectFailures()
+                        .onItem()
+                        .transform(rowSets -> {
+                            Map<String, RowSet<Row>> map = new LinkedHashMap<>();
+                            for (int g = 0; g < rowSets.size(); g++) {
+                                map.put(unisKey.get(g), rowSets.get(g));
+                            }
+                            return map;
+                        })
+                        .onFailure()
+                        .call(connection::close)
+                        .flatMap(stringRowSetMap -> connection.close().replaceWith(stringRowSetMap));
+            });
         }
+
         return client.getConnection()
                 .onItem()
                 .transformToUni(connection -> connection.begin().onItem().transformToUni(transaction -> {
@@ -86,6 +119,11 @@ public class DatabaseUtils {
                             .onItem()
                             .transformToUni(stringRowSetMap -> transaction
                                     .commit()
+                                    .onFailure()
+                                    .invoke(() -> System.out.println("Ошибка в транзакции. Отмена дейстаий"))
+                                    .onFailure()
+                                    .recoverWithUni(
+                                            throwable -> transaction.rollback().flatMap(unused -> connection.close()))
                                     .onItem()
                                     .transformToUni(unused -> connection.close())
                                     .replaceWith(stringRowSetMap));

@@ -2,8 +2,8 @@ plugins {
 	id 'java'
 	id 'groovy'
 	id 'io.quarkus'
-	id "com.diffplug.spotless" version "6.23.3"
-	id("maven-publish")
+	id 'com.diffplug.spotless' version '6.23.3'
+	id 'maven-publish'
 }
 
 quarkusDev.enabled = false
@@ -66,4 +66,10 @@ spotless {
 
 tasks.withType(GenerateModuleMetadata).configureEach {
 	suppressedValidationErrors.add('enforced-platform')
+}
+
+layout.buildDirectory.set(layout.projectDirectory.dir("./build/root/build"))
+
+subprojects {
+	layout.buildDirectory.set(new File("${rootProject.layout.projectDirectory.asFile.getAbsolutePath()}/build${layout.getBuildDirectory().asFile.get().getAbsolutePath().replace(rootProject.layout.projectDirectory.asFile.getAbsolutePath(), "").toString().replace("\\", "/")}"))
 }
