@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Deprecated(since = "Переходите на @TaskSynchronous")
+@Deprecated(since = "Переходите на @TaskSynchronous", forRemoval = true)
 public @interface Task {
     String value();
 }

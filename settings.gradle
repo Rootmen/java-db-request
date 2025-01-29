@@ -6,12 +6,17 @@ pluginManagement {
 	}
 	plugins {
 		id "${quarkusPluginId}" version "${quarkusPluginVersion}"
+		id 'io.quarkus.extension' version "${quarkusPluginVersion}"
 	}
 }
+
+
+
 rootProject.name = 'java-db-request'
 //модули
 include ':source:modules:message-format'
 include ':source:modules:store'
+include ':source:modules:store-generator-plugin'
 include ':source:modules:database-controller'
 include ':source:exceptions'
 include ':source:modules:xml-parser'
