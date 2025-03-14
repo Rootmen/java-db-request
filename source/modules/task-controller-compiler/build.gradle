@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'io.quarkus.extension'
 }
 
 repositories {
@@ -40,14 +39,6 @@ compileJava {
 
 compileTestJava {
     options.encoding = 'UTF-8'
-}
-
-tasks.named('compileTestJava') {
-    dependsOn 'jandex'
-}
-
-tasks.named('test') {
-    dependsOn 'jandex'
 }
 
 publishing {

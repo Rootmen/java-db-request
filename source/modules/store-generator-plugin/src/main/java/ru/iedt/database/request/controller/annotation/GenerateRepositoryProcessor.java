@@ -5,17 +5,10 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.TypeSpec;
 import io.quarkus.deployment.CodeGenContext;
 import io.quarkus.deployment.CodeGenProvider;
-
-import javax.annotation.processing.*;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
-import javax.tools.Diagnostic;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
-
+import javax.annotation.processing.*;
+import javax.lang.model.element.*;
 
 public class GenerateRepositoryProcessor implements CodeGenProvider {
     @Override
@@ -43,8 +36,8 @@ public class GenerateRepositoryProcessor implements CodeGenProvider {
                 .addMethod(main)
                 .build();
 
-        JavaFile javaFile = JavaFile.builder("com.example.helloworld", helloWorld)
-                .build();
+        JavaFile javaFile =
+                JavaFile.builder("com.example.helloworld", helloWorld).build();
 
         try {
             javaFile.writeTo(new File(context.inputDir().toString() + "/demo.java"));
@@ -54,7 +47,7 @@ public class GenerateRepositoryProcessor implements CodeGenProvider {
         return false;
     }
 
-  /*  @BuildStep
+    /*  @BuildStep
     public void handleEndpointParams(ResteasyReactiveResourceMethodEntriesBuildItem resourceMethodEntries, JaxRsResourceIndexBuildItem jaxRsIndex) {
 
         IndexView indexView = jaxRsIndex.getIndexView();
