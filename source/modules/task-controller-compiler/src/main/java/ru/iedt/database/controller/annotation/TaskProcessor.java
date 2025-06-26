@@ -16,7 +16,8 @@ import ru.iedt.database.controller.TaskDescription;
 import ru.iedt.database.messaging.WebsocketMessage;
 
 @SupportedAnnotationTypes("ru.iedt.database.controller.annotation.Task")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SuppressWarnings("removal")
 public class TaskProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {

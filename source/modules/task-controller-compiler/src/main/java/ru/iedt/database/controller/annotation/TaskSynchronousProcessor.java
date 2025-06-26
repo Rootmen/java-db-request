@@ -17,7 +17,7 @@ import ru.iedt.database.controller.TaskDescription;
 import ru.iedt.database.messaging.WebsocketMessage;
 
 @SupportedAnnotationTypes("ru.iedt.database.controller.annotation.TaskSynchronous")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class TaskSynchronousProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
