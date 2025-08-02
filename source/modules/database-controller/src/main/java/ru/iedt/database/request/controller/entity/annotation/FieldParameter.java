@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(value = RetentionPolicy.RUNTIME)
 @RegisterForReflection
+@Deprecated
 public @interface FieldParameter {
     String column_name();
 

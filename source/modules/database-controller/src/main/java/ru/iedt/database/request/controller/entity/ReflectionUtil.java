@@ -143,11 +143,8 @@ public class ReflectionUtil {
             Class<?> arrayClazz = (Class<?>) ((ParameterizedType) typeGeneric).getActualTypeArguments()[0];
             Object[] array = RowTypes.typeArrayFunctionHashMap.get(arrayClazz).apply(row, createParameter);
             List<Object> arrayList = Arrays.stream(array).toList();
-            if (clazz == ArrayList.class) {
+            if (clazz == ArrayList.class || clazz == List.class) {
                 return new ArrayList<>(arrayList);
-            }
-            if (clazz == List.class) {
-                return (List<?>) (new ArrayList<>(arrayList));
             }
             if (clazz == LinkedList.class) {
                 return new LinkedList<>(arrayList);

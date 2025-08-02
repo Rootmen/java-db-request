@@ -1,33 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Definition parser="v3">
-    <QuerySet ID="GET_TEST">
+    <QuerySet ID="GET_TEST_JSON">
         <Query>
             <SQL name="main">
                 <![CDATA[
-                    SELECT 1      AS param_1,
-                           1      AS param_2,
-                           1      AS param_3,
-                           'test' AS param_4,
-                           array[1,2,3] AS param_5,
-                           'test' AS param_6,
-                           'test' AS param_7,
-                           'test' AS param_8
-                    union all
-                    SELECT 1      AS param_1,
-                           1      AS param_2,
-                           1      AS param_3,
-                           'test' AS param_4,
-                           array[1,2,3] AS param_5,
-                           'test' AS param_6,
-                           'test' AS param_7,
-                           'test' AS param_8
+                    SELECT '{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }'::JSONB      AS param_1,
+                            '[{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            },
+                            {
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }]'::JSONB      AS param_2
                 ]]>
             </SQL>
         </Query>
     </QuerySet>
-    <QuerySet ID="GET_TEST_JSON">
+    <QuerySet ID="GET_TEST_TRANSACTION">
         <Query>
+            <SQL>
+                <![CDATA[
+                    SELECT '{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }'::JSONB      AS param_1,
+                            '[{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            },
+                            {
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }]'::JSONB      AS param_2
+                ]]>
+            </SQL>
             <SQL name="main">
+                <![CDATA[
+                    SELECT '{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }'::JSONB      AS param_1,
+                            '[{
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            },
+                            {
+                              "param_1": 1,
+                              "param_2": 3,
+                              "param_3": 5
+                            }]'::JSONB      AS param_2
+                ]]>
+            </SQL>
+            <SQL>
                 <![CDATA[
                     SELECT '{
                               "param_1": 1,

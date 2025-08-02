@@ -6,84 +6,86 @@ import java.math.BigDecimal;
 import java.nio.Buffer;
 import java.time.*;
 import java.time.temporal.Temporal;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class RowTypes {
-    static HashMap<Class<?>, Boolean> primitiveMap = new HashMap<>();
+    public static final Map<Class<?>, Boolean> primitiveMap;
 
     static {
-        primitiveMap.put(int.class, true);
-        primitiveMap.put(double.class, true);
-        primitiveMap.put(long.class, true);
-        primitiveMap.put(boolean.class, true);
-        primitiveMap.put(short.class, true);
-        primitiveMap.put(float.class, true);
-        primitiveMap.put(int[].class, true);
-        primitiveMap.put(double[].class, true);
-        primitiveMap.put(long[].class, true);
-        primitiveMap.put(boolean[].class, true);
-        primitiveMap.put(short[].class, true);
-        primitiveMap.put(float[].class, true);
+        primitiveMap = Map.ofEntries(
+                Map.entry(int.class, true),
+                Map.entry(double.class, true),
+                Map.entry(long.class, true),
+                Map.entry(boolean.class, true),
+                Map.entry(short.class, true),
+                Map.entry(float.class, true),
+                Map.entry(int[].class, true),
+                Map.entry(double[].class, true),
+                Map.entry(long[].class, true),
+                Map.entry(boolean[].class, true),
+                Map.entry(short[].class, true),
+                Map.entry(float[].class, true));
     }
 
-    static HashMap<Class<?>, BiFunction<Row, String, Object>> typeFunctionHashMap = new HashMap<>();
+    public static Map<Class<?>, BiFunction<Row, String, Object>> typeFunctionHashMap;
 
     static {
-        typeFunctionHashMap.put(Integer.class, Row::getInteger);
-        typeFunctionHashMap.put(Double.class, Row::getDouble);
-        typeFunctionHashMap.put(String.class, Row::getString);
-        typeFunctionHashMap.put(Long.class, Row::getLong);
-        typeFunctionHashMap.put(Boolean.class, Row::getBoolean);
-        typeFunctionHashMap.put(Short.class, Row::getShort);
-        typeFunctionHashMap.put(Float.class, Row::getFloat);
-        typeFunctionHashMap.put(Buffer.class, Row::getBuffer);
-        typeFunctionHashMap.put(Numeric.class, Row::getBuffer);
-        typeFunctionHashMap.put(Temporal.class, Row::getTemporal);
-        typeFunctionHashMap.put(LocalDate.class, Row::getLocalDate);
-        typeFunctionHashMap.put(LocalTime.class, Row::getLocalTime);
-        typeFunctionHashMap.put(LocalDateTime.class, Row::getLocalDateTime);
-        typeFunctionHashMap.put(OffsetTime.class, Row::getOffsetTime);
-        typeFunctionHashMap.put(OffsetDateTime.class, Row::getOffsetDateTime);
-        typeFunctionHashMap.put(UUID.class, Row::getUUID);
-        typeFunctionHashMap.put(BigDecimal.class, Row::getBigDecimal);
-        typeFunctionHashMap.put(Boolean[].class, Row::getArrayOfBooleans);
-        typeFunctionHashMap.put(Short[].class, Row::getArrayOfShorts);
-        typeFunctionHashMap.put(Integer[].class, Row::getArrayOfIntegers);
-        typeFunctionHashMap.put(Long[].class, Row::getArrayOfLongs);
-        typeFunctionHashMap.put(Float[].class, Row::getArrayOfFloats);
-        typeFunctionHashMap.put(Double[].class, Row::getArrayOfDoubles);
-        typeFunctionHashMap.put(Numeric[].class, Row::getArrayOfNumerics);
-        typeFunctionHashMap.put(String[].class, Row::getArrayOfStrings);
-        typeFunctionHashMap.put(Temporal[].class, Row::getArrayOfTemporals);
-        typeFunctionHashMap.put(LocalDate[].class, Row::getArrayOfLocalDates);
-        typeFunctionHashMap.put(LocalTime[].class, Row::getArrayOfLocalTimes);
-        typeFunctionHashMap.put(LocalDateTime[].class, Row::getArrayOfLocalDateTimes);
-        typeFunctionHashMap.put(OffsetTime[].class, Row::getArrayOfOffsetTimes);
-        typeFunctionHashMap.put(OffsetDateTime[].class, Row::getArrayOfOffsetDateTimes);
-        typeFunctionHashMap.put(UUID[].class, Row::getArrayOfUUIDs);
-        typeFunctionHashMap.put(BigDecimal[].class, Row::getArrayOfBigDecimals);
+        typeFunctionHashMap = Map.ofEntries(
+                Map.entry(Integer.class, Row::getInteger),
+                Map.entry(Double.class, Row::getDouble),
+                Map.entry(String.class, Row::getString),
+                Map.entry(Long.class, Row::getLong),
+                Map.entry(Boolean.class, Row::getBoolean),
+                Map.entry(Short.class, Row::getShort),
+                Map.entry(Float.class, Row::getFloat),
+                Map.entry(Buffer.class, Row::getBuffer),
+                Map.entry(Numeric.class, Row::getBuffer),
+                Map.entry(Temporal.class, Row::getTemporal),
+                Map.entry(LocalDate.class, Row::getLocalDate),
+                Map.entry(LocalTime.class, Row::getLocalTime),
+                Map.entry(LocalDateTime.class, Row::getLocalDateTime),
+                Map.entry(OffsetTime.class, Row::getOffsetTime),
+                Map.entry(OffsetDateTime.class, Row::getOffsetDateTime),
+                Map.entry(UUID.class, Row::getUUID),
+                Map.entry(BigDecimal.class, Row::getBigDecimal),
+                Map.entry(Boolean[].class, Row::getArrayOfBooleans),
+                Map.entry(Short[].class, Row::getArrayOfShorts),
+                Map.entry(Integer[].class, Row::getArrayOfIntegers),
+                Map.entry(Long[].class, Row::getArrayOfLongs),
+                Map.entry(Float[].class, Row::getArrayOfFloats),
+                Map.entry(Double[].class, Row::getArrayOfDoubles),
+                Map.entry(Numeric[].class, Row::getArrayOfNumerics),
+                Map.entry(String[].class, Row::getArrayOfStrings),
+                Map.entry(Temporal[].class, Row::getArrayOfTemporals),
+                Map.entry(LocalDate[].class, Row::getArrayOfLocalDates),
+                Map.entry(LocalTime[].class, Row::getArrayOfLocalTimes),
+                Map.entry(LocalDateTime[].class, Row::getArrayOfLocalDateTimes),
+                Map.entry(OffsetTime[].class, Row::getArrayOfOffsetTimes),
+                Map.entry(OffsetDateTime[].class, Row::getArrayOfOffsetDateTimes),
+                Map.entry(UUID[].class, Row::getArrayOfUUIDs),
+                Map.entry(BigDecimal[].class, Row::getArrayOfBigDecimals));
     }
 
-    static HashMap<Class<?>, BiFunction<Row, String, Object[]>> typeArrayFunctionHashMap = new HashMap<>();
+    public static Map<Class<?>, BiFunction<Row, String, Object[]>> typeArrayFunctionHashMap;
 
     static {
-        typeArrayFunctionHashMap.put(Boolean.class, Row::getArrayOfBooleans);
-        typeArrayFunctionHashMap.put(Short.class, Row::getArrayOfShorts);
-        typeArrayFunctionHashMap.put(Integer.class, Row::getArrayOfIntegers);
-        typeArrayFunctionHashMap.put(Long.class, Row::getArrayOfLongs);
-        typeArrayFunctionHashMap.put(Float.class, Row::getArrayOfFloats);
-        typeArrayFunctionHashMap.put(Double.class, Row::getArrayOfDoubles);
-        typeArrayFunctionHashMap.put(Numeric.class, Row::getArrayOfNumerics);
-        typeArrayFunctionHashMap.put(String.class, Row::getArrayOfStrings);
-        typeArrayFunctionHashMap.put(Temporal.class, Row::getArrayOfTemporals);
-        typeArrayFunctionHashMap.put(LocalDate.class, Row::getArrayOfLocalDates);
-        typeArrayFunctionHashMap.put(LocalTime.class, Row::getArrayOfLocalTimes);
-        typeArrayFunctionHashMap.put(LocalDateTime.class, Row::getArrayOfLocalDateTimes);
-        typeArrayFunctionHashMap.put(OffsetTime.class, Row::getArrayOfOffsetTimes);
-        typeArrayFunctionHashMap.put(OffsetDateTime.class, Row::getArrayOfOffsetDateTimes);
-        typeArrayFunctionHashMap.put(UUID.class, Row::getArrayOfUUIDs);
-        typeArrayFunctionHashMap.put(BigDecimal.class, Row::getArrayOfBigDecimals);
+        typeArrayFunctionHashMap = Map.ofEntries(
+                Map.entry(Boolean.class, Row::getArrayOfBooleans),
+                Map.entry(Short.class, Row::getArrayOfShorts),
+                Map.entry(Integer.class, Row::getArrayOfIntegers),
+                Map.entry(Long.class, Row::getArrayOfLongs),
+                Map.entry(Float.class, Row::getArrayOfFloats),
+                Map.entry(Double.class, Row::getArrayOfDoubles),
+                Map.entry(Numeric.class, Row::getArrayOfNumerics),
+                Map.entry(String.class, Row::getArrayOfStrings),
+                Map.entry(Temporal.class, Row::getArrayOfTemporals),
+                Map.entry(LocalDate.class, Row::getArrayOfLocalDates),
+                Map.entry(LocalTime.class, Row::getArrayOfLocalTimes),
+                Map.entry(LocalDateTime.class, Row::getArrayOfLocalDateTimes),
+                Map.entry(OffsetTime.class, Row::getArrayOfOffsetTimes),
+                Map.entry(OffsetDateTime.class, Row::getArrayOfOffsetDateTimes),
+                Map.entry(UUID.class, Row::getArrayOfUUIDs),
+                Map.entry(BigDecimal.class, Row::getArrayOfBigDecimals));
     }
 }

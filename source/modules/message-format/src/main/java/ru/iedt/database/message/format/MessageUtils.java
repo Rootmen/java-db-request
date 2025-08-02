@@ -11,7 +11,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 public class MessageUtils {
 
     public static String SUCCEED_MESSAGE = "{\"succeed\":true}";
-    public static String INIT_MESSAGE = "{\"status\":0}";
+    public static String SUCCEED_PACKET_MESSAGE = "{\"status\": 3,\"succeed\":true}";
 
     public static ObjectMapper mapper = new ObjectMapper();
 
@@ -57,8 +57,6 @@ public class MessageUtils {
             throw new RuntimeException(e);
         }
     }
-
-    public static String SUCCEED_PACKET_MESSAGE = "{\"status\": 3,\"succeed\":true}";
 
     public static String endMessage() {
         return SUCCEED_PACKET_MESSAGE;

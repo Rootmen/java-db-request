@@ -5,8 +5,6 @@ import static ru.iedt.database.message.format.MessageUtils.SUCCEED_MESSAGE;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple2;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import ru.iedt.database.controller.TaskDescription;
 import ru.iedt.database.messaging.WebsocketMessage;
@@ -18,8 +16,6 @@ public class GenericMessageWriter {
             Uni<Tuple2<Integer, Multi<T>>> result, WebsocketMessage message, TaskDescription task) {
         return sendMessagesFromMulti(result, message, task, TARGET_SOCKET);
     }
-
-    static ExecutorService executorService = Executors.newFixedThreadPool(100);
 
     public static <T> Uni<Void> sendMessagesFromMulti(
             Uni<Tuple2<Integer, Multi<T>>> result, WebsocketMessage message, TaskDescription task, String target) {
@@ -36,7 +32,6 @@ public class GenericMessageWriter {
                         .replaceWith(tuple.getItem2()))
                 .onItem()
                 .transformToMulti(tMulti -> tMulti)
-                .emitOn(executorService)
                 .onItem()
                 .transformToUni(t -> message.message(WebsocketRequest.newBuilder()
                         .setUser(task.user_id.toString())
@@ -46,7 +41,7 @@ public class GenericMessageWriter {
                         .setTaskId(task.task_id.toString())
                         .setPayload(MessageUtils.rowMessage(index.getAndIncrement(), t))
                         .build()))
-                .merge()
+                .merge(100)
                 .select()
                 .where(i -> false)
                 .toUni()

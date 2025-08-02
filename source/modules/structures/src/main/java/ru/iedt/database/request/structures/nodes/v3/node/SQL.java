@@ -61,6 +61,7 @@ public class SQL implements Elements.SQL {
         }
 
         public String getName() {
+            if (name == null) return "";
             return name;
         }
 
