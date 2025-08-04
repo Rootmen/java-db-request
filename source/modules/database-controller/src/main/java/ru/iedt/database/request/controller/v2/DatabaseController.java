@@ -4,15 +4,12 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.pgclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
 import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.inject.Singleton;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import ru.iedt.database.request.controller.entity.BaseEntity;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
@@ -21,6 +18,7 @@ import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
 import ru.iedt.database.request.store.QueryStoreList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
+import io.vertx.mutiny.sqlclient.Pool;
 
 @Singleton
 public class DatabaseController {
@@ -50,7 +48,7 @@ public class DatabaseController {
             ArrayList<ParameterInput> parameterInputs,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
-            PgPool client) {
+            Pool client) {
 
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
         if (definition == null) {
@@ -94,7 +92,7 @@ public class DatabaseController {
             String querySetName,
             ArrayList<ParameterInput> parameterInputs,
             Class<T> entityClass,
-            PgPool client) {
+            Pool client) {
         return this.runQuerySetMulti(storeName, querySetName, parameterInputs, "main", entityClass, client);
     }
 
@@ -104,7 +102,7 @@ public class DatabaseController {
             ArrayList<ParameterInput> parameterInputs,
             String resultQueryName,
             Class<T> entityClass,
-            PgPool client) {
+            Pool client) {
 
         Function<RowSet<Row>, Multi<T>> resultMapper =
                 rowSet -> rowSet.toMulti().map(row -> BaseEntity.from(row, entityClass));
@@ -117,7 +115,7 @@ public class DatabaseController {
             String querySetName,
             ArrayList<ParameterInput> parameterInputs,
             Class<T> entityClass,
-            PgPool client) {
+            Pool client) {
 
         return runQuerySetUni(storeName, querySetName, parameterInputs, "main", entityClass, client);
     }
@@ -128,10 +126,11 @@ public class DatabaseController {
             ArrayList<ParameterInput> parameterInputs,
             String resultQueryName,
             Class<T> entityClass,
-            PgPool client) {
+            Pool client) {
 
         return runQuerySetMulti(storeName, querySetName, parameterInputs, resultQueryName, entityClass, client)
-                .collect()
-                .first();
+                .select()
+                .first()
+                .toUni();
     }
 }

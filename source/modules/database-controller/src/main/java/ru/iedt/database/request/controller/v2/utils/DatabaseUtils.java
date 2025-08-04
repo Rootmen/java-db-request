@@ -4,7 +4,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.*;
 import java.util.*;
 import java.util.function.Function;
@@ -44,7 +44,7 @@ public class DatabaseUtils {
             Map<String, Elements.Template> templates,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
-            PgPool client,
+            Pool client,
             String storeName,
             String queryName) {
 
@@ -69,7 +69,7 @@ public class DatabaseUtils {
             Map<String, Elements.Parameter<?>> parameters,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
-            PgPool client,
+            Pool client,
             String storeName,
             String queryName) {
         // Оптимизация одиночного запроса
@@ -81,7 +81,8 @@ public class DatabaseUtils {
 
         // Вызов запроса в режиме транзакции когда у нас несколько запросов подряд
 
-        return executeSingleQueryInTransaction( queriesToExecute, parameters, resultQueryName, resultMapper, client, storeName, queryName);
+        return executeSingleQueryInTransaction(
+                queriesToExecute, parameters, resultQueryName, resultMapper, client, storeName, queryName);
     }
 
     /// Оптимизированный метод для запроса в транзакции
@@ -90,7 +91,7 @@ public class DatabaseUtils {
             Map<String, Elements.Parameter<?>> parameters,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
-            PgPool client,
+            Pool client,
             String storeName,
             String queryName) {
         return Multi.createFrom().emitter(emitter -> {
@@ -176,7 +177,7 @@ public class DatabaseUtils {
             Map<String, Elements.Parameter<?>> parameters,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
-            PgPool client,
+            Pool client,
             String storeName,
             String queryName) {
 
