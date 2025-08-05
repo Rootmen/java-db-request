@@ -36,7 +36,7 @@ public class DatabaseController {
         }
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
             String storeName, String queryName, Map<String, ParameterInput> parameterInputs, PgPool client) {
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
@@ -53,7 +53,7 @@ public class DatabaseController {
         return Uni.join().all(unis).andCollectFailures();
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public Uni<List<Map<String, RowSet<Row>>>> runningQuerySet(
             String storeName, String queryName, ArrayList<ParameterInput> parameterInputs, PgPool client) {
         Elements.Definition definition = QUERY_STORE_DEFINITION_MAP.get(storeName);
@@ -70,7 +70,7 @@ public class DatabaseController {
         return Uni.join().all(unis).andCollectFailures();
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public Uni<RowSet<Row>> generateQuery(
             String storeName,
             String queryName,
@@ -85,7 +85,7 @@ public class DatabaseController {
                 .transform(map -> map.get(sqlName));
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public <T extends BaseEntity> Uni<T> runningQuerySetUni(
             String storeName,
             String queryName,
@@ -95,7 +95,7 @@ public class DatabaseController {
         return this.runningQuerySetUni(storeName, queryName, "main", 0, parameterInputs, tClass, client);
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public <T extends BaseEntity> Uni<T> runningQuerySetUni(
             String storeName,
             String queryName,
@@ -106,7 +106,7 @@ public class DatabaseController {
         return this.runningQuerySetUni(storeName, queryName, sqlName, 0, parameterInputs, tClass, client);
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public <T extends BaseEntity> Uni<T> runningQuerySetUni(
             String storeName,
             String queryName,
@@ -124,7 +124,7 @@ public class DatabaseController {
                 .transform(row -> T.from(row, tClass));
     }
 
-    @Deprecated(forRemoval = true)
+    @Deprecated()
     public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
             String storeName,
             String queryName,

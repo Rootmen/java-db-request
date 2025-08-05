@@ -4,7 +4,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.mutiny.pgclient.Pool;
+import io.vertx.mutiny.sqlclient.Pool;
 import io.vertx.mutiny.sqlclient.Row;
 import io.vertx.mutiny.sqlclient.RowSet;
 import jakarta.inject.Singleton;
@@ -18,7 +18,6 @@ import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
 import ru.iedt.database.request.store.QueryStoreList;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
-import io.vertx.mutiny.sqlclient.Pool;
 
 @Singleton
 public class DatabaseController {
@@ -42,7 +41,16 @@ public class DatabaseController {
         }
     }
 
-    private <T> Multi<T> runQuerySet(
+    public <T> Multi<T> runQuerySet(
+            String storeName,
+            String querySetName,
+            ArrayList<ParameterInput> parameterInputs,
+            Function<RowSet<Row>, Multi<T>> resultMapper,
+            Pool client) {
+        return runQuerySet(storeName, querySetName, parameterInputs, "main", resultMapper, client);
+    }
+
+    public <T> Multi<T> runQuerySet(
             String storeName,
             String querySetName,
             ArrayList<ParameterInput> parameterInputs,
