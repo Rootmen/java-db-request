@@ -10,6 +10,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 public class MessageUtils {
 
+    public static String INIT_MESSAGE = "{\"status\":0}";
     public static String SUCCEED_MESSAGE = "{\"succeed\":true}";
     public static String SUCCEED_PACKET_MESSAGE = "{\"status\": 3,\"succeed\":true}";
 
