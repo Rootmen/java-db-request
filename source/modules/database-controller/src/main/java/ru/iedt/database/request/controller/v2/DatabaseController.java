@@ -44,7 +44,7 @@ public class DatabaseController {
     public <T> Multi<T> runQuerySet(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             Function<RowSet<Row>, Multi<T>> resultMapper,
             Pool client) {
         return runQuerySet(storeName, querySetName, parameterInputs, "main", resultMapper, client);
@@ -53,7 +53,7 @@ public class DatabaseController {
     public <T> Multi<T> runQuerySet(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             String resultQueryName,
             Function<RowSet<Row>, Multi<T>> resultMapper,
             Pool client) {
@@ -98,7 +98,7 @@ public class DatabaseController {
     public <T extends BaseEntity> Multi<T> runQuerySetMulti(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             Class<T> entityClass,
             Pool client) {
         return this.runQuerySetMulti(storeName, querySetName, parameterInputs, "main", entityClass, client);
@@ -107,7 +107,7 @@ public class DatabaseController {
     public <T extends BaseEntity> Multi<T> runQuerySetMulti(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             String resultQueryName,
             Class<T> entityClass,
             Pool client) {
@@ -121,7 +121,7 @@ public class DatabaseController {
     public <T extends BaseEntity> Uni<T> runQuerySetUni(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             Class<T> entityClass,
             Pool client) {
 
@@ -131,7 +131,7 @@ public class DatabaseController {
     public <T extends BaseEntity> Uni<T> runQuerySetUni(
             String storeName,
             String querySetName,
-            ArrayList<ParameterInput> parameterInputs,
+            List<ParameterInput> parameterInputs,
             String resultQueryName,
             Class<T> entityClass,
             Pool client) {

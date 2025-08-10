@@ -29,7 +29,7 @@ public class DatabaseUtils {
     }
 
     public static Map<String, Elements.Parameter<?>> createParameters(
-            ArrayList<ParameterInput> parameterInputs, Map<String, Elements.Parameter<?>> parameterMap) {
+            List<ParameterInput> parameterInputs, Map<String, Elements.Parameter<?>> parameterMap) {
         for (ParameterInput parameter : parameterInputs) {
             if (parameter.getName() != null) {
                 parameterMap.get(parameter.getName()).setValue(parameter.getValue());
@@ -153,6 +153,7 @@ public class DatabaseUtils {
                         }
 
                         return chain.onFailure().invoke(t -> {
+                            transaction.close().subscribe().with(unused -> {});
                             String errorMsg = String.format("[%s:%s] Transaction error", storeName, queryName);
                             LOG.error(errorMsg, t);
                         });
