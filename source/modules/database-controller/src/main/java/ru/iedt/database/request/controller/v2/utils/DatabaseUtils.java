@@ -143,7 +143,7 @@ public class DatabaseUtils {
                                                 emitter.emit(item);
                                             })
                                             .collect()
-                                            .asList()
+                                            .last()
                                             .invoke(ts -> emitter.complete())
                                             .replaceWithVoid();
                                 }
@@ -212,12 +212,21 @@ public class DatabaseUtils {
                             storeName, queryName, query.getName(), query.getSql(), buildParamsLog(query, tuple));
                     LOG.error(errorMsg, failure);
                 })
-                .invoke(() -> {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(String.format(
-                                "[%s:%s] Executing single query finis: %s", storeName, queryName, query.getName()));
+                .onItem()
+                .invoke(item -> {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(String.format("[%s:%s] Result item: %s", storeName, queryName, item));
                     }
-                });
+                })
+                .onCompletion()
+                .invoke(
+                        () -> { // Исправлено здесь
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(String.format(
+                                        "[%s:%s] Executing single query finished: %s",
+                                        storeName, queryName, query.getName()));
+                            }
+                        });
     }
 
     // Генерация парметров в погдотоленном запросе
