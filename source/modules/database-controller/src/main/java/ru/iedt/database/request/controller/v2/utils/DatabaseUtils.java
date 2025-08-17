@@ -219,14 +219,12 @@ public class DatabaseUtils {
                     }
                 })
                 .onCompletion()
-                .invoke(
-                        () -> {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(String.format(
-                                        "[%s:%s] Executing single query finished: %s",
-                                        storeName, queryName, query.getName()));
-                            }
-                        });
+                .invoke(() -> {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(String.format(
+                                "[%s:%s] Executing single query finished: %s", storeName, queryName, query.getName()));
+                    }
+                });
     }
 
     // Генерация парметров в погдотоленном запросе

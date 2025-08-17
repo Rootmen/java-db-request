@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.mutiny.sqlclient.Row;
 import java.beans.ConstructorProperties;
 import java.lang.reflect.Constructor;
@@ -17,6 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RowMapper {
+    private static final Logger LOG = LoggerFactory.getLogger(RowMapper.class);
     private static final Map<Class<?>, Function<Row, ?>> mapperCache = new ConcurrentHashMap<>();
 
     static ObjectMapper mapper = new ObjectMapper();
@@ -30,43 +33,86 @@ public class RowMapper {
     }
 
     public static <T> Function<Row, T> getMapper(Class<T> dtoClass) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("[RowMapper] Requesting mapper for class: %s", dtoClass.getName()));
+        }
         return (Function<Row, T>) mapperCache.computeIfAbsent(dtoClass, RowMapper::createMapper);
     }
 
     private static <T> Function<Row, T> createMapper(Class<T> dtoClass) {
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("[RowMapper:createMapper] Creating mapper for class: %s", dtoClass.getName()));
+            }
+
             Constructor<T> constructor = findAnnotatedConstructor(dtoClass);
             ConstructorProperties properties = constructor.getAnnotation(ConstructorProperties.class);
             String[] paramNames = properties.value();
             Class<?>[] paramTypes = constructor.getParameterTypes();
             Type[] genericTypes = constructor.getGenericParameterTypes();
+
             // Precompute column names and converters
             String[] columnNames = new String[paramNames.length];
             BiFunction<Row, String, Object>[] converters = new BiFunction[paramTypes.length];
+
             for (int i = 0; i < paramNames.length; i++) {
                 columnNames[i] = camelToSnake(paramNames[i]);
                 converters[i] = createConverter(paramTypes[i], genericTypes[i]);
+
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(String.format(
+                            "[RowMapper:createMapper] Mapped parameter: %s (type: %s) to column: %s",
+                            paramNames[i], paramTypes[i].getSimpleName(), columnNames[i]));
+                }
             }
 
             return row -> {
                 Object[] args = new Object[paramNames.length];
                 for (int i = 0; i < paramNames.length; i++) {
-                    args[i] = converters[i].apply(row, columnNames[i]);
+                    try {
+                        args[i] = converters[i].apply(row, columnNames[i]);
+
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(String.format(
+                                    "[RowMapper:row-mapping] Set argument %d: %s = %s (from column: %s)",
+                                    i, paramNames[i], args[i], columnNames[i]));
+                        }
+                    } catch (Exception e) {
+                        String errorMsg = String.format(
+                                "Error mapping column '%s' for class %s", columnNames[i], dtoClass.getName());
+                        LOG.error(errorMsg, e);
+                        throw new RuntimeException(errorMsg, e);
+                    }
                 }
                 try {
-                    return constructor.newInstance(args);
+                    T result = constructor.newInstance(args);
+
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(String.format("[RowMapper::row-mapping] Created instance: %s", result));
+                    }
+                    return result;
                 } catch (Exception e) {
-                    throw new RuntimeException("DTO creation failed for: " + dtoClass.getName(), e);
+                    String errorMsg = String.format(
+                            "DTO creation failed for: %s with args: %s", dtoClass.getName(), Arrays.toString(args));
+                    LOG.error(errorMsg, e);
+                    throw new RuntimeException(errorMsg, e);
                 }
             };
         } catch (Exception e) {
-            throw new RuntimeException("Mapper initialization failed for: " + dtoClass.getName(), e);
+            String errorMsg = "Mapper initialization failed for: " + dtoClass.getName();
+            LOG.error(errorMsg, e);
+            throw new RuntimeException(errorMsg, e);
         }
     }
 
     private static <T> Constructor<T> findAnnotatedConstructor(Class<T> dtoClass) {
         for (Constructor<?> c : dtoClass.getConstructors()) {
             if (c.isAnnotationPresent(ConstructorProperties.class)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "[RowMapper] Found @ConstructorProperties in %s with params: %s",
+                            dtoClass.getSimpleName(), Arrays.toString(c.getParameterTypes())));
+                }
                 return (Constructor<T>) c;
             }
         }
@@ -75,14 +121,33 @@ public class RowMapper {
 
     private static BiFunction<Row, String, Object> createConverter(Class<?> targetType, Type type) {
         if (targetType == ArrayList.class || targetType == LinkedList.class || targetType == List.class) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                        "[RowMapper] Creating collection converter for type: %s", targetType.getSimpleName()));
+            }
             return createConverterArray(targetType, type);
         }
+
         BiFunction<Row, String, Object> mapperObject = RowTypes.typeFunctionHashMap.get(targetType);
         if (mapperObject == null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format("[RowMapper] Creating JSON converter for type: %s", targetType.getName()));
+            }
             mapperObject = ((row, string) -> {
                 try {
-                    return mapper.readValue(row.getJson(string).toString(), targetType);
+                    Object value = mapper.readValue(row.getJson(string).toString(), targetType);
+
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(String.format(
+                                "[RowMapper:converter] Converted column '%s' to %s: %s",
+                                string, targetType.getSimpleName(), value));
+                    }
+                    return value;
                 } catch (JsonProcessingException e) {
+                    LOG.error(
+                            String.format(
+                                    "JSON conversion error for column '%s' and type %s", string, targetType.getName()),
+                            e);
                     throw new RuntimeException(e);
                 }
             });
@@ -93,18 +158,50 @@ public class RowMapper {
     private static BiFunction<Row, String, Object> createConverterArray(Class<?> targetType, Type type) {
         if (type instanceof ParameterizedType) {
             Class<?> arrayClazz = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                        "[RowMapper] Creating array converter for: %s<%s>",
+                        targetType.getSimpleName(), arrayClazz.getSimpleName()));
+            }
+
             BiFunction<Row, String, Object[]> convertor = RowTypes.typeArrayFunctionHashMap.get(arrayClazz);
             if (convertor == null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "[RowMapper] Using JSON array converter for: %s<%s>",
+                            targetType.getSimpleName(), arrayClazz.getSimpleName()));
+                }
                 return ((row, string) -> {
                     JavaType jsonType = mapper.getTypeFactory()
                             .constructCollectionType((Class<? extends Collection>) targetType, arrayClazz);
                     try {
-                        return mapper.readValue(row.getJson(string).toString(), jsonType);
+                        Object value = mapper.readValue(row.getJson(string).toString(), jsonType);
+
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(String.format(
+                                    "[RowMapper:converter] Converted column '%s' to %s: %s",
+                                    string, jsonType.getTypeName(), value));
+                        }
+                        return value;
                     } catch (JsonProcessingException e) {
+                        LOG.error(
+                                String.format(
+                                        "JSON array conversion error for column '%s' and type %s",
+                                        string, jsonType.getTypeName()),
+                                e);
                         throw new RuntimeException(e);
                     }
                 });
             }
+
+            // Обработка предопределенных конвертеров
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                        "[RowMapper] Using predefined array converter for: %s<%s>",
+                        targetType.getSimpleName(), arrayClazz.getSimpleName()));
+            }
+
             if (targetType == ArrayList.class || targetType == List.class) {
                 return convertor.andThen(
                         array -> new ArrayList<>(Arrays.stream(array).toList()));
