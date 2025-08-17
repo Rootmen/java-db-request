@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Definition parser="v3">
+    <QuerySet ID="GET_TEST_LIST_20">
+        <Query>
+            <SQL name="main">
+                <![CDATA[
+                    SELECT 1             AS PARAM_INTEGER_ONE,
+                           2             AS PARAM_INTEGER_TWO,
+                           3             AS PARAM_INTEGER3,
+                           'test'        AS PARAM4,
+                           ARRAY [1,2,3] AS PARAM5,
+                           ARRAY [1,2,3] AS PARAM6,
+                           ARRAY [1,2,3] AS PARAM7,
+                           ARRAY [1,2,3] AS PARAM8
+                    FROM GENERATE_SERIES(1, 20)
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
+    <QuerySet ID="GET_TEST">
+        <Query>
+            <SQL name="main">
+                <![CDATA[
+                    SELECT 1             AS PARAM_INTEGER_ONE,
+                           2             AS PARAM_INTEGER_TWO,
+                           3             AS PARAM_INTEGER3,
+                           'test'        AS PARAM4,
+                           ARRAY [1,2,3] AS PARAM5,
+                           ARRAY [1,2,3] AS PARAM6,
+                           ARRAY [1,2,3] AS PARAM7,
+                           ARRAY [1,2,3] AS PARAM8
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
+    <QuerySet ID="GET_TEST_JSON">
+        <Query>
+            <SQL name="main">
+                <![CDATA[
+                    SELECT '{
+                              "param_integer_one": 1,
+                              "param_integer_two": 2,
+                              "param_integer3": 3
+                            }'::jsonb       AS param_one,
+                           '[
+                             {
+                               "param_integer_one": 1,
+                               "param_integer_two": 2,
+                               "param_integer3": 3
+                             },
+                             {
+                               "param_integer_one": 1,
+                               "param_integer_two": 2,
+                               "param_integer3": 3
+                             },
+                             {
+                               "param_integer_one": 1,
+                               "param_integer_two": 2,
+                               "param_integer3": 3
+                             }
+                           ]
+                           '::jsonb AS param_two
+                    FROM GENERATE_SERIES(1, 20)
+                ]]>
+            </SQL>
+        </Query>
+    </QuerySet>
+</Definition>

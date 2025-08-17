@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'io.quarkus'
     id 'maven-publish'
+    id 'io.freefair.lombok' version '8.14'
     id 'org.kordamp.gradle.jandex' version '2.1.0'
 }
 

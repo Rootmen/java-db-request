@@ -220,7 +220,7 @@ public class DatabaseUtils {
                 })
                 .onCompletion()
                 .invoke(
-                        () -> { // Исправлено здесь
+                        () -> {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(String.format(
                                         "[%s:%s] Executing single query finished: %s",

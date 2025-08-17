@@ -11,8 +11,8 @@ import jakarta.inject.Singleton;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
-import ru.iedt.database.request.controller.entity.BaseEntity;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
+import ru.iedt.database.request.controller.v2.entity.RowMapper;
 import ru.iedt.database.request.controller.v2.utils.DatabaseUtils;
 import ru.iedt.database.request.parser.elements.v3.ParserEngine;
 import ru.iedt.database.request.store.QueryStoreDefinition;
@@ -95,7 +95,12 @@ public class DatabaseController {
     }
 
     // Остальные методы без изменений
-    public <T extends BaseEntity> Multi<T> runQuerySetMulti(
+
+    public <T> Multi<T> runQuerySetMulti(String storeName, String querySetName, Class<T> entityClass, Pool client) {
+        return this.runQuerySetMulti(storeName, querySetName, new ArrayList<>(), "main", entityClass, client);
+    }
+
+    public <T> Multi<T> runQuerySetMulti(
             String storeName,
             String querySetName,
             List<ParameterInput> parameterInputs,
@@ -104,21 +109,29 @@ public class DatabaseController {
         return this.runQuerySetMulti(storeName, querySetName, parameterInputs, "main", entityClass, client);
     }
 
-    public <T extends BaseEntity> Multi<T> runQuerySetMulti(
+    public <T> Multi<T> runQuerySetMulti(
             String storeName,
             String querySetName,
             List<ParameterInput> parameterInputs,
             String resultQueryName,
             Class<T> entityClass,
             Pool client) {
-
-        Function<RowSet<Row>, Multi<T>> resultMapper =
-                rowSet -> rowSet.toMulti().map(row -> BaseEntity.from(row, entityClass));
-
-        return runQuerySet(storeName, querySetName, parameterInputs, resultQueryName, resultMapper, client);
+        return runQuerySet(
+                storeName,
+                querySetName,
+                parameterInputs,
+                resultQueryName,
+                rowSet -> rowSet.toMulti()
+                        .map(row -> RowMapper.getMapper(entityClass).apply(row)),
+                client);
     }
 
-    public <T extends BaseEntity> Uni<T> runQuerySetUni(
+    public <T> Uni<T> runQuerySetUni(String storeName, String querySetName, Class<T> entityClass, Pool client) {
+
+        return runQuerySetUni(storeName, querySetName, new ArrayList<>(), "main", entityClass, client);
+    }
+
+    public <T> Uni<T> runQuerySetUni(
             String storeName,
             String querySetName,
             List<ParameterInput> parameterInputs,
@@ -128,7 +141,7 @@ public class DatabaseController {
         return runQuerySetUni(storeName, querySetName, parameterInputs, "main", entityClass, client);
     }
 
-    public <T extends BaseEntity> Uni<T> runQuerySetUni(
+    public <T> Uni<T> runQuerySetUni(
             String storeName,
             String querySetName,
             List<ParameterInput> parameterInputs,

@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.quarkus' version "$quarkusPlatformVersion"
+    id 'io.freefair.lombok' version '8.14'
     id 'org.kordamp.gradle.jandex' version '2.1.0'
     id 'maven-publish'
 }
@@ -56,16 +57,8 @@ compileTestJava {
     options.encoding = 'UTF-8'
 }
 
-tasks.named('compileTestJava') {
-    dependsOn 'jandex'
-}
-
-tasks.named('test') {
-    dependsOn 'jandex'
-}
-
-tasks.named('quarkusDependenciesBuild') {
-    dependsOn 'jandex'
+tasks.named("jandex") {
+    dependsOn(tasks.named("compileJava")) // Jandex после компиляции
 }
 
 
