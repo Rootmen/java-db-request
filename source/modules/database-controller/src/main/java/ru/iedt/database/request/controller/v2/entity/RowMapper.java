@@ -203,12 +203,16 @@ public class RowMapper {
             }
 
             if (targetType == ArrayList.class || targetType == List.class) {
-                return convertor.andThen(
-                        array -> new ArrayList<>(Arrays.stream(array).toList()));
+                return convertor.andThen(array -> {
+                    if (array == null) return null;
+                    return new ArrayList<>(Arrays.stream(array).toList());
+                });
             }
             if (targetType == LinkedList.class) {
-                return convertor.andThen(
-                        array -> new LinkedList<>(Arrays.stream(array).toList()));
+                return convertor.andThen(array -> {
+                    if (array == null) return null;
+                    return new LinkedList<>(Arrays.stream(array).toList());
+                });
             }
             throw new RuntimeException("Непонятный тип массива из List, ArrayList или LinkedList");
         }
