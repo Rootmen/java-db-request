@@ -1,6 +1,7 @@
 package ru.iedt.database.request.app.test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.smallrye.mutiny.tuples.Tuple2;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.mutiny.pgclient.PgPool;
@@ -11,7 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import ru.iedt.database.request.controller.v2.DatabaseController;
+import ru.iedt.database.request.controller.DatabaseController;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,7 +30,9 @@ public class QueryTest {
     @Test
     public void testRunningQuerySetMulti() {
         List<TestClass> result = databaseController
-                .runQuerySetMulti(DEFINITION_NAME, "GET_TEST", new ArrayList<>(), TestClass.class, client)
+                .runningQuerySetMulti(DEFINITION_NAME, "GET_TEST", new ArrayList<>(), TestClass.class, client)
+                .onItem()
+                .transformToMulti(Tuple2::getItem2)
                 .collect()
                 .asList()
                 .await()
@@ -71,7 +74,7 @@ public class QueryTest {
     @Test
     public void testRunningQuerySetUni() {
         TestClass result = databaseController
-                .runQuerySetUni(DEFINITION_NAME, "GET_TEST", new ArrayList<>(), TestClass.class, client)
+                .runningQuerySetUni(DEFINITION_NAME, "GET_TEST", new ArrayList<>(), TestClass.class, client)
                 .await()
                 .indefinitely();
 
@@ -93,7 +96,7 @@ public class QueryTest {
     @Test
     public void testRunningQuerySetJson() {
         TestClass2 result = databaseController
-                .runQuerySetUni(DEFINITION_NAME, "GET_TEST_JSON", new ArrayList<>(), TestClass2.class, client)
+                .runningQuerySetUni(DEFINITION_NAME, "GET_TEST_JSON", new ArrayList<>(), TestClass2.class, client)
                 .await()
                 .indefinitely();
         System.out.println(result);
@@ -103,7 +106,8 @@ public class QueryTest {
     @Test
     public void testRunningQuerySetTransaction() {
         TestClass2 result = databaseController
-                .runQuerySetUni(DEFINITION_NAME, "GET_TEST_TRANSACTION", new ArrayList<>(), TestClass2.class, client)
+                .runningQuerySetUni(
+                        DEFINITION_NAME, "GET_TEST_TRANSACTION", new ArrayList<>(), TestClass2.class, client)
                 .await()
                 .indefinitely();
         System.out.println(result);

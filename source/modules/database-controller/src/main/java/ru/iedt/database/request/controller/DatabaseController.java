@@ -134,6 +134,7 @@ public class DatabaseController {
         return this.runningQuerySetMulti(storeName, queryName, "main", 0, parameterInputs, tClass, client);
     }
 
+    @Deprecated()
     public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
             String storeName,
             String queryName,
@@ -144,6 +145,7 @@ public class DatabaseController {
         return this.runningQuerySetMulti(storeName, queryName, sqlName, 0, parameterInputs, tClass, client);
     }
 
+    @Deprecated()
     public <T extends BaseEntity> Uni<Tuple2<Integer, Multi<T>>> runningQuerySetMulti(
             String storeName,
             String queryName,

@@ -8,6 +8,7 @@ import io.vertx.mutiny.sqlclient.*;
 import io.vertx.mutiny.sqlclient.Pool;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import ru.iedt.database.request.controller.parameter.ParameterInput;
 import ru.iedt.database.request.structures.nodes.v3.Elements;
 import ru.iedt.database.request.structures.nodes.v3.node.SQL;
@@ -16,26 +17,87 @@ public class DatabaseUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseUtils.class);
 
-    @Deprecated
-    public static Map<String, Elements.Parameter<?>> createParametersInputs(
-            Map<String, ParameterInput> parameterInputs, Map<String, Elements.Parameter<?>> parameterMap) {
-        for (Map.Entry<String, Elements.Parameter<?>> entry : parameterMap.entrySet()) {
-            String key = entry.getKey();
-            Elements.Parameter<?> parameters = entry.getValue();
-            ParameterInput parameterInput = parameterInputs.get(key);
-            if (parameterInput != null) parameters.setValue(parameterInput.getValue());
-        }
-        return parameterMap;
-    }
-
     public static Map<String, Elements.Parameter<?>> createParameters(
             List<ParameterInput> parameterInputs, Map<String, Elements.Parameter<?>> parameterMap) {
-        for (ParameterInput parameter : parameterInputs) {
-            if (parameter.getName() != null) {
-                parameterMap.get(parameter.getName()).setValue(parameter.getValue());
+        String methodName = "createParameters";
+
+        try {
+            if (parameterInputs == null) {
+                throw new IllegalArgumentException("Список List<ParameterInput> не может быть null");
             }
+
+            if (parameterMap == null) {
+                throw new IllegalArgumentException("Map <Parameters></Parameters> не может быть null");
+            }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                        "[%s] Начало обработки параметров (inputs: %d, map: %d)",
+                        methodName, parameterInputs.size(), parameterMap.size()));
+            }
+
+            // Проверка на пустоту parameterMap при наличии входных параметров
+            if (parameterMap.isEmpty() && !parameterInputs.isEmpty()) {
+                String errorMsg = String.format(
+                        "[%s] Невозможно обновить параметры: <Parameters></Parameters> пуст, но переданы значения в List<ParameterInput> (%d параметров)",
+                        methodName, parameterInputs.size());
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format(
+                            "[%s] Переданные параметры: %s",
+                            methodName,
+                            parameterInputs.stream()
+                                    .map(ParameterInput::getName)
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList())));
+                }
+
+                throw new IllegalStateException(errorMsg);
+            }
+
+            // Обработка параметров
+            for (ParameterInput parameter : parameterInputs) {
+                if (parameter.getName() == null) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(
+                                String.format("[%s] Обнаружен ParameterInput с null именем. Пропускаем.", methodName));
+                    }
+                    continue;
+                }
+
+                Elements.Parameter<?> targetParam = parameterMap.get(parameter.getName());
+                if (targetParam == null) {
+                    String errorMsg = String.format(
+                            "[%s] Параметр '%s' не найден в parameterMap", methodName, parameter.getName());
+
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(String.format(
+                                "[%s] Доступные параметры: %s", methodName, String.join(", ", parameterMap.keySet())));
+                    }
+
+                    throw new IllegalArgumentException(errorMsg);
+                }
+
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(String.format(
+                            "[%s] Установка значения для параметра '%s': %s",
+                            methodName, parameter.getName(), parameter.getValue()));
+                }
+
+                targetParam.setValue(parameter.getValue());
+            }
+
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("[%s] Успешно обработано %d параметров", methodName, parameterInputs.size()));
+            }
+
+            return parameterMap;
+
+        } catch (Exception failure) {
+            String errorMsg = String.format("[%s] Ошибка обработки параметров: %s", methodName, failure.getMessage());
+            LOG.error(errorMsg, failure);
+            throw new RuntimeException(errorMsg, failure);
         }
-        return parameterMap;
     }
 
     public static <T> Multi<T> runQueries(
