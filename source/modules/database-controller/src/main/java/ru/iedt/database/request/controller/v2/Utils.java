@@ -28,4 +28,18 @@ public class Utils {
                     name, Arrays.stream(array).map(Object::toString).collect(Collectors.joining(","))));
         }
     }
+
+    public static <T> void addOptionalParameterArray(List<ParameterInput> parameter, String name, List<T> array) {
+        if (array != null && !array.isEmpty()) {
+            parameter.add(new ParameterInput(
+                    name, array.stream().map(Object::toString).collect(Collectors.joining(","))));
+        }
+    }
+
+    public static <T> void addOptionalParameterArray(List<ParameterInput> parameter, String name, T[] array) {
+        if (array != null && array.length != 0) {
+            parameter.add(new ParameterInput(
+                    name, Arrays.stream(array).map(Object::toString).collect(Collectors.joining(","))));
+        }
+    }
 }

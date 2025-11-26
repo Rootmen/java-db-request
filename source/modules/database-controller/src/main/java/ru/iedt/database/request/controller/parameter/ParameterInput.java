@@ -9,6 +9,11 @@ public class ParameterInput {
         this.name = name;
     }
 
+    public ParameterInput(String name, Object value) {
+        this.value = value.toString();
+        this.name = name;
+    }
+
     public String getValue() {
         return value;
     }
