@@ -116,6 +116,15 @@ public class DatabaseController {
             String resultQueryName,
             Class<T> entityClass,
             Pool client) {
+        if (entityClass == Boolean.class) {
+            return (Multi<T>) runQuerySet(
+                    storeName,
+                    querySetName,
+                    parameterInputs,
+                    resultQueryName,
+                    rowSet -> Multi.createFrom().item(true),
+                    client);
+        }
         return runQuerySet(
                 storeName,
                 querySetName,
@@ -127,7 +136,6 @@ public class DatabaseController {
     }
 
     public <T> Uni<T> runQuerySetUni(String storeName, String querySetName, Class<T> entityClass, Pool client) {
-
         return runQuerySetUni(storeName, querySetName, new ArrayList<>(), "main", entityClass, client);
     }
 
@@ -137,7 +145,6 @@ public class DatabaseController {
             List<ParameterInput> parameterInputs,
             Class<T> entityClass,
             Pool client) {
-
         return runQuerySetUni(storeName, querySetName, parameterInputs, "main", entityClass, client);
     }
 
@@ -148,7 +155,6 @@ public class DatabaseController {
             String resultQueryName,
             Class<T> entityClass,
             Pool client) {
-
         return runQuerySetMulti(storeName, querySetName, parameterInputs, resultQueryName, entityClass, client)
                 .select()
                 .first()
