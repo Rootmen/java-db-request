@@ -58,6 +58,8 @@ public interface Elements {
 
         String getParameterType();
 
+        String getSqlParameterType();
+
         Map<String, String> getWhenMap();
 
         @Override

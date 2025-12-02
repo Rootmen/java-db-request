@@ -105,7 +105,7 @@ public class SQL implements Elements.SQL {
             out.append("$")
                     .append(index)
                     .append("::")
-                    .append(parameters.get(token).getParameterType());
+                    .append(parameters.get(token).getSqlParameterType());
             index++;
         }
         return new InsertData(matcher.appendTail(out).toString(), parametersTokens, sql.getName(), sql.getWrapper());

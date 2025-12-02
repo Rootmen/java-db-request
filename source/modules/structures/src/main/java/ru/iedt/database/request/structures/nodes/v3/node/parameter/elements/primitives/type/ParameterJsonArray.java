@@ -25,6 +25,11 @@ public class ParameterJsonArray extends ParameterAbstract<JsonArray> {
         tuple.addJsonArray(this.getValue());
     }
 
+    @Override
+    public String getSqlParameterType() {
+        return "json";
+    }
+
     static JsonArray parseString(String value) throws RuntimeException {
         if (value == null) return null;
         try {

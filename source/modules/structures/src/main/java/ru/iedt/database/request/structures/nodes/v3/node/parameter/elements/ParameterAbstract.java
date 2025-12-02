@@ -37,6 +37,10 @@ public abstract class ParameterAbstract<T> implements Elements.Parameter<T> {
         return parameterType;
     }
 
+    public String getSqlParameterType() {
+        return parameterType;
+    }
+
     public Map<String, String> getWhenMap() {
         return new HashMap<>(whenMap);
     }
