@@ -8,11 +8,11 @@ import ru.iedt.database.request.structures.nodes.v3.node.parameter.elements.Para
 public class ParameterJsonArray extends ParameterAbstract<JsonArray> {
 
     public ParameterJsonArray(JsonArray defaultValue, String parameterName) {
-        super(defaultValue, parameterName, ParameterTypes.JSON);
+        super(defaultValue, parameterName, ParameterTypes.JSON_ARRAY);
     }
 
     public ParameterJsonArray(String defaultValue, String parameterName) {
-        super(parseString(defaultValue), parameterName, ParameterTypes.JSON);
+        super(parseString(defaultValue), parameterName, ParameterTypes.JSON_ARRAY);
     }
 
     @Override
